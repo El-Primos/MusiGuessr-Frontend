@@ -1,4 +1,8 @@
+'use client';
+
+import Button from "@/components/Button";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
 export default function Home() {
   return (
@@ -24,6 +28,8 @@ export default function Home() {
             Save and see your changes instantly.
           </li>
         </ol>
+
+        <Button children={"Custom Button"} onClick={()=>redirect("/login")}/>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
