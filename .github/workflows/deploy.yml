@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Build"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-central-1
+
+      - name: SSH into EC2 and deploy container
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: 52.29.130.53
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            aws ecr get-login-password --region eu-central-1 | docker login --username AWS --password-stdin ${{ vars.ECR_REGISTRY }}
+            docker pull ${{ vars.ECR_REGISTRY }}
+            docker-compose -f docker-compose-prod.yml up -d
