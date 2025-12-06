@@ -54,6 +54,7 @@ export default function Game() {
   const [gameOver, setGameOver] = useState(false);
   const [timerFinished, setTimerFinished] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
+  const [searchResetToken, setSearchResetToken] = useState(0);
   const gameplayDuration = 30;
 
   const currentPlayingTrack =
@@ -93,6 +94,7 @@ export default function Game() {
         setPredictFalse((prev) => prev + 1);
       }
 
+      setSearchResetToken((prev) => prev + 1);
       advanceToNextTrack();
     },
     [advanceToNextTrack, currentPlayingTrack, gameOver, gameStarted]
@@ -115,6 +117,7 @@ export default function Game() {
     setPredictTrue(0);
     setPredictFalse(0);
     setCurrentTrackIndex(0);
+    setSearchResetToken(0);
     setTimerFinished(false);
     setGameOver(false);
     setGameStarted(true);
@@ -165,7 +168,11 @@ export default function Game() {
         </section>
 
         {gameStarted && (
-          <MusicSearch tracks={searchTracks} onSelect={handleGuess} />
+          <MusicSearch
+            tracks={searchTracks}
+            onSelect={handleGuess}
+            resetSignal={searchResetToken}
+          />
         )}
       </main>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export interface Track {
   id: number;
@@ -11,10 +11,17 @@ export interface Track {
 interface MusicSearchProps {
   tracks: Track[];
   onSelect?: (track: Track) => void;
+  resetSignal?: number;
 }
 
-export const MusicSearch = ({ tracks, onSelect }: MusicSearchProps) => {
+export const MusicSearch = ({ tracks, onSelect, resetSignal = 0 }: MusicSearchProps) => {
   const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    setQuery("");
+    inputRef.current?.focus();
+  }, [resetSignal]);
 
   const filteredTracks: Track[] = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -35,10 +42,17 @@ export const MusicSearch = ({ tracks, onSelect }: MusicSearchProps) => {
       {/* Input */}
       <div className="flex gap-2 mb-4">
         <input
+          ref={inputRef}
           type="text"
           value={query}
           placeholder="Şarkı ya da Sanatçı ara..."
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && filteredTracks.length > 0) {
+              e.preventDefault();
+              onSelect?.(filteredTracks[0]);
+            }
+          }}
           className="
             flex-1 px-3 py-2 rounded-lg 
             bg-slate-950 text-blue-100
