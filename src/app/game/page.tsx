@@ -25,6 +25,8 @@ const searchTracks: Track[] = [
   { id: 6, artist: "Ed Sheeran", title: "Shape of You" },
   { id: 7, artist: "Radiohead", title: "Creep" },
   { id: 8, artist: "Arctic Monkeys", title: "Do I Wanna Know?" },
+  { id: 9, artist: "Mor ve Ötesi", title: "Cambaz" },
+  { id: 10, artist: "AI", title: "Moonlit" },
 ];
 
 const playingTracks: PlayingTrack[] = [
@@ -32,15 +34,15 @@ const playingTracks: PlayingTrack[] = [
     id: 1,
     src: "/audio/moonlit.mp3",
     second: 0,
-    artist: "Coldplay",
-    title: "Fix You",
+    artist: "AI",
+    title: "Moonlit",
   },
   {
     id: 2,
     src: "/audio/cambaz.mp3",
     second: 0,
-    artist: "Coldplay",
-    title: "Yellow",
+    artist: "Mor ve Ötesi",
+    title: "Cambaz",
   },
 ];
 

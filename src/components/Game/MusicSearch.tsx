@@ -37,7 +37,7 @@ export const MusicSearch = ({ tracks, onSelect }: MusicSearchProps) => {
         <input
           type="text"
           value={query}
-          placeholder="Search by artist or song..."
+          placeholder="Şarkı ya da Sanatçı ara..."
           onChange={(e) => setQuery(e.target.value)}
           className="
             flex-1 px-3 py-2 rounded-lg 
@@ -60,7 +60,7 @@ export const MusicSearch = ({ tracks, onSelect }: MusicSearchProps) => {
           "
         >
           {filteredTracks.length === 0 ? (
-            <div className="text-sm text-gray-400">No results found.</div>
+            <div className="text-sm text-gray-400">Sonuç bulunamadı.</div>
           ) : (
             <ul className="list-none m-0 p-0">
               {filteredTracks.map((track) => (
