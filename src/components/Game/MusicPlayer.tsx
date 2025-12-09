@@ -12,14 +12,12 @@ interface MusicPlayerProps {
 
 export const MusicPlayer = ({
   src,
-  title,
-  artist,
   autoPlay = false,
   onEnded,
 }: MusicPlayerProps) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [isPlaying, setIsPlaying] = useState(autoPlay);
+  // const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
@@ -52,11 +50,9 @@ export const MusicPlayer = ({
       audio
         .play()
         .then(() => {
-          setIsPlaying(true);
           removeInteractionListeners();
         })
         .catch(() => {
-          setIsPlaying(false);
         });
     }
 
@@ -69,18 +65,15 @@ export const MusicPlayer = ({
       audio
         .play()
         .then(() => {
-          setIsPlaying(true);
           removeInteractionListeners();
         })
         .catch(() => {
-          setIsPlaying(false);
           document.addEventListener("pointerdown", resumePlayback);
           document.addEventListener("keydown", resumePlayback);
           hasInteractionListener = true;
         });
     } else {
       audio.pause();
-      setIsPlaying(false);
       removeInteractionListeners();
     }
 
@@ -88,21 +81,6 @@ export const MusicPlayer = ({
       removeInteractionListeners();
     };
   }, [src, autoPlay]);
-
-  const handlePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
-      audio
-        .play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
-    }
-  };
 
   const handleTimeUpdate = () => {
     const audio = audioRef.current;
@@ -134,12 +112,11 @@ export const MusicPlayer = ({
   };
 
   const handleEnded = () => {
-    setIsPlaying(false);
     onEnded?.();
   };
 
   const effectiveDuration = duration > 0 ? duration : Math.max(currentTime, 1);
-  const progressPercent = Math.min(100, (currentTime / effectiveDuration) * 100);
+  // const progressPercent = Math.min(100, (currentTime / effectiveDuration) * 100);
 
   return (
     <div className="w-full m-0 p-0">

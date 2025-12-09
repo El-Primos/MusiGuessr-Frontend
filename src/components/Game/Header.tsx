@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { ExitButton } from "./ExitButton";
 
 interface HeaderProps {
@@ -22,10 +23,11 @@ export const Header = ({ logoSrc, onExit, className = "" }: HeaderProps) => {
 
       {/* Logo */}
       <div className="flex-1 flex justify-center pointer-events-none">
-        <img 
+        <Image 
           src={logoSrc} 
           alt="logo" 
-          className="h-28 object-contain"
+          width={300}
+          height={90}
         />
       </div>
 
