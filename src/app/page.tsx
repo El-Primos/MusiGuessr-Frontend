@@ -29,7 +29,7 @@ export default function Home() {
           </li>
         </ol>
 
-        <Button children={"Custom Button"} onClick={()=>redirect("/login")}/>
+        <Button onClick={()=>redirect("/login")}>Custom Button</Button>
 
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           <a
