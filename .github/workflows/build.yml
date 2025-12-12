@@ -40,5 +40,8 @@ jobs:
       - name: Build Docker image
         run: docker build -t musiguessr-frontend .
 
+      - name: Tag Docker image for ECR
+        run: docker tag musiguessr-frontend:latest ${{ vars.ECR_REGISTRY }}
+
       - name: Push to ECR
         run: docker push ${{ vars.ECR_REGISTRY }}
