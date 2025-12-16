@@ -32,7 +32,7 @@ export default function Home() {
       </div>
       <SettingsButton></SettingsButton>
       <div className="mt-auto p-4 text-center text-sm text-gray-400">
-        &copy; 2024 MusiGuessr. All rights reserved.
+        &copy; 2025 MusiGuessr. All rights reserved.
       </div>
     </div>
   );
