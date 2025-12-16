@@ -1,15 +1,16 @@
 "use client";
 
 import Image from "next/image";
-import { ExitButton } from "./ExitButton";
+import { ExitButton } from "./Game/ExitButton";
 
 interface HeaderProps {
   logoSrc: string;     // PNG path
   onExit?: () => void; // exit callback
   className?: string;  // for extra positioning if needed
+  exitVisible?: boolean; // whether to show exit button
 }
 
-export const Header = ({ logoSrc, onExit, className = "" }: HeaderProps) => {
+export const Header = ({ logoSrc, exitVisible = true, onExit, className = "" }: HeaderProps) => {
   return (
     <header
       className={`
@@ -19,7 +20,7 @@ export const Header = ({ logoSrc, onExit, className = "" }: HeaderProps) => {
         ${className}
       `}
     >
-      <ExitButton onClick={onExit} />
+      {exitVisible && <ExitButton onClick={onExit} />}
 
       {/* Logo */}
       <div className="flex-1 flex justify-center pointer-events-none">
