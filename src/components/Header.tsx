@@ -10,7 +10,7 @@ interface HeaderProps {
   exitVisible?: boolean; // whether to show exit button
 }
 
-export const Header = ({ logoSrc, exitVisible = true, onExit, className = "" }: HeaderProps) => {
+export const Header = ({ logoSrc, exitVisible = false, onExit, className = "" }: HeaderProps) => {
   return (
     <header
       className={`
@@ -23,17 +23,20 @@ export const Header = ({ logoSrc, exitVisible = true, onExit, className = "" }: 
       {exitVisible && <ExitButton onClick={onExit} />}
 
       {/* Logo */}
-      <div className="flex-1 flex justify-center pointer-events-none">
-        <Image 
-          src={logoSrc} 
-          alt="logo" 
-          width={300}
-          height={90}
-        />
+      <div className="flex-1 flex w-72 h-24 justify-center pointer-events-none">
+        <div className="relative w-48 h-20 p-4 bg-green-300 rounded-lg">
+          <Image 
+            src={logoSrc}
+            className="p-1" 
+            alt="logo"
+            fill
+            objectFit="contain"
+          />
+        </div>
       </div>
 
       {/* logo centered */}
-      <div className="w-10" />
+      {exitVisible && <div className="w-10" />}
     </header>
   );
 };

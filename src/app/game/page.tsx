@@ -131,6 +131,7 @@ export default function Game() {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
       <Header
         logoSrc="/logo.png"
+        exitVisible={true}
         onExit={() => redirect('/')}
         className="top-0 left-0"
       />
