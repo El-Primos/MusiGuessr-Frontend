@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { CircularCountdown } from "@/components/Game/CircularCountdown";
 import { Header } from "@/components/Header";
 import { MusicPlayer } from "@/components/Game/MusicPlayer";
@@ -132,7 +132,8 @@ export default function Game() {
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
-        onExit={() => redirect('/')}
+        exitButtonStyle="icon"
+        onExit={() => router.push('/')}
         className="top-0 left-0"
       />
 
