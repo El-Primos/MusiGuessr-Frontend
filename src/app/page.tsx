@@ -2,7 +2,7 @@
 
 import Button from "@/components/Button";
 import { Header } from "@/components/Header";
-import SettingsButton from "@/components/SettingsButton";
+import { SettingsButton } from "@/components/SettingsButton";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 
