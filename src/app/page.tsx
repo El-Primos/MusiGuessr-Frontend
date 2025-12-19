@@ -1,7 +1,5 @@
 'use client';
 
-"use client";
-
 import Button from "@/components/Button";
 import { Header } from "@/components/Header";
 import { SettingsButton } from "@/components/SettingsButton";

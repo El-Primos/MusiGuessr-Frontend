@@ -67,7 +67,7 @@ export default function Auth() {
   }
 
   function login() {
-    console.log("login()");
+
     if (loading) return;
 
     setError(null);
@@ -106,7 +106,6 @@ export default function Auth() {
   }
 
   function signup() {
-    console.log("signup()");
 
     if (loading) return;
 
@@ -145,13 +144,13 @@ export default function Auth() {
       if (!r.ok) {
         let msg = `Sign up failed (HTTP ${r.status})`;
 
-        // önce JSON message dene
+        // if json message
         try {
           const errJson = await r.json();
           if (errJson?.message) msg = errJson.message;
           else if (errJson?.error) msg = errJson.error;
         } catch {
-          // JSON değilse text fallback
+          // else direct backend text log
           try {
             const txt = await r.text();
             if (txt) msg = txt;
@@ -167,7 +166,6 @@ export default function Auth() {
       storeUserAndGoHome(data);
     })
     .catch((err: any) => {
-      console.log(err?.message);
       setError(err?.message || "Sign up failed.");
     })
     .finally(() => {
