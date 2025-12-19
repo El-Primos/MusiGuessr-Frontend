@@ -97,8 +97,12 @@ export default function Auth() {
       .then((data) => {
         storeUserAndGoHome(data);
       })
-      .catch((err: any) => {
-        setError(err?.message || "Login failed.");
+      .catch((err: unknown) => {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Sign up failed.");
+        }
       })
       .finally(() => {
         setLoading(false);
@@ -165,8 +169,12 @@ export default function Auth() {
     .then((data) => {
       storeUserAndGoHome(data);
     })
-    .catch((err: any) => {
-      setError(err?.message || "Sign up failed.");
+    .catch((err: unknown) => {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Sign up failed.");
+      }
     })
     .finally(() => {
       setLoading(false);
