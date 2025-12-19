@@ -5,8 +5,10 @@ import { Header } from "@/components/Header";
 import { SettingsButton } from "@/components/SettingsButton";
 import Image from "next/image";
 import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white flex flex-col">
       <Header
@@ -26,7 +28,7 @@ export default function Home() {
         <Button className="px-6 py-3 text-lg bg-blue-600 hover:bg-blue-700" onClick={() => { redirect('/game'); }}>
           Tournaments
         </Button>
-        <Button className="px-6 py-3 text-lg bg-blue-600 hover:bg-blue-700" onClick={() => { redirect('/game'); }}>
+        <Button className="px-6 py-3 text-lg bg-blue-600 hover:bg-blue-700" onClick={() => { router.push('/leaderboard'); }}>
           Leaderboard
         </Button>
       </div>
