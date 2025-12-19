@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { CircularCountdown } from "@/components/Game/CircularCountdown";
-import { Header } from "@/components/Game/Header";
+import { Header } from "@/components/Header";
 import { MusicPlayer } from "@/components/Game/MusicPlayer";
 import { MusicSearch, type Track } from "@/components/Game/MusicSearch";
 
@@ -131,7 +131,8 @@ export default function Game() {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
       <Header
         logoSrc="/logo.png"
-        onExit={() => console.log("EXIT")}
+        exitVisible={true}
+        onExit={() => redirect('/')}
         className="top-0 left-0"
       />
 
