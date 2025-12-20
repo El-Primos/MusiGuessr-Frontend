@@ -330,13 +330,12 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
               </div>
             )}
 
-            {/* click outside basit çözüm: blur */}
             <div
               className="pointer-events-none absolute inset-0"
               onClick={() => {}}
             />
             <div className="mt-1 text-xs text-slate-500">
-              Yazıp listeden seç.
+              Select from list
             </div>
           </div>
 
@@ -392,7 +391,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
             )}
 
             <div className="mt-1 text-xs text-slate-500">
-              Yazıp listeden seç.
+              Select from list
             </div>
           </div>
         </div>
