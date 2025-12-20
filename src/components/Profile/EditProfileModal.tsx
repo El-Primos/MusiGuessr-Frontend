@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Button from '@/components/Button';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
@@ -85,12 +86,14 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, onSave }: EditP
           <div className="lg:w-80 p-6 border-b lg:border-b-0 lg:border-r border-blue-900/40 bg-slate-950/50">
             <div className="flex flex-col items-center">
               {/* Profile Picture */}
-              <div className="w-32 h-32 rounded-full bg-slate-800 border-2 border-blue-900/40 flex items-center justify-center overflow-hidden mb-4">
+              <div className="w-32 h-32 rounded-full bg-slate-800 border-2 border-blue-900/40 flex items-center justify-center overflow-hidden mb-4 relative">
                 {imagePreview ? (
-                  <img
+                  <Image
                     src={imagePreview}
                     alt={profileData.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover rounded-full"
+                    unoptimized
                   />
                 ) : (
                   <div className="text-4xl text-slate-400">

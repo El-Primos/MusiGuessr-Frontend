@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Button from '@/components/Button';
 import { EditProfileModal } from './EditProfileModal';
 import { useToast } from '@/hooks/useToast';
@@ -85,12 +86,14 @@ export const ProfileSidebar = ({
       <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 p-6">
         {/* Profile Picture */}
         <div className="flex justify-center mb-4 relative">
-          <div className="w-32 h-32 rounded-full bg-slate-800 border-2 border-blue-900/40 flex items-center justify-center overflow-hidden">
+          <div className="w-32 h-32 rounded-full bg-slate-800 border-2 border-blue-900/40 flex items-center justify-center overflow-hidden relative">
             {profileData.avatar ? (
-              <img
+              <Image
                 src={profileData.avatar}
                 alt={profileData.name}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover rounded-full"
+                unoptimized
               />
             ) : (
               <div className="text-4xl text-slate-400">
