@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { SettingsButton } from '@/components/SettingsButton';
@@ -36,11 +36,31 @@ const mockFriendsData: LeaderboardEntry[] = [
 export default function LeaderboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'global' | 'friends'>('global');
+  const [hasUser, setHasUser] = useState<boolean>(false);
+
+  // Check authentication
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('user');
+      if (!raw) return setHasUser(false);
+      const parsed = JSON.parse(raw);
+      setHasUser(Boolean(parsed && parsed.userId && parsed.userName));
+    } catch {
+      setHasUser(false);
+    }
+  }, []);
 
   // TODO: Add authentication check
   // const isAuthenticated = false; // Will come from auth context/state
-  // For now: Assume not authenticated (will be replaced with actual auth check)
-  const isAuthenticated = false;
+  // For now: Use hasUser for authentication check
+  const isAuthenticated = hasUser;
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('friends');
+    setHasUser(false);
+    router.push('/');
+  };
 
   // Select data based on active tab
   // TODO: Backend integration - Replace with API call using useEffect
@@ -61,6 +81,52 @@ export default function LeaderboardPage() {
         exitVisible={true}
         onExit={() => router.push('/')}
         className="top-0 left-0"
+        rightContent={
+          hasUser ? (
+            <div className="flex items-center gap-2 mr-2 md:mr-4">
+              <button
+                onClick={() => router.push("/profile")}
+                className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
+                title="View Profile"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">Profile</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-2 md:px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-1 transition-colors"
+                title="Logout"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                <span className="hidden md:inline">Logout</span>
+              </button>
+            </div>
+          ) : null
+        }
       />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
