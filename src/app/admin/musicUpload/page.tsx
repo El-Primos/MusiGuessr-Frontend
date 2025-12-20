@@ -1,5 +1,6 @@
 'use client';
 
+import MusicUpdate from '@/components/AdminOps/MusicUpdate';
 import MusicUpload from '@/components/AdminOps/MusicUpload';
 import { Header } from '@/components/Header';
 import { useRouter } from "next/navigation";
@@ -59,9 +60,9 @@ export default function MusicUploadPage() {
       */}
 
       <div className="mx-auto w-full max-w-6xl px-6 py-10 space-y-10 flex justify-center">
-        {/* Music Upload */}
         <MusicUpload apiBase={API_BASE} />
-
+        <div className='p-2'></div>
+        <MusicUpdate apiBase={API_BASE} />
       </div>
     </div>
   );
