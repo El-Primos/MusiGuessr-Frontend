@@ -148,6 +148,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
   useEffect(() => {
     fetchMusics();
     fetchArtistsGenres();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiBase]);
 
   const filtered = useMemo(() => {
