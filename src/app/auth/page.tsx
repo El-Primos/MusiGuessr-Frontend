@@ -62,7 +62,6 @@ export default function Auth() {
   }
 
   function storeUserAndGoHome(res: AuthRes) {
-    console.log("res: " , res);
     localStorage.setItem(
       "user",
       JSON.stringify({ id: res.id, username: res.username, email: res.email })
@@ -92,7 +91,6 @@ export default function Auth() {
       }),
     })
       .then(async (r) => {
-        console.log("R.json = ", r);
         if (!r.ok) {
           const txt = await r.text().catch(() => "");
           throw new Error(txt || `Login failed (HTTP ${r.status})`);
