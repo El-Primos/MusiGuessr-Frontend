@@ -13,9 +13,12 @@ type Mode = "login" | "signup";
 
 type AuthRes = {
   message: string;
-  userId: number;
-  userName: string;
+  id: number;
+  username: string;
   email: string;
+  role: string;
+  token: string;
+  token_type: string;
 };
 
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -59,9 +62,10 @@ export default function Auth() {
   }
 
   function storeUserAndGoHome(res: AuthRes) {
+    console.log("res: " , res);
     localStorage.setItem(
       "user",
-      JSON.stringify({ userId: res.userId, userName: res.userName, email: res.email })
+      JSON.stringify({ id: res.id, username: res.username, email: res.email })
     );
     router.push("/");
   }
@@ -83,11 +87,12 @@ export default function Auth() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userName: loginUserName.trim(),
+        username: loginUserName.trim(),
         password: loginPassword,
       }),
     })
       .then(async (r) => {
+        console.log("R.json = ", r);
         if (!r.ok) {
           const txt = await r.text().catch(() => "");
           throw new Error(txt || `Login failed (HTTP ${r.status})`);
@@ -139,7 +144,7 @@ export default function Auth() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: n,
-        userName: u,
+        username: u,
         email: em,
         password: signupPassword,
       }),
