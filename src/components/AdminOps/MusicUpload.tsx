@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useApi } from "@/lib/useApi"; // <-- yolunu projene göre düzelt
+import { useApi } from "@/lib/useApi";
 import { useS3Upload } from "../../hooks/useS3Upload";
 
 type UploadConfirmReq = {
@@ -81,9 +81,8 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
   const [result, setResult] = useState<UploadConfirmRes | null>(null);
 
   const { upload, loading: uploading, stage, error: uploadError } = useS3Upload({
-    apiBase,
+    apiFetch,
     uploadUrlPath: "/api/musics/upload-url",
-    getAuthHeaders: () => authHeaders,
   });
 
   // ---- fetch artists & genres once (token gelince)
