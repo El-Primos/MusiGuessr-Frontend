@@ -83,7 +83,7 @@ export default function Auth() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userName: loginUserName.trim(),
+        username: loginUserName.trim(),
         password: loginPassword,
       }),
     })
@@ -139,7 +139,7 @@ export default function Auth() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: n,
-        userName: u,
+        username: u,
         email: em,
         password: signupPassword,
       }),
