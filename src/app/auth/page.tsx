@@ -64,7 +64,7 @@ export default function Auth() {
   function storeUserAndGoHome(res: AuthRes) {
     localStorage.setItem(
       "user",
-      JSON.stringify({ id: res.id, username: res.username, email: res.email })
+      JSON.stringify({ id: res.id, username: res.username, email: res.email, role: res.role, token: res.token, token_type: res.token_type })
     );
     router.push("/");
   }
