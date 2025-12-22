@@ -2,8 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
-
-type Artist = { id: number; name: string; message?: string };
+import { Artist } from "@/dto/common.dto";
 
 type Props = {
   apiBase: string;

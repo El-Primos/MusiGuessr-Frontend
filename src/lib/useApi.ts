@@ -5,9 +5,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 function getTokenFromLocalStorage(): string {
   try {
     const raw = localStorage.getItem("user");
+    
     if (!raw) return "";
     const parsed = JSON.parse(raw);
-    return parsed?.token || "";
+    console.log("Parsed Token: ", parsed?.accessToken)
+    return parsed?.accessToken || "";
   } catch {
     return "";
   }

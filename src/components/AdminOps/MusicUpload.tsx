@@ -4,27 +4,13 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
 import { useS3Upload } from "../../hooks/useS3Upload";
 
-type UploadConfirmReq = {
-  name: string;
-  genre_id: number;
-  artist_id: number;
-  key: string;
-};
+import { UploadConfirmReq, UploadConfirmRes, Artist, Genre } from "@/dto/common.dto"
 
-type UploadConfirmRes = {
-  message: string;
-  id: number;
-  name: string;
-  url: string;
-};
 
 type Props = {
   apiBase?: string;
   onSuccess?: (music: UploadConfirmRes) => void;
 };
-
-type Artist = { id: number; name: string };
-type Genre = { id: number; name: string; message?: string };
 
 function safeJsonParse(text: string) {
   try {
@@ -216,8 +202,8 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
       setConfirming(true);
       const confirmRes = await confirmUpload({
         name: inferredName,
-        genre_id: selectedGenre.id,
-        artist_id: selectedArtist.id,
+        genreId: selectedGenre.id,
+        artistId: selectedArtist.id,
         key,
       });
 

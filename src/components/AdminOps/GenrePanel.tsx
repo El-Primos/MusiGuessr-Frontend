@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
 
-type Genre = { id: number; name: string; message?: string };
+import { Genre } from "@/dto/common.dto"
 
 type Props = {
   apiBase: string;

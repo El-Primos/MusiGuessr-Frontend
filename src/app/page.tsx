@@ -6,11 +6,7 @@ import { SettingsButton } from "@/components/SettingsButton";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type StoredUser = {
-  userId: number;
-  userName: string;
-  email: string;
-};
+import { StoredUser } from "@/dto/common.dto"
 
 export default function Home() {
   const router = useRouter();
@@ -21,7 +17,7 @@ export default function Home() {
       const raw = localStorage.getItem("user");
       if (!raw) return setHasUser(false);
       const parsed = JSON.parse(raw) as Partial<StoredUser>;
-      setHasUser(Boolean(parsed && parsed.userId && parsed.userName));
+      setHasUser(Boolean(parsed && parsed.id && parsed.username));
     } catch {
       setHasUser(false);
     }

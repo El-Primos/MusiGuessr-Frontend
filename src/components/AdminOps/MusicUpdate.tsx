@@ -3,16 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
 
-type Genre = { id: number; name: string; message?: string };
-type Artist = { id: number; name: string; message?: string };
-
-export type MusicItem = {
-  id: number;
-  name: string;
-  url: string;
-  genre: Genre;
-  artist: Artist;
-};
+import { Genre, Artist, MusicItem } from "@/dto/common.dto"
 
 type Props = {
   apiBase: string;

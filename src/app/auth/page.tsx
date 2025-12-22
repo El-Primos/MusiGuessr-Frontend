@@ -4,22 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/Button";
 import { Header } from "@/components/Header";
-
-
+import { AuthRes } from "@/dto/common.dto";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 type Mode = "login" | "signup";
-
-type AuthRes = {
-  message: string;
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  token: string;
-  token_type: string;
-};
 
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
@@ -64,7 +53,7 @@ export default function Auth() {
   function storeUserAndGoHome(res: AuthRes) {
     localStorage.setItem(
       "user",
-      JSON.stringify({ id: res.id, username: res.username, email: res.email, role: res.role, token: res.token, token_type: res.token_type })
+      JSON.stringify({ id: res.id, username: res.username, email: res.email, role: res.role, accessToken: res.accessToken, refreshToken: res.refreshToken, tokenType: res.tokenType })
     );
     router.push("/");
   }

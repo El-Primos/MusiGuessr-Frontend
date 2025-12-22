@@ -1,28 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
-
-export type UploadUrlReq = {
-  name: string;
-  fileName: string;
-  content_type: string; // <-- this may change after backend camelCase refactoring
-};
-
-export type UploadUrlRes = {
-  message: string;
-  key: string;
-  upload_url: string; // <-- this may change after backend camelCase refactoring
-};
-
-export type S3UploadInput = {
-  name: string;
-  file: File;
-};
-
-export type S3UploadResult = {
-  key: string;
-  uploadUrl: string;
-};
+import { UploadUrlReq, UploadUrlRes, S3UploadInput, S3UploadResult } from "@/dto/s3.dto";
 
 export type UseS3UploadOptions = {
   uploadUrlPath?: string;
@@ -80,7 +59,7 @@ export function useS3Upload(opts: UseS3UploadOptions) {
       }
 
       const parsed = safeJsonParse(text) as UploadUrlRes | null;
-      if (!parsed?.key || !parsed?.upload_url) {
+      if (!parsed?.key || !parsed?.uploadUrl) {
         throw new Error("upload-url response missing key/uploadUrl");
       }
       return parsed;
@@ -119,18 +98,18 @@ export function useS3Upload(opts: UseS3UploadOptions) {
         const urlRes = await requestUploadUrl({
           name,
           fileName: file.name,
-          content_type: file.type || "application/octet-stream",
+          contentType: file.type || "application/octet-stream",
         });
 
         if (myCallId !== callIdRef.current) throw new Error("Upload cancelled");
 
         setStage("uploading");
-        await uploadToPresignedUrl(urlRes.upload_url, file);
+        await uploadToPresignedUrl(urlRes.uploadUrl, file);
 
         if (myCallId !== callIdRef.current) throw new Error("Upload cancelled");
 
         setStage("idle");
-        return { key: urlRes.key, uploadUrl: urlRes.upload_url };
+        return { key: urlRes.key, uploadUrl: urlRes.uploadUrl };
       } catch (e: unknown) {
         setStage("idle");
 

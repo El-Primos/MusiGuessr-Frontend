@@ -5,20 +5,13 @@ import GenrePanel from '@/components/AdminOps/GenrePanel';
 import { Header } from '@/components/Header';
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useAdminGuard } from "@/hooks/useAdminGuard";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function ArtistPanelPage() {
   const router = useRouter();
-
-  useEffect(() => {
-    if (localStorage.getItem("user")) { // We should check user's adminity propery, fromAPI
-      console.log("You are an admin")
-    } else {
-      console.log("You are not an admin")
-      router.push("/");
-    }
-  }, [router]);
+  useAdminGuard(router);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
