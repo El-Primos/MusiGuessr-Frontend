@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useApi } from "@/lib/useApi";
 import { useS3Upload } from "../../hooks/useS3Upload";
 
 type UploadConfirmReq = {
@@ -48,7 +49,13 @@ function normalize(s: string) {
   return s.trim().toLowerCase();
 }
 
+function isError(e: unknown): e is Error {
+  return e instanceof Error;
+}
+
 export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
+  const { token, apiFetch, authHeaders } = useApi(apiBase);
+
   // Song & file
   const [name, setName] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -74,27 +81,21 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
   const [result, setResult] = useState<UploadConfirmRes | null>(null);
 
   const { upload, loading: uploading, stage, error: uploadError } = useS3Upload({
-    apiBase,
+    apiFetch,
     uploadUrlPath: "/api/musics/upload-url",
   });
 
-  function isError(e: unknown): e is Error {
-    return e instanceof Error;
-  }
-
-  // ---- fetch artists & genres once
+  // ---- fetch artists & genres once (token gelince)
   useEffect(() => {
     let cancelled = false;
-
+    if (!token) return;
 
     async function loadLists() {
       setLoadingLists(true);
       setListError(null);
+
       try {
-        const [aRes, gRes] = await Promise.all([
-          fetch(`${apiBase}/api/artists`, { headers: { accept: "*/*" } }),
-          fetch(`${apiBase}/api/genres`, { headers: { accept: "*/*" } }),
-        ]);
+        const [aRes, gRes] = await Promise.all([apiFetch("/api/artists"), apiFetch("/api/genres")]);
 
         const aText = await aRes.text();
         const gText = await gRes.text();
@@ -120,14 +121,9 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
         }
       } catch (e: unknown) {
         if (cancelled) return;
-
-        if (e instanceof Error) {
-          setListError(e.message);
-        } else {
-          setListError("Failed to load artists/genres");
-        }
+        setListError(isError(e) ? e.message : "Failed to load artists/genres");
       } finally {
-              if (!cancelled) setLoadingLists(false);
+        if (!cancelled) setLoadingLists(false);
       }
     }
 
@@ -135,7 +131,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [apiBase]);
+  }, [token, apiFetch]);
 
   const inferredName = useMemo(() => {
     if (name.trim()) return name.trim();
@@ -172,7 +168,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
   }, [inferredName, file, selectedArtist, selectedGenre, uploading, confirming, loadingLists]);
 
   async function confirmUpload(payload: UploadConfirmReq): Promise<UploadConfirmRes> {
-    const res = await fetch(`${apiBase}/api/musics/upload-confirm`, {
+    const res = await apiFetch("/api/musics/upload-confirm", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -249,9 +245,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
     <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="mb-5">
         <h2 className="text-xl font-semibold text-slate-900">Add Music</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Artist/Genre ismini yaz → seç → upload.
-        </p>
+
       </div>
 
       {listError && (

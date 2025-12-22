@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useApi } from "@/lib/useApi";
 
 type Genre = { id: number; name: string; message?: string };
 type Artist = { id: number; name: string; message?: string };
@@ -53,6 +54,8 @@ function PencilIcon(props: React.SVGProps<SVGSVGElement>) {
 }
 
 export default function MusicListAdmin({ apiBase }: Props) {
+  const { token, apiFetch } = useApi(apiBase);
+
   // main list
   const [items, setItems] = useState<MusicItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -86,13 +89,11 @@ export default function MusicListAdmin({ apiBase }: Props) {
   async function fetchMusics() {
     setLoading(true);
     setErr(null);
-    try {
-      const res = await fetch(`${apiBase}/api/musics`, {
-        headers: { accept: "*/*" },
-        cache: "no-store",
-      });
 
+    try {
+      const res = await apiFetch("/api/musics");
       const text = await res.text();
+
       if (!res.ok) {
         const parsed = safeJsonParse(text);
         throw new Error(parsed?.message || `GET /api/musics failed (${res.status})`);
@@ -101,7 +102,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
       const data = safeJsonParse(text) as MusicItem[] | null;
       if (!Array.isArray(data)) throw new Error("Invalid /api/musics response (not an array)");
 
-      data.sort((a, b) => b.id - a.id); // latest first, aka reverse id
+      data.sort((a, b) => b.id - a.id);
       setItems(data);
     } catch (e: unknown) {
       setErr(isError(e) ? e.message : "Failed to load musics");
@@ -112,11 +113,10 @@ export default function MusicListAdmin({ apiBase }: Props) {
 
   async function fetchArtistsGenres() {
     setLoadingLists(true);
+    setErr(null);
+
     try {
-      const [aRes, gRes] = await Promise.all([
-        fetch(`${apiBase}/api/artists`, { headers: { accept: "*/*" }, cache: "no-store" }),
-        fetch(`${apiBase}/api/genres`, { headers: { accept: "*/*" }, cache: "no-store" }),
-      ]);
+      const [aRes, gRes] = await Promise.all([apiFetch("/api/artists"), apiFetch("/api/genres")]);
 
       const aText = await aRes.text();
       const gText = await gRes.text();
@@ -146,26 +146,20 @@ export default function MusicListAdmin({ apiBase }: Props) {
   }
 
   useEffect(() => {
+    if (!token) return;
     fetchMusics();
     fetchArtistsGenres();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [apiBase]);
+  }, [apiBase, token]);
 
   const filtered = useMemo(() => {
     const query = normalize(q);
     if (!query) return items;
 
     return items.filter((m) => {
-      const hay = [
-        String(m.id),
-        m.name ?? "",
-        m.artist?.name ?? "",
-        m.genre?.name ?? "",
-        m.url ?? "",
-      ]
+      const hay = [String(m.id), m.name ?? "", m.artist?.name ?? "", m.genre?.name ?? "", m.url ?? ""]
         .join(" ")
         .toLowerCase();
-
       return hay.includes(query);
     });
   }, [items, q]);
@@ -253,9 +247,9 @@ export default function MusicListAdmin({ apiBase }: Props) {
     setItems(patchedLocal);
 
     try {
-      const res = await fetch(`${apiBase}/api/musics/${id}`, {
+      const res = await apiFetch(`/api/musics/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json", accept: "*/*" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editName.trim(),
           artist_id: selectedArtist.id,
@@ -271,7 +265,6 @@ export default function MusicListAdmin({ apiBase }: Props) {
 
       const updated = safeJsonParse(text) as MusicItem | null;
       if (!updated?.id) {
-        // retry at least
         await fetchMusics();
       } else {
         setItems((cur) => cur.map((m) => (m.id === id ? updated : m)).sort((a, b) => b.id - a.id));
@@ -279,7 +272,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
 
       cancelEdit();
     } catch (e: unknown) {
-      setItems(prev); // rollback
+      setItems(prev);
       setErr(isError(e) ? e.message : "Update failed");
     } finally {
       setSavingId(null);
@@ -290,13 +283,11 @@ export default function MusicListAdmin({ apiBase }: Props) {
     const prev = items;
     setDeletingId(id);
     setErr(null);
+
     setItems((cur) => cur.filter((x) => x.id !== id));
 
     try {
-      const res = await fetch(`${apiBase}/api/musics/${id}`, {
-        method: "DELETE",
-        headers: { accept: "*/*" },
-      });
+      const res = await apiFetch(`/api/musics/${id}`, { method: "DELETE" });
 
       const text = await res.text().catch(() => "");
       if (!res.ok) {
