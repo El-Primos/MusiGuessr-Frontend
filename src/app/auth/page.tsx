@@ -13,9 +13,12 @@ type Mode = "login" | "signup";
 
 type AuthRes = {
   message: string;
-  userId: number;
-  userName: string;
+  id: number;
+  username: string;
   email: string;
+  role: string;
+  token: string;
+  token_type: string;
 };
 
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
@@ -61,7 +64,7 @@ export default function Auth() {
   function storeUserAndGoHome(res: AuthRes) {
     localStorage.setItem(
       "user",
-      JSON.stringify({ userId: res.userId, userName: res.userName, email: res.email })
+      JSON.stringify({ id: res.id, username: res.username, email: res.email, role: res.role, token: res.token, token_type: res.token_type })
     );
     router.push("/");
   }
@@ -83,7 +86,7 @@ export default function Auth() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        userName: loginUserName.trim(),
+        username: loginUserName.trim(),
         password: loginPassword,
       }),
     })
@@ -139,7 +142,7 @@ export default function Auth() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: n,
-        userName: u,
+        username: u,
         email: em,
         password: signupPassword,
       }),
