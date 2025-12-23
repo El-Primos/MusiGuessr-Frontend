@@ -167,13 +167,35 @@ export default function PlaylistAdmin({ apiBase }: Props) {
   }
 
 
+  function getUserIdFromStorage(): number | null {
+    if (!localStorage.getItem("user")) return null;
+
+    const parsed = safeJsonParse(localStorage.getItem("user")!) as
+      | { id?: number; userId?: number }
+      | null;
+
+    const id = parsed?.id ?? parsed?.userId;
+    if (typeof id === "number" && id > 0) return id;
+
+    return null;
+  }
 
   const fetchPlaylists = useCallback(async () => {
     setListLoading(true);
     setListErr(null);
+
     try {
-      // backend pagination var (limit/offset), ama UI tarafında da page yapıyoruz.
-      const res = await apiFetch("/api/playlists");
+      const ownerId = getUserIdFromStorage();
+      if (!ownerId) throw new Error("User not found. Please login again.");
+
+      // name filter + UI pagination (limit/offset backend’e de gönderebilirsin ama şimdilik gerek yok)
+      const qs = new URLSearchParams();
+      qs.set("ownerId", String(ownerId));
+
+      const q = plistQuery.trim();
+      if (q) qs.set("name", q);
+
+      const res = await apiFetch(`/api/playlists?${qs.toString()}`);
       const text = await res.text();
 
       if (!res.ok) {
@@ -191,12 +213,20 @@ export default function PlaylistAdmin({ apiBase }: Props) {
       if (data.length > 0 && selectedId == null) {
         setSelectedId(data[0].id);
       }
+      // seçili playlist artık yoksa (silindi vs) ilkine dön
+      if (data.length > 0 && selectedId != null && !data.some((p) => p.id === selectedId)) {
+        setSelectedId(data[0].id);
+      }
+      if (data.length === 0) {
+        setSelectedId(null);
+      }
     } catch (e: unknown) {
       setListErr(isError(e) ? e.message : "Failed to load playlists");
     } finally {
       setListLoading(false);
     }
-  }, [apiFetch, selectedId]);
+  }, [apiFetch, selectedId, plistQuery]);
+
 
   const fetchPlaylistSongs = useCallback(
     async (playlistId: number) => {
