@@ -1,53 +1,66 @@
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import ShareGamePost, { ShareGamePostData } from '@/components/Game/ShareGamePost';
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import ShareGamePost from "@/components/Game/ShareGamePost";
+import { useApi } from "@/lib/useApi";
 
-const MOCKS: Record<number, ShareGamePostData> = {
-  1: {
-    gameId: 1,
-    gameScore: 100,
-    playedAt: 'a time',
-    truePredict: 2,
-    falsePredict: 1,
-    gameHistory: {
-      song1: { Response: true, songName: 'Song 1' },
-      song2: { Response: false, song_name: 'Song 2' },
-      song3: { Response: true, song_name: 'Song 3' },
-    },
-  },
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080";
 
-  2: {
-    gameId: 2,
-    gameScore: 60,
-    playedAt: 'yesterday 20:30',
-    truePredict: 1,
-    falsePredict: 2,
-    gameHistory: {
-      song1: { Response: false, song_name: 'Another Song' },
-      song2: { Response: true, songName: 'Hit Track' },
-      song3: { Response: false, song_name: 'Old Classic' },
-    },
-  },
-};
+export default function SharePostPage() {
+  const params = useParams();
+  const id = params?.id as string;
+  const idNum = Number(id);
 
-export default function ShareGamePage({ params }: { params: { id: string } }) {
-  const idNum = Number(params.id);
+  // useApi'den token'ı da çekiyoruz
+  const { apiFetch, token } = useApi(API_BASE);
+  
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const data = useMemo(() => {
-    return MOCKS[idNum] ?? {
-      gameId: idNum || 0,
-      gameScore: 0,
-      playedAt: 'unknown',
-      truePredict: 0,
-      falsePredict: 0,
-      gameHistory: {},
-    };
-  }, [idNum]);
+  useEffect(() => {
+
+    const checkToken = localStorage.getItem("user");
+    if (!checkToken) {
+      setError("Lütfen önce giriş yapın (Token bulunamadı).");
+      setLoading(false);
+      return;
+    }
+
+    async function fetchData() {
+      if (!idNum) return;
+
+      try {
+        const res = await apiFetch(`/api/posts/${idNum}`);
+        
+        if (res.status === 401) {
+          throw new Error("Oturum süreniz dolmuş veya yetkiniz yok (401).");
+        }
+
+        if (!res.ok) throw new Error(`Hata: ${res.status}`);
+        
+        const json = await res.json();
+        setData(json);
+      } catch (e: any) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Token useApi içinde set edildiğinde veya sayfa yüklendiğinde çalış
+    if (token) {
+      fetchData();
+    }
+  }, [idNum, apiFetch, token]); // token bağımlılığını ekledik
+
+  if (loading) return <div className="p-20 text-white">Yükleniyor...</div>;
+  if (error) return <div className="p-20 text-red-500">❌ Hata: {error}</div>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white flex items-center justify-center px-4 py-10">
-      <ShareGamePost data={data} />
+    <div className="min-h-screen bg-black py-10 flex justify-center">
+      {data && <ShareGamePost data={data} />}
     </div>
   );
 }
