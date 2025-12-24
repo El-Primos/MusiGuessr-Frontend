@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Button from '@/components/Button';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
+import { updateProfile, uploadProfileImage } from '@/services/profileService';
 
 interface ProfileData {
   userId: number;
@@ -18,15 +19,17 @@ interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   profileData: ProfileData;
+  apiFetch: (path: string, init?: RequestInit) => Promise<Response>;
   onSave?: (updatedData: { name: string; avatar?: string }) => void;
 }
 
-export const EditProfileModal = ({ isOpen, onClose, profileData, onSave }: EditProfileModalProps) => {
+export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSave }: EditProfileModalProps) => {
   const [name, setName] = useState(profileData.name);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(profileData.avatar || null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast, showToast, hideToast } = useToast();
 
   useEffect(() => {
@@ -51,29 +54,69 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, onSave }: EditP
     }
   };
 
-  const handleSave = () => {
-    // TODO: Backend integration
-    // Validate and save changes
+  const handleSave = async () => {
+    // Validate password if provided
     if (password && password !== confirmPassword) {
       showToast('Passwords do not match', 'error');
       return;
     }
-    
-    // TODO: API call to update profile
-    console.log('Saving profile:', { name, password, selectedImage });
-    
-    // Update parent component with new data
-    if (onSave) {
-      onSave({
-        name,
-        avatar: imagePreview || undefined,
-      });
+
+    if (password && password.length < 6) {
+      showToast('Password must be at least 6 characters', 'error');
+      return;
     }
     
-    showToast('Profile updated!', 'success');
-    setTimeout(() => {
-      onClose();
-    }, 1000);
+    setIsLoading(true);
+    
+    try {
+      let newAvatarUrl: string | undefined = profileData.avatar;
+      
+      // Upload image if selected
+      if (selectedImage) {
+        try {
+          const uploadResult = await uploadProfileImage(selectedImage, apiFetch);
+          newAvatarUrl = uploadResult.avatarUrl;
+        } catch (err) {
+          console.error('Failed to upload image:', err);
+          showToast('Failed to upload profile picture', 'error');
+          // Continue with other updates even if image upload fails
+        }
+      }
+      
+      // Update profile data
+      const updateData: { name?: string; password?: string } = {};
+      if (name !== profileData.name) {
+        updateData.name = name;
+      }
+      if (password) {
+        updateData.password = password;
+      }
+      
+      if (Object.keys(updateData).length > 0 || selectedImage) {
+        await updateProfile(updateData, apiFetch);
+      }
+      
+      // Update parent component with new data
+      if (onSave) {
+        onSave({
+          name,
+          avatar: newAvatarUrl,
+        });
+      }
+      
+      showToast('Profile updated successfully!', 'success');
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+      showToast(
+        err instanceof Error ? err.message : 'Failed to update profile',
+        'error'
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -230,10 +273,11 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, onSave }: EditP
             {/* Save Button */}
             <div className="mt-6 flex justify-end">
               <Button
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSave}
+                disabled={isLoading}
               >
-                Save
+                {isLoading ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </div>

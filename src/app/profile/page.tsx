@@ -7,85 +7,103 @@ import { SettingsButton } from '@/components/SettingsButton';
 import { ProfileSidebar } from '@/components/Profile/ProfileSidebar';
 import { ProfileStats } from '@/components/Profile/ProfileStats';
 import { GameHistory } from '@/components/Profile/GameHistory';
+import { useApi } from '@/lib/useApi';
+import { fetchOwnProfile, fetchUserGameHistory, ProfileData } from '@/services/profileService';
+import { Toast } from '@/components/Toast';
 
-// Interface definitions
-interface ProfileData {
-  userId: number;
-  userName: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  stats: {
-    averageScore: number;
-    totalGames: number;
-    guessAccuracy: number; // percentage
-  };
-  gameHistory: {
-    gameId: string;
-    date: string; // "01.01.25"
-    mode: 'Normal' | 'Tournament';
-    score: number;
-  }[];
-}
-
-// Mock data - Remove when backend is ready
-// Backend integration: Replace with API call
-// Expected API endpoint: GET /api/profile/me
-// Expected response format: ProfileData
-const mockProfileData: ProfileData = {
-  userId: 1,
-  userName: 'username',
-  name: 'Name',
-  email: 'user@example.com',
-  avatar: undefined, // Will use default avatar
-  stats: {
-    averageScore: 9999,
-    totalGames: 1245,
-    guessAccuracy: 87,
-  },
-  gameHistory: [
-    { gameId: '1', date: '01.01.25', mode: 'Normal', score: 213 },
-    { gameId: '2', date: '01.01.25', mode: 'Tournament', score: 251 },
-    { gameId: '3', date: '31.12.24', mode: 'Normal', score: 198 },
-    { gameId: '4', date: '30.12.24', mode: 'Tournament', score: 312 },
-  ],
-};
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function ProfilePage() {
   const router = useRouter();
+  const { apiFetch } = useApi(API_BASE);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; isVisible: boolean }>({
+    message: '',
+    type: 'info',
+    isVisible: false,
+  });
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type, isVisible: true });
+    setTimeout(() => setToast((prev) => ({ ...prev, isVisible: false })), 3000);
+  };
 
   useEffect(() => {
-    // Check if user is authenticated
-    try {
-      const raw = localStorage.getItem('user');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        const authenticated = Boolean(parsed && (parsed.id || parsed.userId) && (parsed.username || parsed.userName));
-        setIsAuthenticated(authenticated);
+    const loadProfile = async () => {
+      try {
+        // Check if user is authenticated
+        const raw = localStorage.getItem('user');
+        console.log('Raw user data from localStorage:', raw);
         
-        if (!authenticated) {
+        if (!raw) {
+          console.log('No user data found, redirecting to login');
           router.push('/auth?mode=login');
           return;
         }
+
+        const parsed = JSON.parse(raw);
+        console.log('Parsed user data:', parsed);
         
-        // TODO: Backend integration - Replace with API call
-        // fetchProfileData().then(setProfileData).finally(() => setIsLoading(false));
+        const userId = parsed?.userId || parsed?.id;
+        const userName = parsed?.username || parsed?.userName;
         
-        // Mock: Simulate API call
-        setTimeout(() => {
-          setProfileData(mockProfileData);
-          setIsLoading(false);
-        }, 500);
-      } else {
-        router.push('/auth?mode=login');
+        console.log('Extracted userId:', userId, 'userName:', userName);
+        
+        const authenticated = Boolean(userId && userName);
+        setIsAuthenticated(authenticated);
+        
+        if (!authenticated) {
+          console.log('User not authenticated (missing userId or userName), redirecting to login');
+          router.push('/auth?mode=login');
+          return;
+        }
+
+        console.log('User authenticated, fetching profile for userId:', userId);
+
+        // Fetch profile data from API
+        setIsLoading(true);
+        setError(null);
+        
+        const data = await fetchOwnProfile(userId, apiFetch);
+        console.log('Profile data fetched:', data);
+        setProfileData(data);
+        
+        // Optionally fetch game history
+        try {
+          const history = await fetchUserGameHistory(userId, apiFetch);
+          setProfileData(prev => prev ? { ...prev, gameHistory: history } : prev);
+        } catch (err) {
+          console.error('Failed to load game history:', err);
+          // Non-critical, continue without game history
+        }
+      } catch (err) {
+        console.error('Failed to load profile:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load profile');
+        
+        // Only redirect to login if it's an authentication error
+        // Don't remove token immediately - let user try again
+        if (err instanceof Error && (err.message.includes('401') || err.message.includes('Unauthorized'))) {
+          console.log('Unauthorized error detected');
+          showToast('Authentication failed. Please login again.', 'error');
+          // Wait a bit before removing token and redirecting
+          setTimeout(() => {
+            localStorage.removeItem('user');
+            router.push('/auth?mode=login');
+          }, 2000);
+        } else {
+          // For other errors, just show the error but stay on the page
+          showToast('Failed to load profile. Please try again.', 'error');
+        }
+      } finally {
+        setIsLoading(false);
       }
-    } catch {
-      router.push('/auth?mode=login');
-    }
-  }, [router]);
+    };
+
+    loadProfile();
+  }, [router, apiFetch]);
 
   if (isLoading) {
     return (
@@ -98,6 +116,30 @@ export default function ProfilePage() {
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center text-slate-400">Loading...</div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error && !profileData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+        <Header
+          logoSrc="/logo.png"
+          exitVisible={true}
+          onExit={() => router.push('/')}
+          className="top-0 left-0"
+        />
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          <div className="text-center">
+            <div className="text-red-400 mb-4">{error}</div>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            >
+              Retry
+            </button>
+          </div>
         </main>
       </div>
     );
@@ -131,22 +173,23 @@ export default function ProfilePage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-6 flex-col lg:flex-row">
           {/* Left Panel - Profile Sidebar */}
-                <div className="w-full lg:w-80 flex-shrink-0">
-                  <ProfileSidebar
-                    profileData={profileData}
-                    isOwnProfile={true}
-                    isAuthenticated={isAuthenticated}
-                    onProfileUpdate={(updatedData) => {
-                      if (profileData) {
-                        setProfileData({
-                          ...profileData,
-                          name: updatedData.name,
-                          avatar: updatedData.avatar,
-                        });
-                      }
-                    }}
-                  />
-                </div>
+          <div className="w-full lg:w-80 flex-shrink-0">
+            <ProfileSidebar
+              profileData={profileData}
+              isOwnProfile={true}
+              isAuthenticated={isAuthenticated}
+              apiFetch={apiFetch}
+              onProfileUpdate={(updatedData) => {
+                if (profileData) {
+                  setProfileData({
+                    ...profileData,
+                    name: updatedData.name,
+                    avatar: updatedData.avatar,
+                  });
+                }
+              }}
+            />
+          </div>
 
           {/* Right Panel - Statistics and Game History */}
           <div className="flex-1">
@@ -162,6 +205,14 @@ export default function ProfilePage() {
       </main>
 
       <SettingsButton />
+
+      {/* Toast Notification */}
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={() => setToast((prev) => ({ ...prev, isVisible: false }))}
+      />
     </div>
   );
 }
