@@ -30,7 +30,7 @@ yarn install
 ### 3. Configure Environment Variables
 Create a `.env.local` file in the root directory:
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8080
+NEXT_PUBLIC_API_BASE=http://localhost:8080
 ```
 
 ### 4. Run the Development Server

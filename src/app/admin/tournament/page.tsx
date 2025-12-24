@@ -1,7 +1,7 @@
 'use client';
 
 import TournamentCreate from '@/components/AdminOps/TournamentCreate';
-import TournamentManagement from '@/components/AdminOps/TournamentManagement';
+import TournamentManage from '@/components/AdminOps/TournamentManage';
 import { useState } from 'react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
@@ -38,8 +38,17 @@ export default function TournamentPage() {
       </div>
 
       {/* Content */}
-      {activeTab === 'manage' ? (
-        <TournamentManagement apiBase={API_BASE} />
+      {activeTab === 'manage' ? (     
+        <TournamentManage
+          apiBase={API_BASE}
+          playlistEditPath="/admin/playlists"
+          endpoints={{
+            // eğer backend farklıysa örnek:
+            // update: (id)=>`/api/tournaments/${id}/update-time`,
+            // del: (id)=>`/api/tournaments/${id}`,
+            // participantRemove: (tid, uid)=>`/api/tournaments/${tid}/participants/${uid}`,
+          }}
+        />
       ) : (
         <TournamentCreate apiBase={API_BASE} onCreated={() => setActiveTab('manage')} />
       )}
