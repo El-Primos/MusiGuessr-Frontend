@@ -1,34 +1,18 @@
+"use client";
+
 import { useCallback, useRef, useState } from "react";
-
-export type UploadUrlReq = {
-  name: string;
-  fileName: string;
-  contentType: string;
-};
-
-export type UploadUrlRes = {
-  message: string;
-  key: string;
-  uploadUrl: string;
-};
+import { UploadUrlReq, UploadUrlRes, S3UploadInput, S3UploadResult } from "@/dto/s3.dto";
 
 export type UseS3UploadOptions = {
-  apiBase?: string;
   uploadUrlPath?: string;
-  // if auth needed
-  getAuthHeaders?: () => Record<string, string>;
+
+  /**
+   * IMPORTANT:
+   * This should be `apiFetch` returned from `useApi(apiBase)`
+  */
+  apiFetch: (path: string, init?: RequestInit) => Promise<Response>;
 
   method?: "PUT";
-};
-
-export type S3UploadInput = {
-  name: string;
-  file: File;
-};
-
-export type S3UploadResult = {
-  key: string;
-  uploadUrl: string;
 };
 
 function safeJsonParse(text: string) {
@@ -39,46 +23,38 @@ function safeJsonParse(text: string) {
   }
 }
 
-export function useS3Upload(opts: UseS3UploadOptions = {}) {
-  const {
-    apiBase = "",
-    uploadUrlPath = "/api/musics/upload-url",
-    getAuthHeaders,
-    method = "PUT",
-  } = opts;
+function isError(e: unknown): e is Error {
+  return e instanceof Error;
+}
+
+export function useS3Upload(opts: UseS3UploadOptions) {
+  const { apiFetch, uploadUrlPath = "/api/musics/upload-url", method = "PUT" } = opts;
 
   const [loading, setLoading] = useState(false);
-  const [stage, setStage] = useState<"idle" | "requesting_url" | "uploading">(
-    "idle"
-  );
+  const [stage, setStage] = useState<"idle" | "requesting_url" | "uploading">("idle");
   const [error, setError] = useState<string | null>(null);
 
   // If two uploads are triggered simultaneously, to cancel/ignore the former:
   const callIdRef = useRef(0);
 
-  function isError(e: unknown): e is Error {
-    return e instanceof Error;
-  }
-
   const requestUploadUrl = useCallback(
     async (payload: UploadUrlReq): Promise<UploadUrlRes> => {
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        ...(getAuthHeaders ? getAuthHeaders() : {}),
-      };
-
-      const res = await fetch(`${apiBase}${uploadUrlPath}`, {
+      const res = await apiFetch(uploadUrlPath, {
         method: "POST",
-        headers,
+        headers: {
+          // apiFetch already merges authHeaders, so no need to pass Authorization here
+          "Content-Type": "application/json",
+          accept: "*/*",
+        },
         body: JSON.stringify(payload),
+        cache: "no-store",
       });
 
       const text = await res.text();
       if (!res.ok) {
         const parsed = safeJsonParse(text);
         throw new Error(
-          parsed?.message ||
-            `upload-url failed (${res.status}): ${text || res.statusText}`
+          parsed?.message || `upload-url failed (${res.status}): ${text || res.statusText}`
         );
       }
 
@@ -88,7 +64,7 @@ export function useS3Upload(opts: UseS3UploadOptions = {}) {
       }
       return parsed;
     },
-    [apiBase, uploadUrlPath, getAuthHeaders]
+    [apiFetch, uploadUrlPath]
   );
 
   const uploadToPresignedUrl = useCallback(
@@ -104,9 +80,7 @@ export function useS3Upload(opts: UseS3UploadOptions = {}) {
 
       if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(
-          `Upload to storage failed (${res.status}): ${text || res.statusText}`
-        );
+        throw new Error(`Upload to storage failed (${res.status}): ${text || res.statusText}`);
       }
     },
     [method]
@@ -119,6 +93,7 @@ export function useS3Upload(opts: UseS3UploadOptions = {}) {
       setError(null);
       setLoading(true);
       setStage("requesting_url");
+
       try {
         const urlRes = await requestUploadUrl({
           name,
@@ -126,17 +101,12 @@ export function useS3Upload(opts: UseS3UploadOptions = {}) {
           contentType: file.type || "application/octet-stream",
         });
 
-        // last upload (don't let to process 2 upload n same time)
-        if (myCallId !== callIdRef.current) {
-          throw new Error("Upload cancelled");
-        }
+        if (myCallId !== callIdRef.current) throw new Error("Upload cancelled");
 
         setStage("uploading");
         await uploadToPresignedUrl(urlRes.uploadUrl, file);
 
-        if (myCallId !== callIdRef.current) {
-          throw new Error("Upload cancelled");
-        }
+        if (myCallId !== callIdRef.current) throw new Error("Upload cancelled");
 
         setStage("idle");
         return { key: urlRes.key, uploadUrl: urlRes.uploadUrl };
@@ -144,18 +114,14 @@ export function useS3Upload(opts: UseS3UploadOptions = {}) {
         setStage("idle");
 
         if (isError(e)) {
-          if (e.message !== "Upload cancelled") {
-            setError(e.message);
-          }
+          if (e.message !== "Upload cancelled") setError(e.message);
         } else {
           setError("Unexpected error");
         }
 
         throw e;
       } finally {
-        if (myCallId === callIdRef.current) {
-          setLoading(false);
-        }
+        if (myCallId === callIdRef.current) setLoading(false);
       }
     },
     [requestUploadUrl, uploadToPresignedUrl]
