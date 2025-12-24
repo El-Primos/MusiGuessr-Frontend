@@ -1,31 +1,48 @@
-"use client";
+'use client';
 
-import { Header } from "@/components/Header";
-import TournamentCreate from "@/components/AdminOps/TournamentCreate";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import TournamentCreate from '@/components/AdminOps/TournamentCreate';
+import TournamentManagement from '@/components/AdminOps/TournamentManagement';
+import { useState } from 'react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
-export default function TournamentCreatePage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!localStorage.getItem("user")) router.push("/");
-  }, [router]);
+export default function TournamentPage() {
+  const [activeTab, setActiveTab] = useState<'manage' | 'create'>('manage');
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
-      <Header
-        logoSrc="/logo.png"
-        exitVisible
-        onExit={() => router.push("/")}
-        className="top-0 left-0"
-      />
-
-      <div className="mx-auto w-full max-w-6xl px-6 py-10">
-        <TournamentCreate apiBase={API_BASE} />
+    <div className="p-8">
+      {/* Tabs */}
+      <div className="mb-6 border-b border-slate-700">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab('manage')}
+            className={`px-4 py-2 font-semibold transition-colors ${
+              activeTab === 'manage'
+                ? 'border-b-2 border-blue-500 text-blue-400'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Manage Tournaments
+          </button>
+          <button
+            onClick={() => setActiveTab('create')}
+            className={`px-4 py-2 font-semibold transition-colors ${
+              activeTab === 'create'
+                ? 'border-b-2 border-blue-500 text-blue-400'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Create Tournament
+          </button>
+        </div>
       </div>
+
+      {/* Content */}
+      {activeTab === 'manage' ? (
+        <TournamentManagement apiBase={API_BASE} />
+      ) : (
+        <TournamentCreate apiBase={API_BASE} onCreated={() => setActiveTab('manage')} />
+      )}
     </div>
   );
 }
