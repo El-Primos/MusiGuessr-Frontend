@@ -19,6 +19,7 @@ interface ProfileSidebarProps {
   profileData: ProfileData;
   isOwnProfile: boolean;
   isAuthenticated: boolean;
+  apiFetch?: (path: string, init?: RequestInit) => Promise<Response>;
   isFriend?: boolean; // For other user's profile
   onAddFriend?: () => void;
   onRemoveFriend?: () => void;
@@ -29,6 +30,7 @@ export const ProfileSidebar = ({
   profileData,
   isOwnProfile,
   isAuthenticated,
+  apiFetch,
   isFriend,
   onAddFriend,
   onRemoveFriend,
@@ -205,7 +207,6 @@ export const ProfileSidebar = ({
                 className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
                 onClick={() => {
                   localStorage.removeItem('user');
-                  localStorage.removeItem('friends');
                   window.location.href = '/';
                 }}
               >
@@ -258,11 +259,12 @@ export const ProfileSidebar = ({
       </div>
 
       {/* Edit Profile Modal */}
-      {isOwnProfile && (
+      {isOwnProfile && apiFetch && (
         <EditProfileModal
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
           profileData={profileData}
+          apiFetch={apiFetch}
           onSave={onProfileUpdate}
         />
       )}

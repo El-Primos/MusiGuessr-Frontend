@@ -4,63 +4,29 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { SettingsButton } from '@/components/SettingsButton';
+import { FriendRequestsButton } from '@/components/FriendRequests/FriendRequestsButton';
 import { ProfileSidebar } from '@/components/Profile/ProfileSidebar';
 import { ProfileStats } from '@/components/Profile/ProfileStats';
 import { GameHistory } from '@/components/Profile/GameHistory';
 import { Toast } from '@/components/Toast';
+import { useApi } from '@/lib/useApi';
+import { fetchUserProfile, ProfileData } from '@/services/profileService';
+import { addFriend, removeFriend, checkFriendship } from '@/services/friendsService';
 
-// Interface definitions
-interface ProfileData {
-  userId: number;
-  userName: string;
-  name: string;
-  email: string;
-  avatar?: string;
-  stats: {
-    averageScore: number;
-    totalGames: number;
-    guessAccuracy: number; // percentage
-  };
-  gameHistory: {
-    gameId: string;
-    date: string; // "01.01.25"
-    mode: 'Normal' | 'Tournament';
-    score: number;
-  }[];
-}
-
-// Mock data - Remove when backend is ready
-// Backend integration: Replace with API call
-// Expected API endpoint: GET /api/profile/:userId
-// Expected response format: ProfileData
-const getMockProfileData = (userId: number): ProfileData => ({
-  userId,
-  userName: `user${userId}`,
-  name: `User ${userId}`,
-  email: `user${userId}@example.com`,
-  avatar: undefined,
-  stats: {
-    averageScore: 8500,
-    totalGames: 987,
-    guessAccuracy: 82,
-  },
-  gameHistory: [
-    { gameId: '1', date: '01.01.25', mode: 'Normal', score: 198 },
-    { gameId: '2', date: '31.12.24', mode: 'Tournament', score: 245 },
-    { gameId: '3', date: '30.12.24', mode: 'Normal', score: 167 },
-  ],
-});
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function OtherUserProfilePage() {
   const router = useRouter();
   const params = useParams();
   const userId = parseInt(params.userId as string, 10);
+  const { apiFetch } = useApi(API_BASE);
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFriend, setIsFriend] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Check authentication
   useEffect(() => {
@@ -87,31 +53,38 @@ export default function OtherUserProfilePage() {
     }
   }, [currentUserId, userId, router]);
 
-  // TODO: Backend integration - Replace with API call
-  // useEffect(() => {
-  //   fetchProfileData(userId).then(setProfileData).finally(() => setIsLoading(false));
-  //   checkFriendship(userId).then(setIsFriend);
-  // }, [userId]);
-
+  // Load user profile and friendship status
   useEffect(() => {
-    // Mock: Simulate API call
-    setTimeout(() => {
-      setProfileData(getMockProfileData(userId));
-      // Mock: Check if friend from localStorage
+    const loadUserProfile = async () => {
       try {
-        const friendsList = localStorage.getItem('friends');
-        if (friendsList) {
-          const friends = JSON.parse(friendsList) as number[];
-          setIsFriend(friends.includes(userId));
-        } else {
-          setIsFriend(false);
+        setIsLoading(true);
+        setError(null);
+        
+        // Fetch user profile
+        const data = await fetchUserProfile(userId, apiFetch);
+        setProfileData(data);
+        
+        // Check friendship status if authenticated
+        if (isAuthenticated) {
+          try {
+            const { isFriend: friendStatus } = await checkFriendship(userId, apiFetch);
+            setIsFriend(friendStatus);
+          } catch (err) {
+            console.error('Failed to check friendship:', err);
+            // Non-critical error, continue without friendship status
+          }
         }
-      } catch {
-        setIsFriend(false);
+      } catch (err) {
+        console.error('Failed to load user profile:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load profile');
+        showToast('Failed to load profile. Please try again.', 'error');
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }, 500);
-  }, [userId]);
+    };
+
+    loadUserProfile();
+  }, [userId, apiFetch, isAuthenticated]);
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; isVisible: boolean }>({
     message: '',
@@ -124,49 +97,36 @@ export default function OtherUserProfilePage() {
     setTimeout(() => setToast((prev) => ({ ...prev, isVisible: false })), 3000);
   };
 
-  const handleAddFriend = () => {
-    // TODO: Backend integration - POST /api/friends/:userId
-    console.log('Adding friend:', userId);
-    
-    // Mock: Save to localStorage
+  const handleAddFriend = async () => {
     try {
-      const friendsList = localStorage.getItem('friends');
-      const friends = friendsList ? (JSON.parse(friendsList) as number[]) : [];
-      if (!friends.includes(userId)) {
-        friends.push(userId);
-        localStorage.setItem('friends', JSON.stringify(friends));
-      }
-    } catch {
-      // Handle error silently
+      await addFriend(userId, apiFetch);
+      setIsFriend(true);
+      showToast('Friend added!', 'success');
+    } catch (err) {
+      console.error('Failed to add friend:', err);
+      showToast(
+        err instanceof Error ? err.message : 'Failed to add friend',
+        'error'
+      );
     }
-    
-    setIsFriend(true);
-    showToast('Friend added!', 'success');
   };
 
-  const handleRemoveFriend = () => {
-    // TODO: Backend integration - DELETE /api/friends/:userId
-    console.log('Removing friend:', userId);
-    
-    // Mock: Remove from localStorage
+  const handleRemoveFriend = async () => {
     try {
-      const friendsList = localStorage.getItem('friends');
-      if (friendsList) {
-        const friends = JSON.parse(friendsList) as number[];
-        const updatedFriends = friends.filter((id) => id !== userId);
-        localStorage.setItem('friends', JSON.stringify(updatedFriends));
-      }
-    } catch {
-      // Handle error silently
+      await removeFriend(userId, apiFetch);
+      setIsFriend(false);
+      showToast('Friend removed!', 'success');
+    } catch (err) {
+      console.error('Failed to remove friend:', err);
+      showToast(
+        err instanceof Error ? err.message : 'Failed to remove friend',
+        'error'
+      );
     }
-    
-    setIsFriend(false);
-    showToast('Friend removed!', 'success');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
-    localStorage.removeItem('friends');
     router.push('/');
   };
 
@@ -357,6 +317,7 @@ export default function OtherUserProfilePage() {
               profileData={profileData}
               isOwnProfile={false}
               isAuthenticated={isAuthenticated}
+              apiFetch={apiFetch}
               isFriend={isFriend}
               onAddFriend={handleAddFriend}
               onRemoveFriend={handleRemoveFriend}
@@ -377,6 +338,9 @@ export default function OtherUserProfilePage() {
       </main>
 
       <SettingsButton />
+
+      {/* Friend Requests Button - Mock data: 3 requests, 4 friends */}
+      {isAuthenticated && <FriendRequestsButton requestCount={3} friendCount={4} />}
 
       {/* Toast Notification */}
       <Toast
