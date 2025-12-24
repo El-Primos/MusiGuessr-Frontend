@@ -8,7 +8,7 @@ function getTokenFromLocalStorage(): string {
     
     if (!raw) return "";
     const parsed = JSON.parse(raw);
-    console.log("Parsed Token: ", parsed?.accessToken)
+    
     return parsed?.accessToken || "";
   } catch {
     return "";

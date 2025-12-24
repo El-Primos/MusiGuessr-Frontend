@@ -74,8 +74,15 @@ export default function TournamentsPage() {
         return;
       }
 
-      // Fetch user registrations first
+      // Fetch user registrations and calculate stats
       let userRegisteredIds = new Set<number>();
+      const calculatedStats = {
+        tournamentsPlayed: 0,
+        tournamentsWon: 0,
+        bestRank: 0,
+        totalPoints: 0,
+      };
+
       try {
         const userResponse = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
         if (userResponse.ok) {
@@ -83,6 +90,22 @@ export default function TournamentsPage() {
           userRegisteredIds = new Set<number>(userData.map((t: { tournamentId: number }) => t.tournamentId));
           setRegisteredTournamentIds(userRegisteredIds);
           console.log('Loaded registered tournament IDs:', Array.from(userRegisteredIds));
+
+          // Calculate stats from user tournament history
+          calculatedStats.tournamentsPlayed = userData.length;
+          
+          // Calculate tournaments won, best rank, and total points
+          userData.forEach((tournament: { rank: number; score: number }) => {
+            if (tournament.rank === 1) {
+              calculatedStats.tournamentsWon++;
+            }
+            if (tournament.rank && (calculatedStats.bestRank === 0 || tournament.rank < calculatedStats.bestRank)) {
+              calculatedStats.bestRank = tournament.rank;
+            }
+            if (tournament.score) {
+              calculatedStats.totalPoints += tournament.score;
+            }
+          });
         } else {
           console.warn('Could not fetch user tournaments (status:', userResponse.status, '). Registration status will be updated after joining.');
           // Continue anyway - registration status will be determined by join attempts
@@ -124,7 +147,7 @@ export default function TournamentsPage() {
       // Transform backend DTOs to frontend format with current registration status
       const tournaments: TournamentCardData[] = data.content.map((dto) => {
         const isRegistered = userRegisteredIds.has(dto.id);
-        console.log(`Tournament ${dto.id} (${dto.name}): isRegistered = ${isRegistered}`);
+        
         return {
           tournamentId: dto.id.toString(),
           name: dto.name,
@@ -140,12 +163,7 @@ export default function TournamentsPage() {
       });
 
       setTournamentData({
-        stats: {
-          tournamentsPlayed: 0, // TODO: Will be fetched from /api/users/self/tournaments
-          tournamentsWon: 0,
-          bestRank: 0,
-          totalPoints: 0,
-        },
+        stats: calculatedStats,
         tournaments,
       });
 
