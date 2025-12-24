@@ -8,6 +8,8 @@ import Button from '@/components/Button';
 import { useApi } from '@/lib/useApi';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
+import { Loading } from '@/components/Loading';
+import { calculateTournamentStatus, hasTournamentStarted, hasTournamentEnded } from '@/lib/tournamentUtils';
 import {
   TournamentResponseDTO,
   TournamentLeaderboardEntryDTO,
@@ -100,10 +102,26 @@ export default function TournamentDetailsPage() {
 
       let isRegistered = false;
       if (userId) {
-        const participantsResponse = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
-        if (participantsResponse.ok) {
-          const userTournaments = await participantsResponse.json();
-          isRegistered = userTournaments.some((t: { tournamentId: number }) => t.tournamentId === parseInt(tournamentId));
+        try {
+          const participantsResponse = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
+          if (participantsResponse.ok) {
+            const userTournaments = await participantsResponse.json();
+            isRegistered = userTournaments.some((t: { tournamentId: number }) => t.tournamentId === parseInt(tournamentId));
+          } else {
+            console.warn('Could not fetch tournament history, status:', participantsResponse.status);
+            // Fallback: check localStorage for recently joined tournaments
+            try {
+              const recentJoins = localStorage.getItem('recentTournamentJoins');
+              if (recentJoins) {
+                const joins: number[] = JSON.parse(recentJoins);
+                isRegistered = joins.includes(parseInt(tournamentId));
+              }
+            } catch (e) {
+              console.warn('Could not check localStorage for recent joins');
+            }
+          }
+        } catch (error) {
+          console.warn('Error fetching tournament history:', error);
         }
       }
 
@@ -165,6 +183,19 @@ export default function TournamentDetailsPage() {
           isRegistered: true, 
           participants: tournament.participants + 1 
         });
+        
+        // Save to localStorage as fallback
+        try {
+          const recentJoins = localStorage.getItem('recentTournamentJoins');
+          const joins: number[] = recentJoins ? JSON.parse(recentJoins) : [];
+          const tournamentIdNum = parseInt(tournamentId);
+          if (!joins.includes(tournamentIdNum)) {
+            joins.push(tournamentIdNum);
+            localStorage.setItem('recentTournamentJoins', JSON.stringify(joins));
+          }
+        } catch (e) {
+          console.warn('Could not save to localStorage');
+        }
       }
     } catch (error) {
       showToast('Failed to join tournament', 'error');
@@ -172,19 +203,7 @@ export default function TournamentDetailsPage() {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
-        <Header
-          logoSrc="/logo.png"
-          exitVisible={true}
-          onExit={() => router.push('/tournaments')}
-          className="top-0 left-0"
-        />
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-400">Loading...</div>
-        </main>
-      </div>
-    );
+    return <Loading fullScreen message="Loading tournament details..." />;
   }
 
   if (!tournament) {
@@ -212,11 +231,17 @@ export default function TournamentDetailsPage() {
     );
   }
 
-  const canJoin = tournament.status === 'Upcoming' && !tournament.isRegistered;
+  // Calculate actual status and timing using shared utility functions
+  const actualStatus = calculateTournamentStatus(tournament.startDate, tournament.endDate);
+  const hasStarted = hasTournamentStarted(tournament.startDate);
+  const hasEnded = hasTournamentEnded(tournament.endDate);
+  
+  const canJoin = !tournament.isRegistered && !hasEnded;
   const isFull = tournament.maxParticipants && tournament.participants >= tournament.maxParticipants;
+  const canPlay = tournament.isRegistered && hasStarted && !hasEnded;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white animate-in fade-in duration-300">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
@@ -238,8 +263,8 @@ export default function TournamentDetailsPage() {
             <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900">
               <div className="relative h-64 bg-gradient-to-br from-blue-900/40 to-purple-900/40 flex items-center justify-center">
                 <div className="text-8xl text-white/20">🏆</div>
-                <span className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(tournament.status)}`}>
-                  {tournament.status}
+                <span className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(actualStatus)}`}>
+                  {actualStatus}
                 </span>
               </div>
 
@@ -286,18 +311,23 @@ export default function TournamentDetailsPage() {
                       {isFull ? 'Tournament Full' : 'Join Tournament'}
                     </Button>
                   )}
-                  {tournament.isRegistered && tournament.status !== 'Completed' && (
-                    <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
-                      Already Joined
-                    </div>
-                  )}
-                  {tournament.isRegistered && tournament.status === 'Active' && (
+                  {canPlay && (
                     <Button
                       className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-semibold"
                       onClick={() => router.push(`/game?tournament=${tournament.tournamentId}`)}
                     >
                       Play Now
                     </Button>
+                  )}
+                  {tournament.isRegistered && !canPlay && !hasEnded && (
+                    <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
+                      Already Joined
+                    </div>
+                  )}
+                  {tournament.isRegistered && hasEnded && (
+                    <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
+                      Registered
+                    </div>
                   )}
                 </div>
               </div>

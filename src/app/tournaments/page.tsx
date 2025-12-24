@@ -10,7 +10,9 @@ import { TournamentTabs } from '@/components/Tournaments/TournamentTabs';
 import { TournamentCardData } from '@/components/Tournaments/TournamentCard';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
+import { Loading } from '@/components/Loading';
 import { useApi } from '@/lib/useApi';
+import { calculateTournamentStatus } from '@/lib/tournamentUtils';
 import {
   TournamentPageResponse,
   mapTournamentStatus,
@@ -56,61 +58,55 @@ export default function TournamentsPage() {
     }
   }, []);
 
-  // Fetch user's registered tournaments
+  // Fetch tournaments and user registrations together
   useEffect(() => {
-    if (token && userId) {
-      fetchUserTournaments();
+    if (typeof window !== 'undefined' && token && userId) {
+      fetchAllData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, userId]);
+  }, [activeTab, currentPage, token, userId]);
 
-  // Fetch tournaments from API - only after token is loaded
-  useEffect(() => {
-    // Skip if we're still loading the token on client side
-    if (typeof window !== 'undefined') {
-      fetchTournaments();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, currentPage, token]);
-
-  async function fetchUserTournaments() {
-    if (!userId) return;
-
-    try {
-      const response = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
-      if (response.ok) {
-        const data = await response.json();
-        const ids = new Set<number>(data.map((t: { tournamentId: number }) => t.tournamentId));
-        setRegisteredTournamentIds(ids);
-      }
-    } catch (error) {
-      console.error('Failed to fetch user tournaments:', error);
-    }
-  }
-
-  async function fetchTournaments() {
+  async function fetchAllData() {
     setIsLoading(true);
     try {
-      // Check if user is authenticated
-      if (!token) {
-        console.log('No token available, skipping tournament fetch');
+      if (!token || !userId) {
         setIsLoading(false);
         return;
       }
 
-      // Build query params
+      // Fetch user registrations first
+      let userRegisteredIds = new Set<number>();
+      try {
+        const userResponse = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
+        if (userResponse.ok) {
+          const userData = await userResponse.json();
+          userRegisteredIds = new Set<number>(userData.map((t: { tournamentId: number }) => t.tournamentId));
+          setRegisteredTournamentIds(userRegisteredIds);
+          console.log('Loaded registered tournament IDs:', Array.from(userRegisteredIds));
+        } else {
+          console.warn('Could not fetch user tournaments (status:', userResponse.status, '). Registration status will be updated after joining.');
+          // Continue anyway - registration status will be determined by join attempts
+        }
+      } catch (error) {
+        console.warn('Could not fetch user tournaments:', error, '. Registration status will be updated after joining.');
+        // Continue anyway - registration status will be determined by join attempts
+      }
+
+      // Now fetch tournaments with the registration data already loaded
+
+      // Build query params - fetch all tournaments, filter on client side by dates
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        size: '12',
+        size: '50', // Increase size to get more tournaments for client-side filtering
         sort: 'createDate',
         direction: 'DESC',
       });
 
-      // Add status filter if not 'all'
-      const backendStatus = mapToBackendStatus(activeTab);
-      if (backendStatus) {
-        params.append('status', backendStatus);
-      }
+      // Don't send status filter to backend - we'll filter by actual dates on frontend
+      // const backendStatus = mapToBackendStatus(activeTab);
+      // if (backendStatus) {
+      //   params.append('status', backendStatus);
+      // }
 
       const response = await apiFetch(`/api/tournaments?${params.toString()}`);
 
@@ -125,19 +121,23 @@ export default function TournamentsPage() {
 
       const data: TournamentPageResponse = await response.json();
 
-      // Transform backend DTOs to frontend format
-      const tournaments: TournamentCardData[] = data.content.map((dto) => ({
-        tournamentId: dto.id.toString(),
-        name: dto.name,
-        description: dto.description,
-        startDate: formatTournamentDate(dto.startDate),
-        endDate: formatTournamentDate(dto.endDate),
-        status: mapTournamentStatus(dto.status),
-        participants: dto.participantCount,
-        maxParticipants: 500, // TODO: Add to backend when max participants feature is implemented
-        prize: '1000 Points', // TODO: Add to backend when prize field is implemented
-        isRegistered: registeredTournamentIds.has(dto.id),
-      }));
+      // Transform backend DTOs to frontend format with current registration status
+      const tournaments: TournamentCardData[] = data.content.map((dto) => {
+        const isRegistered = userRegisteredIds.has(dto.id);
+        console.log(`Tournament ${dto.id} (${dto.name}): isRegistered = ${isRegistered}`);
+        return {
+          tournamentId: dto.id.toString(),
+          name: dto.name,
+          description: dto.description,
+          startDate: formatTournamentDate(dto.startDate),
+          endDate: formatTournamentDate(dto.endDate),
+          status: mapTournamentStatus(dto.status),
+          participants: dto.participantCount,
+          maxParticipants: 500, // TODO: Add to backend when max participants feature is implemented
+          prize: '1000 Points', // TODO: Add to backend when prize field is implemented
+          isRegistered: isRegistered,
+        };
+      });
 
       setTournamentData({
         stats: {
@@ -162,10 +162,11 @@ export default function TournamentsPage() {
     }
   }
 
-  // Filter tournaments based on active tab
+  // Filter tournaments based on active tab using date-calculated status
   const filteredTournaments = tournamentData?.tournaments.filter((tournament) => {
     if (activeTab === 'all') return true;
-    return tournament.status.toLowerCase() === activeTab;
+    const actualStatus = calculateTournamentStatus(tournament.startDate, tournament.endDate);
+    return actualStatus.toLowerCase() === activeTab;
   }) || [];
 
   // Handle joining a tournament
@@ -228,24 +229,16 @@ export default function TournamentsPage() {
 
   // Handle viewing tournament details
   const handleViewTournament = (tournamentId: string) => {
-    // TODO: Navigate to tournament details page
     router.push(`/tournaments/${tournamentId}`);
   };
 
+  // Handle playing a tournament
+  const handlePlayTournament = (tournamentId: string) => {
+    router.push(`/game?tournament=${tournamentId}`);
+  };
+
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
-        <Header
-          logoSrc="/logo.png"
-          exitVisible={true}
-          onExit={() => router.push('/')}
-          className="top-0 left-0"
-        />
-        <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-400">Loading...</div>
-        </main>
-      </div>
-    );
+    return <Loading fullScreen message="Loading tournaments..." />;
   }
 
   if (!tournamentData) {
@@ -265,7 +258,7 @@ export default function TournamentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white animate-in fade-in duration-300">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
@@ -293,6 +286,7 @@ export default function TournamentsPage() {
           tournaments={filteredTournaments}
           onJoin={handleJoinTournament}
           onView={handleViewTournament}
+          onPlay={handlePlayTournament}
         />
 
         {/* Pagination Controls */}

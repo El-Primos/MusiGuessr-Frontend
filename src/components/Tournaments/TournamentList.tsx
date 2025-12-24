@@ -6,9 +6,10 @@ interface TournamentListProps {
   tournaments: TournamentCardData[];
   onJoin?: (tournamentId: string) => void;
   onView?: (tournamentId: string) => void;
+  onPlay?: (tournamentId: string) => void;
 }
 
-export const TournamentList = ({ tournaments, onJoin, onView }: TournamentListProps) => {
+export const TournamentList = ({ tournaments, onJoin, onView, onPlay }: TournamentListProps) => {
   if (tournaments.length === 0) {
     return (
       <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900">
@@ -32,6 +33,7 @@ export const TournamentList = ({ tournaments, onJoin, onView }: TournamentListPr
             tournament={tournament}
             onJoin={onJoin}
             onView={onView}
+            onPlay={onPlay}
           />
         ))}
       </div>
