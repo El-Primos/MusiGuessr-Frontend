@@ -55,48 +55,37 @@ export default function ProfilePage() {
   const router = useRouter();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // TODO: Backend integration - Replace with API call
-  // useEffect(() => {
-  //   fetchProfileData().then(setProfileData).finally(() => setIsLoading(false));
-  // }, []);
-
-  useEffect(() => {
-    // Mock: Simulate API call
-    setTimeout(() => {
-      setProfileData(mockProfileData);
-      setIsLoading(false);
-    }, 500);
-  }, []);
-
-  // Check if user is authenticated
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
   useEffect(() => {
+    // Check if user is authenticated
     try {
       const raw = localStorage.getItem('user');
       if (raw) {
         const parsed = JSON.parse(raw);
-        setIsAuthenticated(Boolean(parsed && parsed.userId && parsed.userName));
+        const authenticated = Boolean(parsed && (parsed.id || parsed.userId) && (parsed.username || parsed.userName));
+        setIsAuthenticated(authenticated);
+        
+        if (!authenticated) {
+          router.push('/auth?mode=login');
+          return;
+        }
+        
+        // TODO: Backend integration - Replace with API call
+        // fetchProfileData().then(setProfileData).finally(() => setIsLoading(false));
+        
+        // Mock: Simulate API call
+        setTimeout(() => {
+          setProfileData(mockProfileData);
+          setIsLoading(false);
+        }, 500);
       } else {
-        setIsAuthenticated(false);
+        router.push('/auth?mode=login');
       }
     } catch {
-      setIsAuthenticated(false);
-    }
-  }, []);
-
-  // Redirect to login if not authenticated (after loading)
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
       router.push('/auth?mode=login');
-      return;
     }
-  }, [isLoading, isAuthenticated, router]);
-
-  // Don't render if not authenticated (will redirect)
-  if (!isLoading && !isAuthenticated) {
-    return null;
-  }
+  }, [router]);
 
   if (isLoading) {
     return (
