@@ -76,7 +76,7 @@ export default function ProfilePage() {
       const raw = localStorage.getItem('user');
       if (raw) {
         const parsed = JSON.parse(raw);
-        setIsAuthenticated(Boolean(parsed && parsed.userId && parsed.userName));
+        setIsAuthenticated(Boolean(parsed && parsed.id && parsed.username));
       } else {
         setIsAuthenticated(false);
       }

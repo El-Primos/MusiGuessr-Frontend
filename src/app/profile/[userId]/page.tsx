@@ -65,11 +65,14 @@ export default function OtherUserProfilePage() {
   // Check authentication
   useEffect(() => {
     try {
+      console.log("aaaaaa");
       const raw = localStorage.getItem('user');
+      console.log(raw);
       if (raw) {
         const parsed = JSON.parse(raw);
-        setIsAuthenticated(Boolean(parsed && parsed.userId && parsed.userName));
-        setCurrentUserId(parsed.userId);
+        
+        setIsAuthenticated(Boolean(parsed && parsed.id && parsed.username));
+        setCurrentUserId(parsed.id);
       } else {
         setIsAuthenticated(false);
         setCurrentUserId(null);

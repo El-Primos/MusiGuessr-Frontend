@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
+import TournamentCoverUpload from "./TournamentCoverUpload";
 
 type Props = { apiBase: string; onCreated?: (t: Tournament) => void };
 
@@ -27,6 +28,7 @@ type Tournament = {
   startDate?: string;
   endDate?: string;
   participantCount?: number;
+  coverUrl: string;  // I need cover image, take is as url
 };
 
 type CreateTournamentReq = {
@@ -35,6 +37,7 @@ type CreateTournamentReq = {
   playlistId: number;
   startDate: string; // ISO date-time
   endDate: string;   // ISO date-time
+  coverUrl: string; // I need cover image, take is as url
 };
 
 function safeJsonParse(text: string) {
@@ -99,6 +102,12 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
   // time err
   const MIN_START_MS = 2 * 60 * 1000;
   const [timeError, setTimeError] = useState<string | null>(null);
+
+  // img
+  const [coverUrl, setCoverUrl] = useState<string>("");
+  const [coverKey, setCoverKey] = useState<string>("");
+  const [coverOpen, setCoverOpen] = useState(false);
+
 
   useEffect(() => {
     if (!startLocal || !endLocal) {
@@ -224,6 +233,9 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
     if (!selectedPlaylistId) return false;
     if (!name.trim()) return false;
     if (!startLocal || !endLocal) return false;
+    if (!coverUrl) return false;
+    if (timeError) return false;
+
 
     const startMs = new Date(startLocal).getTime();
     const endMs = new Date(endLocal).getTime();
@@ -259,7 +271,9 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
       playlistId: selectedPlaylistId,
       startDate: startIso,
       endDate: endIso,
+      coverUrl, // ✅
     };
+
 
     setCreating(true);
     try {
@@ -419,6 +433,47 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
           <div className="text-sm font-semibold">Tournament details</div>
 
           <div className="mt-3 space-y-3">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="font-medium">Cover image</div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    Upload before creating.
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setCoverOpen((v) => !v)}
+                  className="h-9 rounded-xl border border-slate-200 bg-white px-3 text-sm hover:bg-slate-50"
+                >
+                  {coverOpen ? "Close" : coverUrl ? "Change" : "Add cover"}
+                </button>
+              </div>
+
+              {coverUrl && (
+                <div className="mt-2 text-xs text-slate-600 break-all">
+                  <span className="font-medium">Cover:</span> {coverUrl}
+                </div>
+              )}
+
+              {coverOpen && (
+                <div className="mt-3">
+                  <TournamentCoverUpload
+                    apiBase={apiBase}
+                    uploadUrlPath="/api/tournaments/cover/upload-url"
+                    aspect={1 / 1} // ✅ istediğin oran
+                    onUploaded={({ key, coverUrl }) => {
+                      setCoverKey(key);
+                      setCoverUrl(coverUrl);
+                      setCoverOpen(false);
+                    }}
+                  />
+
+
+                  
+                </div>
+              )}
+            </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
               <input
@@ -487,8 +542,14 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
             <div className="flex justify-end">
               <button
                 type="button"
-                onClick={createTournament}
-                disabled={!canCreate}
+                onClick={() => {
+                  if (!coverUrl) {
+                    setCoverOpen(true);
+                    return;
+                  }
+                  createTournament();
+                }}
+                disabled={!canCreate && !!coverUrl}
                 className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
               >
                 {creating ? "Creating..." : "Create Tournament"}
