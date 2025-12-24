@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { SettingsButton } from '@/components/SettingsButton';
+import { FriendRequestsButton } from '@/components/FriendRequests/FriendRequestsButton';
 import { ProfileSidebar } from '@/components/Profile/ProfileSidebar';
 import { ProfileStats } from '@/components/Profile/ProfileStats';
 import { GameHistory } from '@/components/Profile/GameHistory';
@@ -337,6 +338,9 @@ export default function OtherUserProfilePage() {
       </main>
 
       <SettingsButton />
+
+      {/* Friend Requests Button - Mock data: 3 requests, 4 friends */}
+      {isAuthenticated && <FriendRequestsButton requestCount={3} friendCount={4} />}
 
       {/* Toast Notification */}
       <Toast
