@@ -4,10 +4,17 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { SettingsButton } from '@/components/SettingsButton';
-import { LeaderboardTable } from '@/components/Leaderboard/LeaderboardTable';
 import Button from '@/components/Button';
+import { useApi } from '@/lib/useApi';
+import { useToast } from '@/hooks/useToast';
+import { Toast } from '@/components/Toast';
+import {
+  TournamentResponseDTO,
+  TournamentLeaderboardEntryDTO,
+  mapTournamentStatus,
+  formatTournamentDate,
+} from '@/dto/tournament.dto';
 
-// Interface definitions
 interface TournamentDetails {
   tournamentId: string;
   name: string;
@@ -18,72 +25,13 @@ interface TournamentDetails {
   participants: number;
   maxParticipants?: number;
   prize?: string;
-  imageUrl?: string;
-  isRegistered?: boolean;
-  rules: string[];
+  isRegistered: boolean;
   leaderboard: {
     rank: number;
     playerName: string;
     score: number;
   }[];
 }
-
-// Mock data - Remove when backend is ready
-// Backend integration: Replace with API call
-// Expected API endpoint: GET /api/tournaments/:id
-// Expected response format: TournamentDetails
-const mockTournamentDetails: Record<string, TournamentDetails> = {
-  '1': {
-    tournamentId: '1',
-    name: 'Winter Championship 2025',
-    description: 'Compete for the ultimate winter music champion title! Test your knowledge of winter classics and contemporary hits in this exciting tournament.',
-    startDate: '25.12.24',
-    endDate: '05.01.25',
-    status: 'Active',
-    participants: 456,
-    maxParticipants: 500,
-    prize: '1000 Points',
-    isRegistered: true,
-    rules: [
-      'Tournament runs from December 25, 2024 to January 5, 2025',
-      'Each player gets 10 songs to guess per day',
-      'Points are awarded based on speed and accuracy',
-      'Top 3 players receive special prizes',
-      'Fair play rules apply - cheating will result in disqualification',
-    ],
-    leaderboard: [
-      { rank: 1, playerName: 'MusicMaster', score: 9850 },
-      { rank: 2, playerName: 'SongGuru', score: 9720 },
-      { rank: 3, playerName: 'MelodyKing', score: 9650 },
-      { rank: 4, playerName: 'Your name', score: 9500 },
-      { rank: 5, playerName: 'BeatHunter', score: 9350 },
-      { rank: 6, playerName: 'RhythmQueen', score: 9200 },
-      { rank: 7, playerName: 'TuneSeeker', score: 9100 },
-      { rank: 8, playerName: 'HarmonyPro', score: 8950 },
-      { rank: 9, playerName: 'ChordChampion', score: 8800 },
-      { rank: 10, playerName: 'NoteNinja', score: 8650 },
-    ],
-  },
-  '2': {
-    tournamentId: '2',
-    name: 'New Year Special',
-    description: 'Ring in the new year with an exciting tournament.',
-    startDate: '01.01.25',
-    endDate: '07.01.25',
-    status: 'Upcoming',
-    participants: 234,
-    maxParticipants: 500,
-    prize: '500 Points',
-    isRegistered: false,
-    rules: [
-      'Tournament starts on January 1, 2025',
-      'Registration closes when max participants reached',
-      'Daily challenges available',
-      'Prize pool distributed to top 10 players',
-    ],
-    leaderboard: [],
-  },
-};
 
 export default function TournamentDetailsPage() {
   const router = useRouter();
@@ -92,16 +40,93 @@ export default function TournamentDetailsPage() {
   
   const [tournament, setTournament] = useState<TournamentDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const { apiFetch, token } = useApi('http://localhost:8080');
+  const { toast, showToast, hideToast } = useToast();
+  const [userId, setUserId] = useState<number | null>(null);
 
-  // TODO: Backend integration - Replace with API call
   useEffect(() => {
-    // Mock: Simulate API call
-    setTimeout(() => {
-      const data = mockTournamentDetails[tournamentId];
-      setTournament(data || null);
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('user');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setUserId(parsed?.id || null);
+        }
+      } catch (error) {
+        console.error('Failed to parse user from localStorage:', error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (token && tournamentId) {
+      fetchTournamentData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, tournamentId]);
+
+  async function fetchTournamentData() {
+    setIsLoading(true);
+    try {
+      if (!token) {
+        setIsLoading(false);
+        return;
+      }
+
+      const tournamentResponse = await apiFetch(`/api/tournaments/${tournamentId}`);
+      
+      if (!tournamentResponse.ok) {
+        if (tournamentResponse.status === 404) {
+          setTournament(null);
+          setIsLoading(false);
+          return;
+        }
+        throw new Error('Failed to fetch tournament');
+      }
+
+      const tournamentData: TournamentResponseDTO = await tournamentResponse.json();
+
+      const leaderboardResponse = await apiFetch(`/api/tournaments/${tournamentId}/leaderboard`);
+      let leaderboard: { rank: number; playerName: string; score: number }[] = [];
+      
+      if (leaderboardResponse.ok) {
+        const leaderboardData: TournamentLeaderboardEntryDTO[] = await leaderboardResponse.json();
+        leaderboard = leaderboardData.map(entry => ({
+          rank: entry.rank,
+          playerName: entry.username,
+          score: entry.score,
+        }));
+      }
+
+      let isRegistered = false;
+      if (userId) {
+        const participantsResponse = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
+        if (participantsResponse.ok) {
+          const userTournaments = await participantsResponse.json();
+          isRegistered = userTournaments.some((t: { tournamentId: number }) => t.tournamentId === parseInt(tournamentId));
+        }
+      }
+
+      setTournament({
+        tournamentId: tournamentData.id.toString(),
+        name: tournamentData.name,
+        description: tournamentData.description,
+        startDate: formatTournamentDate(tournamentData.startDate),
+        endDate: formatTournamentDate(tournamentData.endDate),
+        status: mapTournamentStatus(tournamentData.status),
+        participants: tournamentData.participantCount,
+        maxParticipants: 500,
+        prize: '1000 Points',
+        isRegistered: isRegistered,
+        leaderboard,
+      });
+    } catch (error) {
+      showToast('Failed to load tournament', 'error');
+      setTournament(null);
+    } finally {
       setIsLoading(false);
-    }, 500);
-  }, [tournamentId]);
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -116,17 +141,33 @@ export default function TournamentDetailsPage() {
     }
   };
 
-  const handleJoinTournament = () => {
-    // TODO: Backend integration - Call API to join tournament
-    if (tournament) {
-      setTournament({ ...tournament, isRegistered: true, participants: tournament.participants + 1 });
-    }
-  };
+  const handleJoinTournament = async () => {
+    try {
+      const response = await apiFetch(`/api/tournaments/${tournamentId}/join`, {
+        method: 'POST',
+      });
 
-  const handleLeaveTournament = () => {
-    // TODO: Backend integration - Call API to leave tournament
-    if (tournament) {
-      setTournament({ ...tournament, isRegistered: false, participants: tournament.participants - 1 });
+      if (!response.ok) {
+        if (response.status === 409) {
+          showToast('You are already registered', 'error');
+          if (tournament) {
+            setTournament({ ...tournament, isRegistered: true });
+          }
+          return;
+        }
+        throw new Error('Failed to join tournament');
+      }
+
+      showToast('Successfully joined tournament!', 'success');
+      if (tournament) {
+        setTournament({ 
+          ...tournament, 
+          isRegistered: true, 
+          participants: tournament.participants + 1 
+        });
+      }
+    } catch (error) {
+      showToast('Failed to join tournament', 'error');
     }
   };
 
@@ -172,7 +213,6 @@ export default function TournamentDetailsPage() {
   }
 
   const canJoin = tournament.status === 'Upcoming' && !tournament.isRegistered;
-  const canLeave = tournament.status !== 'Completed' && tournament.isRegistered;
   const isFull = tournament.maxParticipants && tournament.participants >= tournament.maxParticipants;
 
   return (
@@ -185,7 +225,6 @@ export default function TournamentDetailsPage() {
       />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Back Button */}
         <button
           onClick={() => router.push('/tournaments')}
           className="mb-6 text-blue-400 hover:text-blue-300 flex items-center gap-2 transition-colors"
@@ -195,11 +234,8 @@ export default function TournamentDetailsPage() {
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel - Tournament Info */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Tournament Header */}
             <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900">
-              {/* Tournament Image */}
               <div className="relative h-64 bg-gradient-to-br from-blue-900/40 to-purple-900/40 flex items-center justify-center">
                 <div className="text-8xl text-white/20">🏆</div>
                 <span className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(tournament.status)}`}>
@@ -207,7 +243,6 @@ export default function TournamentDetailsPage() {
                 </span>
               </div>
 
-              {/* Tournament Details */}
               <div className="p-6 space-y-4">
                 <div>
                   <h1 className="text-3xl font-bold text-white mb-2">{tournament.name}</h1>
@@ -238,7 +273,6 @@ export default function TournamentDetailsPage() {
                   )}
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-3 pt-4">
                   {canJoin && (
                     <Button
@@ -247,18 +281,15 @@ export default function TournamentDetailsPage() {
                           ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
                           : 'bg-blue-600 hover:bg-blue-700 text-white'
                       }`}
-                      onClick={handleJoinTournament}
+                      onClick={!isFull ? handleJoinTournament : undefined}
                     >
                       {isFull ? 'Tournament Full' : 'Join Tournament'}
                     </Button>
                   )}
-                  {canLeave && (
-                    <Button
-                      className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg font-semibold"
-                      onClick={handleLeaveTournament}
-                    >
-                      Leave Tournament
-                    </Button>
+                  {tournament.isRegistered && tournament.status !== 'Completed' && (
+                    <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
+                      Already Joined
+                    </div>
                   )}
                   {tournament.isRegistered && tournament.status === 'Active' && (
                     <Button
@@ -271,26 +302,8 @@ export default function TournamentDetailsPage() {
                 </div>
               </div>
             </div>
-
-            {/* Rules Section */}
-            <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900">
-              <div className="bg-slate-950 px-6 py-4 border-b border-blue-900/40">
-                <h2 className="text-xl font-bold text-white">Tournament Rules</h2>
-              </div>
-              <div className="p-6">
-                <ul className="space-y-3">
-                  {tournament.rules.map((rule, index) => (
-                    <li key={index} className="flex gap-3 text-slate-300">
-                      <span className="text-blue-400 font-semibold">{index + 1}.</span>
-                      <span>{rule}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
           </div>
 
-          {/* Right Panel - Leaderboard */}
           <div className="lg:col-span-1">
             <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 sticky top-4">
               <div className="bg-slate-950 px-6 py-4 border-b border-blue-900/40">
@@ -307,41 +320,48 @@ export default function TournamentDetailsPage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {tournament.leaderboard.map((entry) => (
-                      <div
-                        key={entry.rank}
-                        className={`
-                          flex items-center gap-3 p-3 rounded-lg
-                          ${entry.playerName === 'Your name' 
-                            ? 'bg-blue-900/30 border border-blue-600/40' 
-                            : 'bg-slate-900/50 hover:bg-slate-800/50'}
-                          transition-colors
-                        `}
-                      >
-                        {/* Rank */}
-                        <div className={`
-                          w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm
-                          ${entry.rank === 1 ? 'bg-yellow-600/30 text-yellow-400' : ''}
-                          ${entry.rank === 2 ? 'bg-slate-500/30 text-slate-300' : ''}
-                          ${entry.rank === 3 ? 'bg-orange-600/30 text-orange-400' : ''}
-                          ${entry.rank > 3 ? 'bg-slate-700/30 text-slate-400' : ''}
-                        `}>
-                          {entry.rank}
-                        </div>
+                    {tournament.leaderboard.map((entry) => {
+                      let isCurrentUser = false;
+                      try {
+                        const userStr = localStorage.getItem('user');
+                        if (userStr) {
+                          const user = JSON.parse(userStr);
+                          isCurrentUser = user?.username === entry.playerName;
+                        }
+                      } catch (e) {
+                        // Ignore parse errors
+                      }
+                      
+                      return (
+                        <div
+                          key={entry.rank}
+                          className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                            isCurrentUser
+                              ? 'bg-blue-900/30 border border-blue-600/40' 
+                              : 'bg-slate-900/50 hover:bg-slate-800/50'
+                          }`}
+                        >
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
+                            entry.rank === 1 ? 'bg-yellow-600/30 text-yellow-400' : ''
+                          } ${entry.rank === 2 ? 'bg-slate-500/30 text-slate-300' : ''} ${
+                            entry.rank === 3 ? 'bg-orange-600/30 text-orange-400' : ''
+                          } ${entry.rank > 3 ? 'bg-slate-700/30 text-slate-400' : ''}`}>
+                            {entry.rank}
+                          </div>
 
-                        {/* Player Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className={`text-sm font-semibold truncate ${
-                            entry.playerName === 'Your name' ? 'text-blue-300' : 'text-white'
-                          }`}>
-                            {entry.playerName}
-                          </div>
-                          <div className="text-xs text-slate-400">
-                            {entry.score.toLocaleString()} pts
+                          <div className="flex-1 min-w-0">
+                            <div className={`text-sm font-semibold truncate ${
+                              isCurrentUser ? 'text-blue-300' : 'text-white'
+                            }`}>
+                              {entry.playerName}
+                            </div>
+                            <div className="text-xs text-slate-400">
+                              {entry.score.toLocaleString()} pts
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -351,6 +371,13 @@ export default function TournamentDetailsPage() {
       </main>
 
       <SettingsButton />
+      
+      <Toast
+        message={toast.message}
+        type={toast.type}
+        isVisible={toast.isVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 }

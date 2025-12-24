@@ -104,7 +104,7 @@ export default function Home() {
 
             <Button
               className="px-4 py-2 text-base bg-blue-600 hover:bg-blue-700"
-              onClick={() => go("/game")}
+              onClick={() => go("/tournaments")}
             >
               Tournaments
             </Button>

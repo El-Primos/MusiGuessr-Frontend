@@ -10,6 +10,13 @@ import { TournamentTabs } from '@/components/Tournaments/TournamentTabs';
 import { TournamentCardData } from '@/components/Tournaments/TournamentCard';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
+import { useApi } from '@/lib/useApi';
+import {
+  TournamentPageResponse,
+  mapTournamentStatus,
+  mapToBackendStatus,
+  formatTournamentDate,
+} from '@/dto/tournament.dto';
 
 // Interface definitions
 interface TournamentData {
@@ -22,88 +29,138 @@ interface TournamentData {
   tournaments: TournamentCardData[];
 }
 
-// Mock data - Remove when backend is ready
-// Backend integration: Replace with API call
-// Expected API endpoint: GET /api/tournaments
-// Expected response format: TournamentData
-const mockTournamentData: TournamentData = {
-  stats: {
-    tournamentsPlayed: 42,
-    tournamentsWon: 8,
-    bestRank: 1,
-    totalPoints: 15420,
-  },
-  tournaments: [
-    {
-      tournamentId: '1',
-      name: 'Winter Championship 2025',
-      description: 'Compete for the ultimate winter music champion title!',
-      startDate: '25.12.24',
-      endDate: '05.01.25',
-      status: 'Active',
-      participants: 456,
-      maxParticipants: 500,
-      prize: '1000 Points',
-      isRegistered: true,
-    },
-    {
-      tournamentId: '2',
-      name: 'New Year Special',
-      description: 'Ring in the new year with an exciting tournament.',
-      startDate: '01.01.25',
-      endDate: '07.01.25',
-      status: 'Upcoming',
-      participants: 234,
-      maxParticipants: 500,
-      prize: '500 Points',
-      isRegistered: false,
-    },
-    {
-      tournamentId: '3',
-      name: 'Holiday Classics',
-      description: 'Test your knowledge of holiday music!',
-      startDate: '15.12.24',
-      endDate: '24.12.24',
-      status: 'Completed',
-      participants: 500,
-      maxParticipants: 500,
-      prize: '750 Points',
-      isRegistered: true,
-    },
-    {
-      tournamentId: '4',
-      name: 'Spring Preview Tournament',
-      description: 'Get ready for spring with this preview tournament.',
-      startDate: '15.01.25',
-      endDate: '22.01.25',
-      status: 'Upcoming',
-      participants: 89,
-      maxParticipants: 300,
-      prize: '400 Points',
-      isRegistered: false,
-    },
-  ],
-};
-
 export default function TournamentsPage() {
   const router = useRouter();
   const [tournamentData, setTournamentData] = useState<TournamentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'active' | 'completed'>('all');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [registeredTournamentIds, setRegisteredTournamentIds] = useState<Set<number>>(new Set());
   const { toast, showToast, hideToast } = useToast();
+  const { apiFetch, token } = useApi('http://localhost:8080');
+  const [userId, setUserId] = useState<number | null>(null);
 
-  // TODO: Backend integration - Replace with API call
-  // useEffect(() => {
-  //   fetchTournamentData().then(setTournamentData).finally(() => setIsLoading(false));
-  // }, []);
-
+  // Load user ID from localStorage
   useEffect(() => {
-    // Mock: Simulate API call
-    setTimeout(() => {
-      setTournamentData(mockTournamentData);
-      setIsLoading(false);
-    }, 500);
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('user');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          setUserId(parsed?.id || null);
+        }
+      } catch (error) {
+        console.error('Failed to parse user from localStorage:', error);
+      }
+    }
   }, []);
+
+  // Fetch user's registered tournaments
+  useEffect(() => {
+    if (token && userId) {
+      fetchUserTournaments();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, userId]);
+
+  // Fetch tournaments from API - only after token is loaded
+  useEffect(() => {
+    // Skip if we're still loading the token on client side
+    if (typeof window !== 'undefined') {
+      fetchTournaments();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, currentPage, token]);
+
+  async function fetchUserTournaments() {
+    if (!userId) return;
+
+    try {
+      const response = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
+      if (response.ok) {
+        const data = await response.json();
+        const ids = new Set<number>(data.map((t: { tournamentId: number }) => t.tournamentId));
+        setRegisteredTournamentIds(ids);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user tournaments:', error);
+    }
+  }
+
+  async function fetchTournaments() {
+    setIsLoading(true);
+    try {
+      // Check if user is authenticated
+      if (!token) {
+        console.log('No token available, skipping tournament fetch');
+        setIsLoading(false);
+        return;
+      }
+
+      // Build query params
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        size: '12',
+        sort: 'createDate',
+        direction: 'DESC',
+      });
+
+      // Add status filter if not 'all'
+      const backendStatus = mapToBackendStatus(activeTab);
+      if (backendStatus) {
+        params.append('status', backendStatus);
+      }
+
+      const response = await apiFetch(`/api/tournaments?${params.toString()}`);
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          showToast('Please log in to view tournaments', 'error');
+          router.push('/auth');
+          return;
+        }
+        throw new Error(`Failed to fetch tournaments: ${response.statusText}`);
+      }
+
+      const data: TournamentPageResponse = await response.json();
+
+      // Transform backend DTOs to frontend format
+      const tournaments: TournamentCardData[] = data.content.map((dto) => ({
+        tournamentId: dto.id.toString(),
+        name: dto.name,
+        description: dto.description,
+        startDate: formatTournamentDate(dto.startDate),
+        endDate: formatTournamentDate(dto.endDate),
+        status: mapTournamentStatus(dto.status),
+        participants: dto.participantCount,
+        maxParticipants: 500, // TODO: Add to backend when max participants feature is implemented
+        prize: '1000 Points', // TODO: Add to backend when prize field is implemented
+        isRegistered: registeredTournamentIds.has(dto.id),
+      }));
+
+      setTournamentData({
+        stats: {
+          tournamentsPlayed: 0, // TODO: Will be fetched from /api/users/self/tournaments
+          tournamentsWon: 0,
+          bestRank: 0,
+          totalPoints: 0,
+        },
+        tournaments,
+      });
+
+      setTotalPages(data.totalPages);
+    } catch (error) {
+      console.error('Error fetching tournaments:', error);
+      showToast(
+        error instanceof Error ? error.message : 'Failed to load tournaments',
+        'error'
+      );
+      setTournamentData(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   // Filter tournaments based on active tab
   const filteredTournaments = tournamentData?.tournaments.filter((tournament) => {
@@ -112,23 +169,62 @@ export default function TournamentsPage() {
   }) || [];
 
   // Handle joining a tournament
-  const handleJoinTournament = (tournamentId: string) => {
-    // TODO: Backend integration - Call API to join tournament
-    // Expected API endpoint: POST /api/tournaments/:tournamentId/join
-    showToast('Successfully joined tournament!', 'success');
-    
-    // Update local state to reflect registration
-    if (tournamentData) {
-      setTournamentData({
-        ...tournamentData,
-        tournaments: tournamentData.tournaments.map((t) =>
-          t.tournamentId === tournamentId
-            ? { ...t, isRegistered: true, participants: t.participants + 1 }
-            : t
-        ),
+  async function handleJoinTournament(tournamentId: string) {
+    try {
+      const response = await apiFetch(`/api/tournaments/${tournamentId}/join`, {
+        method: 'POST',
       });
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          showToast('You are already registered for this tournament', 'error');
+          // Update local state to reflect that user is already registered
+          const tournamentIdNum = parseInt(tournamentId);
+          setRegisteredTournamentIds(prev => new Set(prev).add(tournamentIdNum));
+          
+          // Update tournament data immediately
+          if (tournamentData) {
+            setTournamentData({
+              ...tournamentData,
+              tournaments: tournamentData.tournaments.map((t) =>
+                t.tournamentId === tournamentId
+                  ? { ...t, isRegistered: true }
+                  : t
+              ),
+            });
+          }
+          return;
+        }
+        const errorText = await response.text();
+        throw new Error(errorText || `Failed to join tournament: ${response.statusText}`);
+      }
+
+      showToast('Successfully joined tournament!', 'success');
+
+      const tournamentIdNum = parseInt(tournamentId);
+      
+      // Update registered tournaments set
+      setRegisteredTournamentIds(prev => new Set(prev).add(tournamentIdNum));
+
+      // Update tournament data immediately to show button change
+      if (tournamentData) {
+        setTournamentData({
+          ...tournamentData,
+          tournaments: tournamentData.tournaments.map((t) =>
+            t.tournamentId === tournamentId
+              ? { ...t, isRegistered: true, participants: t.participants + 1 }
+              : t
+          ),
+        });
+      }
+    } catch (error) {
+      console.error('Error joining tournament:', error);
+      showToast(
+        error instanceof Error ? error.message : 'Failed to join tournament',
+        'error'
+      );
     }
-  };
+  }
 
   // Handle viewing tournament details
   const handleViewTournament = (tournamentId: string) => {
@@ -198,6 +294,29 @@ export default function TournamentsPage() {
           onJoin={handleJoinTournament}
           onView={handleViewTournament}
         />
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="mt-8 flex justify-center items-center gap-4">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-slate-300">
+              Page {currentPage + 1} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage === totalPages - 1}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        )}
       </main>
 
       <SettingsButton />
