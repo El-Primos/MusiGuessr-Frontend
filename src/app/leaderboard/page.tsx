@@ -6,73 +6,90 @@ import { Header } from '@/components/Header';
 import { SettingsButton } from '@/components/SettingsButton';
 import { LeaderboardTabs } from '@/components/Leaderboard/LeaderboardTabs';
 import { LeaderboardTable } from '@/components/Leaderboard/LeaderboardTable';
+import { useApi } from '@/lib/useApi';
+import { fetchGlobalLeaderboard, fetchFriendsLeaderboard, type LeaderboardEntry, type LeaderboardPeriod } from '@/services/leaderboardService';
 
-// Interface definition
-interface LeaderboardEntry {
-  rank: number;
-  playerName: string;
-  score: number;
-}
-
-// Mock data - Remove when backend is ready
-// Backend integration: Replace with API call
-// Expected API endpoint: GET /api/leaderboard?type=global|friends
-// Expected response format: LeaderboardEntry[]
-const mockGlobalData: LeaderboardEntry[] = [
-  { rank: 1, playerName: "nambaone", score: 123223 },
-  { rank: 2, playerName: "insan2", score: 1232 },
-  { rank: 3, playerName: "numerotres", score: 299 },
-  { rank: 4, playerName: "player4", score: 150 },
-  { rank: 5, playerName: "player5", score: 100 },
-  { rank: 24, playerName: "Your name", score: 22 },
-];
-
-const mockFriendsData: LeaderboardEntry[] = [
-  { rank: 1, playerName: "friend1", score: 5000 },
-  { rank: 2, playerName: "friend2", score: 3000 },
-  { rank: 3, playerName: "friend3", score: 2000 },
-];
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function LeaderboardPage() {
   const router = useRouter();
+  const { apiFetch } = useApi(API_BASE);
+  
   const [activeTab, setActiveTab] = useState<'global' | 'friends'>('global');
+  const [data, setData] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [hasUser, setHasUser] = useState<boolean>(false);
+  
+  // Period is fixed to 'all' for now
+  const period: LeaderboardPeriod = 'all';
 
-  // Check authentication
+  // Check authentication and get current user ID
   useEffect(() => {
     try {
       const raw = localStorage.getItem('user');
-      if (!raw) return setHasUser(false);
+      if (!raw) {
+        setHasUser(false);
+        setCurrentUserId(null);
+        return;
+      }
       const parsed = JSON.parse(raw);
-      setHasUser(Boolean(parsed && parsed.userId && parsed.userName));
+      const userId = parsed?.id || parsed?.userId;
+      const userName = parsed?.username || parsed?.userName;
+      const authenticated = Boolean(userId && userName);
+      setHasUser(authenticated);
+      setCurrentUserId(userId || null);
     } catch {
       setHasUser(false);
+      setCurrentUserId(null);
     }
   }, []);
 
-  // TODO: Add authentication check
-  // const isAuthenticated = false; // Will come from auth context/state
-  // For now: Use hasUser for authentication check
   const isAuthenticated = hasUser;
+
+  // Fetch leaderboard data (only if authenticated)
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setLoading(false);
+      setData([]);
+      return;
+    }
+
+    const loadLeaderboard = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        let result: LeaderboardEntry[];
+        
+        if (activeTab === 'global') {
+          result = await fetchGlobalLeaderboard(period, 100, apiFetch);
+        } else {
+          // Friends leaderboard - backend endpoint not ready yet
+          result = await fetchFriendsLeaderboard(period, 100, apiFetch);
+        }
+
+        setData(result);
+      } catch (err) {
+        console.error('Failed to load leaderboard:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load leaderboard');
+        setData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadLeaderboard();
+  }, [activeTab, apiFetch, isAuthenticated, period]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     localStorage.removeItem('friends');
     setHasUser(false);
+    setCurrentUserId(null);
     router.push('/');
   };
-
-  // Select data based on active tab
-  // TODO: Backend integration - Replace with API call using useEffect
-  // Example: const [data, setData] = useState<LeaderboardEntry[]>([]);
-  // useEffect(() => { fetchLeaderboard(activeTab).then(setData); }, [activeTab]);
-  let currentData = activeTab === 'global' ? mockGlobalData : mockFriendsData;
-  
-  // Filter out "Your name" entry if user is not authenticated
-  // In real implementation, backend will handle this based on auth token
-  if (activeTab === 'global' && !isAuthenticated) {
-    currentData = currentData.filter(entry => entry.playerName !== 'Your name');
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
@@ -138,12 +155,28 @@ export default function LeaderboardPage() {
           onTabChange={setActiveTab}
         />
 
-        {/* Leaderboard Table */}
-        <LeaderboardTable
-          data={currentData}
-          activeTab={activeTab}
-          isAuthenticated={isAuthenticated}
-        />
+        {/* Error message */}
+        {error && (
+          <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            {error}
+          </div>
+        )}
+
+        {/* Loading state */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
+            <p className="text-slate-400 text-sm">Loading leaderboard...</p>
+          </div>
+        ) : (
+          /* Leaderboard Table */
+          <LeaderboardTable
+            data={data}
+            activeTab={activeTab}
+            isAuthenticated={isAuthenticated}
+            currentUserId={currentUserId}
+          />
+        )}
       </main>
 
       <SettingsButton />
