@@ -9,7 +9,7 @@ interface User {
   username: string;
   email: string;
   role: 'USER' | 'ADMIN';
-  score: number;
+  totalScore: number;
   createdAt?: string;
 }
 
@@ -268,7 +268,7 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                      {user.score}
+                      {user.totalScore}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                       <button
