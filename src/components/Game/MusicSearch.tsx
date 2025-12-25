@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { useApi } from "@/lib/useApi";
 
 export interface Track {
   id: number;
@@ -9,94 +10,106 @@ export interface Track {
 }
 
 interface MusicSearchProps {
-  tracks: Track[];
   onSelect?: (track: Track) => void;
   resetSignal?: number;
 }
 
-export const MusicSearch = ({ tracks, onSelect, resetSignal = 0 }: MusicSearchProps) => {
-  const [query, setQuery] = useState("");
-  const inputRef = useRef<HTMLInputElement | null>(null);
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
+export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => {
+  const [query, setQuery] = useState("");
+  const [allMusics, setAllMusics] = useState<Track[]>([]); // Tüm müzik havuzu
+  const [isLoading, setIsLoading] = useState(false);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const { apiFetch } = useApi(API_BASE);
+
+  // 1. ADIM: Tüm müzikleri tek seferde çek (Mount olduğunda)
+  useEffect(() => {
+    const fetchAllMusics = async () => {
+      setIsLoading(true);
+      try {
+        // Tüm müzikleri çekmek için size'ı yine de yüksek tutalım
+        const res = await apiFetch(`/api/musics?size=1000`);
+        const data = await res.json();
+        
+        // --- KRİTİK DÜZELTME BAŞLANGICI ---
+        // Eğer data bir array ise direkt onu kullan, değilse data.content'i kullan
+        const rawList = Array.isArray(data) ? data : (data.content || []);
+        
+        console.log("Ham liste uzunluğu:", rawList.length);
+
+        const formatted: Track[] = rawList.map((m: any) => ({
+          id: m.id,
+          title: m.name, // Backend 'name' gönderiyor, biz 'title' olarak eşliyoruz
+          artist: m.artist?.name || "Bilinmeyen Sanatçı"
+        }));
+        // --- KRİTİK DÜZELTME BİTİŞİ ---
+
+        setAllMusics(formatted);
+        console.log("allMusics güncellendi, toplam:", formatted.length);
+      } catch (err) {
+        console.error("Müzikler yüklenemedi:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllMusics();
+  }, [apiFetch]);
+
+  // 2. ADIM: Raund değiştiğinde kutuyu temizle
   useEffect(() => {
     setQuery("");
     inputRef.current?.focus();
   }, [resetSignal]);
 
-  const filteredTracks: Track[] = useMemo(() => {
+  // 3. ADIM: Frontend tarafında filtreleme (Performans için useMemo)
+  const filteredResults = useMemo(() => {
+    console.log("query değişti");
     const q = query.trim().toLowerCase();
-    if (!q) return [];
+    if (q.length < 1) return [];
 
-    return tracks.filter((track) => {
-      const artist = track.artist.toLowerCase();
-      const title = track.title.toLowerCase();
-      return artist.includes(q) || title.includes(q);
-    });
-  }, [query, tracks]);
-
-  const showResults = query.trim().length > 0;
+    return allMusics.filter(
+      (m) =>
+        m.title.toLowerCase().includes(q) || 
+        m.artist.toLowerCase().includes(q)
+    ).slice(0, 10); // Sadece ilk 10 sonucu göster
+  }, [query, allMusics]);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 font-sans">
-
-      {/* Input */}
-      <div className="flex gap-2 mb-4">
+    <div className="w-full max-w-md relative">
+      <div className="relative">
         <input
           ref={inputRef}
           type="text"
           value={query}
-          placeholder="Şarkı ya da Sanatçı ara..."
+          placeholder={isLoading ? "Yükleniyor..." : "Şarkı ara..."}
+          disabled={isLoading}
           onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && filteredTracks.length > 0) {
-              e.preventDefault();
-              onSelect?.(filteredTracks[0]);
-            }
-          }}
-          className="
-            flex-1 px-3 py-2 rounded-lg 
-            bg-slate-950 text-blue-100
-            border border-blue-900
-            shadow-[0_0_0_1px_rgba(37,99,235,0.4)]
-            outline-none
-            placeholder-blue-400/50
-          "
+          className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-blue-900 outline-none focus:ring-2 ring-blue-500 disabled:opacity-50"
         />
+        {isLoading && (
+          <div className="absolute right-3 top-3 animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
+        )}
       </div>
 
-      {/* Input Results */}
-      {showResults && (
-        <div
-          className="
-            rounded-xl border border-blue-900/60 p-3
-            bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900
-            max-h-70 overflow-y-auto
-          "
-        >
-          {filteredTracks.length === 0 ? (
-            <div className="text-sm text-gray-400">Sonuç bulunamadı.</div>
-          ) : (
-            <ul className="list-none m-0 p-0">
-              {filteredTracks.map((track) => (
-                <li
-                  key={track.id}
-                  onClick={() => onSelect?.(track)}
-                  className="
-                    py-2 px-2 border-b border-blue-900/40
-                    flex flex-col gap-1 cursor-pointer
-                    hover:bg-blue-900/20 active:bg-blue-900/40
-                    rounded transition-all duration-150
-                  "
-                >
-                  <span className="font-semibold text-blue-200">
-                    {track.title}
-                  </span>
-                  <span className="text-sm text-blue-300">
-                    {track.artist}
-                  </span>
-                </li>
-              ))}
-            </ul>
+      {query && !isLoading && (
+        <div className="absolute top-full left-0 w-full mt-2 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden z-50 max-h-60 overflow-y-auto shadow-2xl">
+          {filteredResults.map((track) => (
+            <div
+              key={track.id}
+              onClick={() => {
+                onSelect?.(track);
+                setQuery(""); // Seçtikten sonra temizle
+              }}
+              className="px-4 py-3 hover:bg-blue-600/20 cursor-pointer border-b border-slate-800 last:border-none"
+            >
+              <div className="font-bold text-blue-100">{track.title}</div>
+              <div className="text-sm text-slate-400">{track.artist}</div>
+            </div>
+          ))}
+          {filteredResults.length === 0 && (
+            <div className="p-4 text-slate-500 text-sm">Sonuç bulunamadı.</div>
           )}
         </div>
       )}
