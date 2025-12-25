@@ -2,6 +2,7 @@
 
 interface LeaderboardEntry {
   rank: number;
+  userId: number;
   playerName: string;
   score: number;
 }
@@ -10,12 +11,13 @@ interface LeaderboardTableProps {
   data: LeaderboardEntry[];
   activeTab: 'global' | 'friends';
   isAuthenticated: boolean;
+  currentUserId?: number | null;
 }
 
 // Helper function to get rank color
-const getRankColor = (rank: number, playerName: string): string => {
+const getRankColor = (rank: number, isCurrentUser: boolean): string => {
   // Highlight current user's entry
-  if (playerName === 'Your name') {
+  if (isCurrentUser) {
     return 'text-blue-400 font-bold';
   }
   
@@ -32,7 +34,7 @@ const getRankColor = (rank: number, playerName: string): string => {
   }
 };
 
-export const LeaderboardTable = ({ data, activeTab, isAuthenticated }: LeaderboardTableProps) => {
+export const LeaderboardTable = ({ data, activeTab, isAuthenticated, currentUserId }: LeaderboardTableProps) => {
   return (
     <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900">
       {/* Table Header */}
@@ -44,11 +46,11 @@ export const LeaderboardTable = ({ data, activeTab, isAuthenticated }: Leaderboa
 
       {/* Table Rows */}
       <div className="divide-y divide-blue-900/40">
-        {activeTab === 'friends' && !isAuthenticated ? (
+        {!isAuthenticated ? (
           // Not authenticated state
           <div className="px-4 py-8 text-center">
             <p className="text-slate-400 text-sm">
-              Please log in to see your friends leaderboard.
+              Please log in to see the leaderboard.
             </p>
           </div>
         ) : data.length === 0 ? (
@@ -62,33 +64,36 @@ export const LeaderboardTable = ({ data, activeTab, isAuthenticated }: Leaderboa
             </p>
           </div>
         ) : (
-          data.map((entry) => (
-            <div
-              key={entry.rank}
-              className={`
-                px-4 py-3 flex items-center text-sm
-                border-b border-blue-900/40
-                hover:bg-blue-900/20
-                transition-colors
-                ${entry.playerName === 'Your name' ? 'bg-blue-950/30' : ''}
-              `}
-            >
-              {/* Rank */}
-              <div className={`w-16 ${getRankColor(entry.rank, entry.playerName)}`}>
-                {entry.rank}
-              </div>
+          data.map((entry) => {
+            const isCurrentUser = currentUserId !== null && entry.userId === currentUserId;
+            return (
+              <div
+                key={`${entry.userId}-${entry.rank}`}
+                className={`
+                  px-4 py-3 flex items-center text-sm
+                  border-b border-blue-900/40
+                  hover:bg-blue-900/20
+                  transition-colors
+                  ${isCurrentUser ? 'bg-blue-950/30' : ''}
+                `}
+              >
+                {/* Rank */}
+                <div className={`w-16 ${getRankColor(entry.rank, isCurrentUser)}`}>
+                  {entry.rank}
+                </div>
 
-              {/* Player Name */}
-              <div className={`flex-1 ${entry.playerName === 'Your name' ? 'text-blue-300 font-semibold' : 'text-blue-200'}`}>
-                {entry.playerName}
-              </div>
+                {/* Player Name */}
+                <div className={`flex-1 ${isCurrentUser ? 'text-blue-300 font-semibold' : 'text-blue-200'}`}>
+                  {entry.playerName}
+                </div>
 
-              {/* Score */}
-              <div className={`w-32 text-right font-semibold ${entry.playerName === 'Your name' ? 'text-blue-300' : 'text-white'}`}>
-                {entry.score.toLocaleString()}
+                {/* Score */}
+                <div className={`w-32 text-right font-semibold ${isCurrentUser ? 'text-blue-300' : 'text-white'}`}>
+                  {entry.score.toLocaleString()}
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
