@@ -13,7 +13,6 @@ type Mode = "login" | "signup";
 const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 
 export default function Auth() {
-
   const router = useRouter();
   const sp = useSearchParams();
 
@@ -50,18 +49,34 @@ export default function Auth() {
     router.replace(`/auth?mode=${m}`);
   }
 
+  /**
+   * Kullanıcıyı kaydetmeden önce BANNED olup olmadığını kontrol eder.
+   */
   function storeUserAndGoHome(res: AuthRes) {
+    // KRİTİK KONTROL: Eğer kullanıcı BANNED rolündeyse giriş yapmasına izin verme
+    if (res.role === "BANNED") {
+      setError("Hesabınız banlanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.");
+      setLoading(false); // Loading state'i kapat ki buton tekrar aktif olsun
+      return;
+    }
+
     localStorage.setItem(
       "user",
-      JSON.stringify({ id: res.id, username: res.username, email: res.email, role: res.role, accessToken: res.accessToken, refreshToken: res.refreshToken, tokenType: res.tokenType })
+      JSON.stringify({ 
+        id: res.id, 
+        username: res.username, 
+        email: res.email, 
+        role: res.role, 
+        accessToken: res.accessToken, 
+        refreshToken: res.refreshToken, 
+        tokenType: res.tokenType 
+      })
     );
     router.push("/");
   }
 
   function login() {
-
     if (loading) return;
-
     setError(null);
 
     if (!loginUserName.trim() || !loginPassword) {
@@ -82,6 +97,7 @@ export default function Auth() {
       .then(async (r) => {
         if (!r.ok) {
           const txt = await r.text().catch(() => "");
+          // Backend'den gelen spesifik ban mesajlarını veya hata mesajlarını yakala
           throw new Error(txt || `Login failed (HTTP ${r.status})`);
         }
         return (await r.json()) as AuthRes;
@@ -90,21 +106,17 @@ export default function Auth() {
         storeUserAndGoHome(data);
       })
       .catch((err: unknown) => {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Sign up failed.");
-        }
+        setError(err instanceof Error ? err.message : "Login failed.");
       })
       .finally(() => {
+        // Eğer banlandıysa storeUserAndGoHome zaten loading'i false yapacak, 
+        // ama diğer genel hatalar için burada da false yapıyoruz.
         setLoading(false);
       });
   }
 
   function signup() {
-
     if (loading) return;
-
     setError(null);
 
     const n = name.trim();
@@ -139,43 +151,30 @@ export default function Auth() {
     .then(async (r) => {
       if (!r.ok) {
         let msg = `Sign up failed (HTTP ${r.status})`;
-
-        // if json message
         try {
           const errJson = await r.json();
-          if (errJson?.message) msg = errJson.message;
-          else if (errJson?.error) msg = errJson.error;
+          msg = errJson.message || errJson.error || msg;
         } catch {
-          // else direct backend text log
-          try {
-            const txt = await r.text();
-            if (txt) msg = txt;
-          } catch {}
+          const txt = await r.text();
+          if (txt) msg = txt;
         }
-
         throw new Error(msg);
       }
-
       return (await r.json()) as AuthRes;
     })
     .then((data) => {
       storeUserAndGoHome(data);
     })
     .catch((err: unknown) => {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Sign up failed.");
-      }
+      setError(err instanceof Error ? err.message : "Sign up failed.");
     })
     .finally(() => {
       setLoading(false);
     });
-
   }
 
   const primaryBtnClass = [
-    "w-full py-3 bg-blue-600 hover:bg-blue-700",
+    "w-full py-3 bg-blue-600 hover:bg-blue-700 transition-colors rounded-xl font-semibold",
     loading ? "opacity-60 cursor-not-allowed pointer-events-none" : "",
   ].join(" ");
 
@@ -184,24 +183,22 @@ export default function Auth() {
       <Header
         logoSrc="/logo.png"
         exitVisible={false}
-        onExit={() => console.log("EXIT")}
+        onExit={() => {}}
         className="top-0 left-0"
       />
     
       <div className="flex-1 flex items-center justify-center px-4 text-white">
-        
-        <div className="w-full max-w-md m-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-6 shadow-xl">
-          <div className="mb-6">
+        <div className="w-full max-w-md m-4 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl">
+          <div className="mb-8">
             <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-semibold">{title}</h1>
-              <div className="flex gap-2 rounded-xl bg-white/5 p-1 border border-white/10">
+              <h1 className="text-3xl font-bold">{title}</h1>
+              <div className="flex gap-1 rounded-xl bg-white/5 p-1 border border-white/10">
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
                   className={[
-                    "px-3 py-1.5 rounded-lg text-sm transition",
-                    mode === "login" ? "bg-white/15 text-white" : "text-white/70 hover:text-white",
-                    loading ? "opacity-60 cursor-not-allowed" : "",
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                    mode === "login" ? "bg-blue-600 text-white shadow-lg" : "text-white/60 hover:text-white",
                   ].join(" ")}
                 >
                   Login
@@ -210,62 +207,61 @@ export default function Auth() {
                   type="button"
                   onClick={() => switchMode("signup")}
                   className={[
-                    "px-3 py-1.5 rounded-lg text-sm transition",
-                    mode === "signup" ? "bg-white/15 text-white" : "text-white/70 hover:text-white",
-                    loading ? "opacity-60 cursor-not-allowed" : "",
+                    "px-4 py-2 rounded-lg text-sm font-medium transition-all",
+                    mode === "signup" ? "bg-blue-600 text-white shadow-lg" : "text-white/60 hover:text-white",
                   ].join(" ")}
                 >
                   Sign Up
                 </button>
               </div>
             </div>
-            <p className="mt-2 text-white/70">{subtitle}</p>
+            <p className="mt-2 text-slate-400">{subtitle}</p>
           </div>
 
           {error && (
-            <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100 ">
-              {error}
+            <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-4 text-sm text-red-200 animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center gap-2">
+                <span className="text-lg">⚠️</span>
+                {error}
+              </div>
             </div>
           )}
 
           {mode === "login" ? (
-            <div className="space-y-4">
+            <div className="space-y-5">
               <div>
-                <label className="block text-sm text-white/80 mb-1">Username</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
                 <input
                   value={loginUserName}
                   onChange={(e) => setLoginUserName(e.target.value)}
-                  className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-white/25"
-                  placeholder="username"
+                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  placeholder="Enter your username"
                   autoComplete="username"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white/80 mb-1">Password</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
                 <input
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   type="password"
-                  className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-white/25"
+                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
                   placeholder="••••••••"
                   autoComplete="current-password"
                 />
               </div>
 
               <Button className={primaryBtnClass} onClick={login}>
-                {loading ? "Logging in..." : "Login"}
+                {loading ? "Processing..." : "Login"}
               </Button>
 
-              <p className="text-center text-sm text-white/70">
+              <p className="text-center text-sm text-slate-400">
                 Don&apos;t have an account?{" "}
                 <button
                   type="button"
                   onClick={() => switchMode("signup")}
-                  className={[
-                    "text-blue-300 hover:text-blue-200 underline underline-offset-4",
-                    loading ? "opacity-60 cursor-not-allowed pointer-events-none" : "",
-                  ].join(" ")}
+                  className="text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-4"
                 >
                   Sign up
                 </button>
@@ -274,63 +270,56 @@ export default function Auth() {
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-white/80 mb-1">Name</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-white/25"
-                  placeholder="name"
-                  autoComplete="name"
+                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white/80 mb-1">Username</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
                 <input
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-white/25"
-                  placeholder="username"
-                  autoComplete="username"
+                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  placeholder="johndoe123"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white/80 mb-1">Email</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-white/25"
-                  placeholder="you@example.com"
-                  autoComplete="email"
+                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-white/80 mb-1">Password</label>
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
                 <input
                   value={signupPassword}
                   onChange={(e) => setSignupPassword(e.target.value)}
                   type="password"
-                  className="w-full rounded-xl bg-black/30 border border-white/10 px-4 py-3 outline-none focus:border-white/25"
-                  placeholder="min 6 chars"
-                  autoComplete="new-password"
+                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  placeholder="Min. 6 characters"
                 />
               </div>
 
               <Button className={primaryBtnClass} onClick={() => signup()}>
-                {loading ? "Creating account..." : "Sign Up"}
+                {loading ? "Creating account..." : "Create Account"}
               </Button>
 
-              <p className="text-center text-sm text-white/70">
-                Do you have an account?{" "}
+              <p className="text-center text-sm text-slate-400">
+                Already have an account?{" "}
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
-                  className={[
-                    "text-blue-300 hover:text-blue-200 underline underline-offset-4",
-                    loading ? "opacity-60 cursor-not-allowed pointer-events-none" : "",
-                  ].join(" ")}
+                  className="text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-4"
                 >
                   Login
                 </button>
@@ -338,16 +327,13 @@ export default function Auth() {
             </div>
           )}
 
-          <div className="mt-6 flex justify-center">
+          <div className="mt-8 pt-6 border-t border-white/5 flex justify-center">
             <button
               type="button"
               onClick={() => (loading ? null : router.push("/"))}
-              className={[
-                "text-sm text-white/60 hover:text-white underline underline-offset-4",
-                loading ? "opacity-60 cursor-not-allowed pointer-events-none" : "",
-              ].join(" ")}
+              className="text-sm text-slate-500 hover:text-white transition-colors"
             >
-              Back to home
+              ← Back to home
             </button>
           </div>
         </div>

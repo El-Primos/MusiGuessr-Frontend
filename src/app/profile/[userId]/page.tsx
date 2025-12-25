@@ -11,7 +11,7 @@ import { GameHistory } from '@/components/Profile/GameHistory';
 import { Toast } from '@/components/Toast';
 import { useApi } from '@/lib/useApi';
 import { fetchUserProfile, ProfileData } from '@/services/profileService';
-import { addFriend, removeFriend, checkFriendship } from '@/services/friendsService';
+import { addFriend, removeFriend, checkFriendship, getIncomingRequests, sendFollowRequest } from '@/services/friendsService';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
@@ -23,7 +23,7 @@ export default function OtherUserProfilePage() {
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isFriend, setIsFriend] = useState(false);
+  const [friendshipStatus, setFriendshipStatus] = useState<'none' | 'pending' | 'friend'>('none');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -73,10 +73,48 @@ export default function OtherUserProfilePage() {
         if (isAuthenticated) {
           try {
             const { isFriend: friendStatus } = await checkFriendship(userId, apiFetch);
-            setIsFriend(friendStatus);
+            if (friendStatus) {
+              setFriendshipStatus('friend');
+              // Remove from pending requests if exists (request was accepted)
+              const pendingRequests = JSON.parse(localStorage.getItem('pendingFriendRequests') || '[]') as number[];
+              if (pendingRequests.includes(userId)) {
+                const updated = pendingRequests.filter(id => id !== userId);
+                localStorage.setItem('pendingFriendRequests', JSON.stringify(updated));
+              }
+            } else {
+              // Check if we have a pending request in localStorage
+              const pendingRequests = JSON.parse(localStorage.getItem('pendingFriendRequests') || '[]') as number[];
+              if (pendingRequests.includes(userId)) {
+                // Verify the request still exists by trying to send it again
+                // If we get 409 (Conflict) "already sent", the request is still pending
+                // If we get other errors or success, the request doesn't exist (was denied/removed)
+                try {
+                  const result = await sendFollowRequest(userId, apiFetch);
+                  
+                  if (result.errorCode === 409) {
+                    // 409 Conflict means "already sent" - request still exists and is pending
+                    setFriendshipStatus('pending');
+                  } else {
+                    // Request doesn't exist anymore (was denied or removed)
+                    // Clean up localStorage
+                    const updated = pendingRequests.filter(id => id !== userId);
+                    localStorage.setItem('pendingFriendRequests', JSON.stringify(updated));
+                    setFriendshipStatus('none');
+                  }
+                } catch (err) {
+                  // If verification fails, keep pending status from localStorage
+                  // This is a fallback - better to show pending than nothing
+                  console.error('Failed to verify pending request:', err);
+                  setFriendshipStatus('pending');
+                }
+              } else {
+                setFriendshipStatus('none');
+              }
+            }
           } catch (err) {
             console.error('Failed to check friendship:', err);
             // Non-critical error, continue without friendship status
+            setFriendshipStatus('none');
           }
         }
       } catch (err) {
@@ -104,13 +142,36 @@ export default function OtherUserProfilePage() {
 
   const handleAddFriend = async () => {
     try {
-      await addFriend(userId, apiFetch);
-      setIsFriend(true);
-      showToast('Friend added!', 'success');
+      const result: { success: boolean; message?: string; errorCode?: number } = await addFriend(userId, apiFetch);
+      
+      // If request was successful, mark as pending
+      if (result.success) {
+        setFriendshipStatus('pending');
+        // Save to localStorage
+        const pendingRequests = JSON.parse(localStorage.getItem('pendingFriendRequests') || '[]') as number[];
+        if (!pendingRequests.includes(userId)) {
+          pendingRequests.push(userId);
+          localStorage.setItem('pendingFriendRequests', JSON.stringify(pendingRequests));
+        }
+        showToast('Friend request sent!', 'success');
+      } else if (result.errorCode === 409) {
+        // 409 Conflict means "already sent" - request already exists
+        // Mark as pending and save to localStorage
+        setFriendshipStatus('pending');
+        const pendingRequests = JSON.parse(localStorage.getItem('pendingFriendRequests') || '[]') as number[];
+        if (!pendingRequests.includes(userId)) {
+          pendingRequests.push(userId);
+          localStorage.setItem('pendingFriendRequests', JSON.stringify(pendingRequests));
+        }
+        showToast('Friend request already sent!', 'info');
+      } else {
+        // Other errors (404, 401, etc.)
+        throw new Error(result.message || 'Failed to send friend request');
+      }
     } catch (err) {
       console.error('Failed to add friend:', err);
       showToast(
-        err instanceof Error ? err.message : 'Failed to add friend',
+        err instanceof Error ? err.message : 'Failed to send friend request',
         'error'
       );
     }
@@ -119,7 +180,11 @@ export default function OtherUserProfilePage() {
   const handleRemoveFriend = async () => {
     try {
       await removeFriend(userId, apiFetch);
-      setIsFriend(false);
+      setFriendshipStatus('none');
+      // Remove from localStorage
+      const pendingRequests = JSON.parse(localStorage.getItem('pendingFriendRequests') || '[]') as number[];
+      const updated = pendingRequests.filter(id => id !== userId);
+      localStorage.setItem('pendingFriendRequests', JSON.stringify(updated));
       showToast('Friend removed!', 'success');
     } catch (err) {
       console.error('Failed to remove friend:', err);
@@ -127,6 +192,21 @@ export default function OtherUserProfilePage() {
         err instanceof Error ? err.message : 'Failed to remove friend',
         'error'
       );
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    try {
+      // Cancel pending request - we need to discard it if it was accepted by the other user
+      // For now, just remove from localStorage and update state
+      setFriendshipStatus('none');
+      const pendingRequests = JSON.parse(localStorage.getItem('pendingFriendRequests') || '[]') as number[];
+      const updated = pendingRequests.filter(id => id !== userId);
+      localStorage.setItem('pendingFriendRequests', JSON.stringify(updated));
+      showToast('Friend request cancelled!', 'success');
+    } catch (err) {
+      console.error('Failed to cancel request:', err);
+      showToast('Failed to cancel request', 'error');
     }
   };
 
@@ -260,9 +340,10 @@ export default function OtherUserProfilePage() {
               isOwnProfile={false}
               isAuthenticated={isAuthenticated}
               apiFetch={apiFetch}
-              isFriend={isFriend}
+              friendshipStatus={friendshipStatus}
               onAddFriend={handleAddFriend}
               onRemoveFriend={handleRemoveFriend}
+              onCancelRequest={handleCancelRequest}
             />
           </div>
 
