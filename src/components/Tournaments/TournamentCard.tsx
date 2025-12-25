@@ -122,7 +122,7 @@ export const TournamentCard = ({ tournament, onJoin, onView, onPlay }: Tournamen
           )}
           {tournament.isRegistered && hasEnded && (
             <div className="flex-1 py-2 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
-              Registered
+              Finished
             </div>
           )}
           <Button
