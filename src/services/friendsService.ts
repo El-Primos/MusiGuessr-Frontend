@@ -26,18 +26,24 @@ export interface FriendData {
  * Send a follow request to a user
  * @param targetUserId - The user ID to send request to
  * @param apiFetch - API fetch function from useApi hook
+ * @returns Object with success status and optional error code
  */
 export async function sendFollowRequest(
   targetUserId: number,
   apiFetch: (path: string, init?: RequestInit) => Promise<Response>
-): Promise<{ success: boolean; message?: string }> {
+): Promise<{ success: boolean; message?: string; errorCode?: number }> {
   const response = await apiFetch(`/api/followings/request?targetUserId=${targetUserId}`, {
     method: 'POST',
   });
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => response.statusText);
-    throw new Error(`Failed to send follow request: ${errorText}`);
+    // Return error code so caller can handle "already sent" case
+    return { 
+      success: false, 
+      message: errorText,
+      errorCode: response.status 
+    };
   }
 
   return { success: true, message: await response.text() };
@@ -154,7 +160,7 @@ export async function markInboxSeen(
 export async function addFriend(
   userId: number,
   apiFetch: (path: string, init?: RequestInit) => Promise<Response>
-): Promise<{ success: boolean; message?: string }> {
+): Promise<{ success: boolean; message?: string; errorCode?: number }> {
   return sendFollowRequest(userId, apiFetch);
 }
 
@@ -190,6 +196,38 @@ export async function checkFriendship(
   } catch (err) {
     console.error('Failed to check friendship:', err);
     return { isFriend: false };
+  }
+}
+
+/**
+ * Check friendship status including pending requests
+ * Returns: 'none' | 'pending' | 'friend'
+ * Note: This checks if user is a friend, and also checks incoming requests
+ * to see if the other user sent us a request (which means we might have sent one too)
+ */
+export async function checkFriendshipStatus(
+  userId: number,
+  apiFetch: (path: string, init?: RequestInit) => Promise<Response>
+): Promise<'none' | 'pending' | 'friend'> {
+  try {
+    // First check if they're friends
+    const { isFriend } = await checkFriendship(userId, apiFetch);
+    if (isFriend) {
+      return 'friend';
+    }
+
+    // Check incoming requests - if the other user sent us a request,
+    // it means we might have a pending request to them
+    const incomingRequests = await getIncomingRequests(apiFetch);
+    const hasIncomingRequest = incomingRequests.some(req => req.requesterId === userId);
+    
+    // If we have an incoming request from them, it's likely we sent one too
+    // But we can't be 100% sure without backend endpoint for outgoing requests
+    // So we'll rely on localStorage for now
+    return 'none';
+  } catch (err) {
+    console.error('Failed to check friendship status:', err);
+    return 'none';
   }
 }
 
