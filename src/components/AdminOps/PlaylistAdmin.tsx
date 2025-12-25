@@ -423,11 +423,11 @@ export default function PlaylistAdmin({ apiBase }: Props) {
     }
   }
 
-  async function addSongToPlaylist(playlistId: number, songId: number) {
+  async function addSongToPlaylist(playlistId: number, songId: number, position: number) {
     const res = await apiFetch(`/api/playlists/${playlistId}/songs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ songId }),
+      body: JSON.stringify({ songId, position }),
     });
 
     const text = await res.text().catch(() => "");
@@ -535,8 +535,11 @@ export default function PlaylistAdmin({ apiBase }: Props) {
 
     try {
       // IMPORTANT: sequential (senin sorunu çözen yaklaşım)
+      // Position'ı mevcut şarkı sayısından başlayarak artırıyoruz
+      let currentPosition = songs.length + 1;
       for (const songId of unique) {
-        await addSongToPlaylist(pid, songId);
+        await addSongToPlaylist(pid, songId, currentPosition);
+        currentPosition++;
       }
       await fetchPlaylistSongs(pid);
       setAddSelected({});
