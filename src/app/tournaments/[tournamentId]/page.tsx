@@ -231,6 +231,33 @@ export default function TournamentDetailsPage() {
     }
   };
 
+  const handlePlayTournament = async () => {
+    try {
+      // Create tournament game
+      const response = await apiFetch(`/api/games/tournament?tournamentId=${tournamentId}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to create tournament game:', errorText);
+        throw new Error('Failed to create tournament game');
+      }
+
+      const gameData = await response.json();
+      console.log('Tournament game created:', gameData);
+      
+      // Navigate to game page with the game ID
+      router.push(`/game?gameId=${gameData.id}&tournament=${tournamentId}&playlist=${gameData.playlistId}`);
+    } catch (error) {
+      showToast('Failed to start tournament game', 'error');
+      console.error('Error creating tournament game:', error);
+    }
+  };
+
   if (isLoading) {
     return <Loading fullScreen message="Loading tournament details..." />;
   }
@@ -353,7 +380,7 @@ export default function TournamentDetailsPage() {
                   {canPlay && (
                     <Button
                       className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-semibold"
-                      onClick={() => router.push(`/game?tournament=${tournament.tournamentId}&playlist=${tournament.playlistId}`)}
+                      onClick={handlePlayTournament}
                     >
                       Play Now
                     </Button>

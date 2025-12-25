@@ -15,6 +15,7 @@ export default function Game() {
   const searchParams = useSearchParams();
   const playlistId = searchParams?.get('playlist');
   const tournamentId = searchParams?.get('tournament');
+  const existingGameId = searchParams?.get('gameId');
   const { apiFetch } = useApi(API_BASE);
 
   // API State
@@ -36,45 +37,59 @@ export default function Game() {
   /**
    * 1. Oyunu Oluştur ve Başlat
    * Backend: POST /api/games -> POST /api/games/{id}/start
+   * OR: Use existing game ID if provided (for tournaments)
    */
   const handleStartGame = useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Create Game
-      // Body kısmını tamamen boş bırakıyoruz (Swagger'daki gibi)
-      // Ama eğer playlistId varsa onu da gönderiyoruz
-      const createBody = playlistId ? JSON.stringify({ playlistId: parseInt(playlistId) }) : "";
-      
-      const createRes = await apiFetch("/api/games", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Accept": "application/json" 
-        },
-        body: createBody,
-      });
-      
-      console.log('Creating game with playlist:', playlistId, 'tournament:', tournamentId);
+      let gameIdToUse: number;
 
-      if (!createRes.ok) {
-        const errorText = await createRes.text();
-        console.error("Backend Error:", errorText);
-        throw new Error("Oyun oluşturulamadı");
+      // If we have an existing game ID (from tournament), use it
+      if (existingGameId) {
+        gameIdToUse = parseInt(existingGameId);
+        console.log('Using existing game ID:', gameIdToUse);
+      } else {
+        // Otherwise, create a new game
+        const createBody = playlistId ? JSON.stringify({ playlistId: parseInt(playlistId) }) : "";
+        
+        const createRes = await apiFetch("/api/games", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json" 
+          },
+          body: createBody,
+        });
+        
+        console.log('Creating game with playlist:', playlistId, 'tournament:', tournamentId);
+
+        if (!createRes.ok) {
+          const errorText = await createRes.text();
+          console.error("Backend Error:", errorText);
+          throw new Error("Oyun oluşturulamadı");
+        }
+
+        const gameData = await createRes.json();
+        gameIdToUse = gameData.id;
       }
-
-      const gameData = await createRes.json();
       
-      // 2. Start Game
-      const startRes = await apiFetch(`/api/games/${gameData.id}/start`, { 
+      // Start the game (works for both new and existing games)
+      const startRes = await apiFetch(`/api/games/${gameIdToUse}/start`, { 
         method: "POST",
-        body: "" // Burada da body boş olmalı
+        headers: {
+          "Accept": "application/json"
+        },
       });
 
-      if (!startRes.ok) throw new Error("Oyun başlatılamadı");
+      if (!startRes.ok) {
+        const errorText = await startRes.text();
+        console.error("Start game error:", errorText);
+        throw new Error("Oyun başlatılamadı");
+      }
       
       const startData = await startRes.json();
 
-      setGameId(gameData.id);
+      setGameId(gameIdToUse);
       setAudioSrc(startData.nextPreviewUrl);
       setTotalRounds(startData.totalRounds);
       setCurrentRound(startData.currentRound);
@@ -83,11 +98,12 @@ export default function Game() {
       setRoundStartTime(Date.now());
     } catch (err) {
       console.error("Başlatma hatası detay:", err);
-      alert("Oyun başlatılırken bir hata oluştu. Konsolu kontrol edin.");
+      const errorMessage = err instanceof Error ? err.message : "Oyun başlatılırken bir hata oluştu.";
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
-  }, [apiFetch, playlistId, tournamentId]);
+  }, [apiFetch, playlistId, tournamentId, existingGameId]);
 
   /**
    * 2. Tahmin Gönder (Guess)
