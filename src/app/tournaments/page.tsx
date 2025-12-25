@@ -121,7 +121,7 @@ export default function TournamentsPage() {
       const params = new URLSearchParams({
         page: currentPage.toString(),
         size: '50', // Increase size to get more tournaments for client-side filtering
-        sort: 'createDate',
+        sort: 'createdAt',
         direction: 'DESC',
       });
 
