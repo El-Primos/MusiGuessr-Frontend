@@ -231,6 +231,42 @@ export default function TournamentDetailsPage() {
     }
   };
 
+  const handleLeaveTournament = async () => {
+    try {
+      const response = await apiFetch(`/api/tournaments/${tournamentId}/leave`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to leave tournament');
+      }
+
+      showToast('Successfully left tournament', 'success');
+      if (tournament) {
+        setTournament({ 
+          ...tournament, 
+          isRegistered: false, 
+          participants: Math.max(0, tournament.participants - 1)
+        });
+        
+        // Remove from localStorage fallback
+        try {
+          const recentJoins = localStorage.getItem('recentTournamentJoins');
+          if (recentJoins) {
+            const joins: number[] = JSON.parse(recentJoins);
+            const tournamentIdNum = parseInt(tournamentId);
+            const updatedJoins = joins.filter(id => id !== tournamentIdNum);
+            localStorage.setItem('recentTournamentJoins', JSON.stringify(updatedJoins));
+          }
+        } catch (e) {
+          console.warn('Could not update localStorage');
+        }
+      }
+    } catch (error) {
+      showToast('Failed to leave tournament', 'error');
+    }
+  };
+
   const handlePlayTournament = async () => {
     try {
       // Create tournament game
@@ -295,6 +331,7 @@ export default function TournamentDetailsPage() {
   const canJoin = !tournament.isRegistered && !hasEnded;
   const isFull = tournament.maxParticipants && tournament.participants >= tournament.maxParticipants;
   const canPlay = tournament.isRegistered && hasStarted && !hasEnded;
+  const canLeave = tournament.isRegistered && !hasEnded;
 
   // Debug log to check button states
   console.log('Tournament button states:', {
@@ -385,10 +422,13 @@ export default function TournamentDetailsPage() {
                       Play Now
                     </Button>
                   )}
-                  {tournament.isRegistered && !canPlay && !hasEnded && (
-                    <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
-                      Already Joined
-                    </div>
+                  {canLeave && (
+                    <Button
+                      className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg font-semibold"
+                      onClick={handleLeaveTournament}
+                    >
+                      Leave Tournament
+                    </Button>
                   )}
                   {tournament.isRegistered && hasEnded && (
                     <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">

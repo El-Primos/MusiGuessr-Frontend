@@ -272,12 +272,30 @@ export default function TournamentsPage() {
   };
 
   // Handle playing a tournament
-  const handlePlayTournament = (tournamentId: string) => {
-    const tournament = tournamentData?.tournaments.find(t => t.tournamentId === tournamentId);
-    if (tournament) {
-      router.push(`/game?tournament=${tournamentId}&playlist=${tournament.playlistId}`);
-    } else {
-      router.push(`/game?tournament=${tournamentId}`);
+  const handlePlayTournament = async (tournamentId: string) => {
+    try {
+      // Create tournament game
+      const response = await apiFetch(`/api/games/tournament?tournamentId=${tournamentId}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to create tournament game:', errorText);
+        throw new Error('Failed to create tournament game');
+      }
+
+      const gameData = await response.json();
+      console.log('Tournament game created:', gameData);
+      
+      // Navigate to game page with the game ID
+      router.push(`/game?gameId=${gameData.id}&tournament=${tournamentId}&playlist=${gameData.playlistId}`);
+    } catch (error) {
+      showToast('Failed to start tournament game', 'error');
+      console.error('Error creating tournament game:', error);
     }
   };
 
