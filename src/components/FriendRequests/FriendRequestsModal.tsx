@@ -1,25 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Toast } from '@/components/Toast';
+import { getIncomingRequests, getFriends, acceptRequest, discardRequest, markInboxSeen, type FriendRequest as BackendFriendRequest, type Friend as BackendFriend } from '@/services/friendsService';
 
 interface FriendRequest {
-  id: number;
-  userId: number;
-  userName: string;
-  name: string;
-  avatar?: string;
-  requestedAt: string;
+  requesterId: number;
+  requesterUsername: string;
+  pending: boolean;
+  accepted: boolean;
 }
 
 interface Friend {
   userId: number;
-  userName: string;
-  name: string;
-  avatar?: string;
-  friendSince: string;
+  username: string;
 }
 
 interface FriendRequestsModalProps {
@@ -27,112 +23,106 @@ interface FriendRequestsModalProps {
   onClose: () => void;
   requestCount?: number;
   friendCount?: number;
+  apiFetch?: (path: string, init?: RequestInit) => Promise<Response>;
 }
-
-// Mock data - Replace with API call when backend is ready
-const mockFriendRequests: FriendRequest[] = [
-  {
-    id: 1,
-    userId: 2,
-    userName: 'john_doe',
-    name: 'John Doe',
-    avatar: undefined,
-    requestedAt: '2 hours ago',
-  },
-  {
-    id: 2,
-    userId: 3,
-    userName: 'jane_smith',
-    name: 'Jane Smith',
-    avatar: undefined,
-    requestedAt: '5 hours ago',
-  },
-  {
-    id: 3,
-    userId: 4,
-    userName: 'music_lover',
-    name: 'Music Lover',
-    avatar: undefined,
-    requestedAt: '1 day ago',
-  },
-];
-
-const mockFriends: Friend[] = [
-  {
-    userId: 5,
-    userName: 'alex_williams',
-    name: 'Alex Williams',
-    avatar: undefined,
-    friendSince: '3 months ago',
-  },
-  {
-    userId: 6,
-    userName: 'sarah_jones',
-    name: 'Sarah Jones',
-    avatar: undefined,
-    friendSince: '6 months ago',
-  },
-  {
-    userId: 7,
-    userName: 'mike_brown',
-    name: 'Mike Brown',
-    avatar: undefined,
-    friendSince: '1 year ago',
-  },
-  {
-    userId: 8,
-    userName: 'emma_davis',
-    name: 'Emma Davis',
-    avatar: undefined,
-    friendSince: '2 years ago',
-  },
-];
 
 type TabType = 'requests' | 'friends';
 
-export const FriendRequestsModal = ({ isOpen, onClose, requestCount = 0, friendCount = 0 }: FriendRequestsModalProps) => {
+export const FriendRequestsModal = ({ isOpen, onClose, requestCount = 0, friendCount = 0, apiFetch }: FriendRequestsModalProps) => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('requests');
-  const [requests, setRequests] = useState<FriendRequest[]>(mockFriendRequests);
-  const [friends, setFriends] = useState<Friend[]>(mockFriends);
+  const [requests, setRequests] = useState<FriendRequest[]>([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info'; isVisible: boolean }>({
     message: '',
     type: 'info',
     isVisible: false,
   });
 
+  // Load data when modal opens
+  useEffect(() => {
+    if (isOpen && apiFetch) {
+      loadData();
+      // Mark inbox as seen when opening
+      markInboxSeen(apiFetch).catch(err => console.error('Failed to mark inbox as seen:', err));
+    }
+  }, [isOpen, apiFetch]);
+
+  const loadData = async () => {
+    if (!apiFetch) return;
+
+    setIsLoading(true);
+    try {
+      const [incomingRequests, friendsList] = await Promise.all([
+        getIncomingRequests(apiFetch).catch(() => []),
+        getFriends(apiFetch).catch(() => []),
+      ]);
+
+      setRequests(incomingRequests);
+      setFriends(friendsList);
+    } catch (err) {
+      console.error('Failed to load friends data:', err);
+      showToast('Failed to load friends data', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setToast({ message, type, isVisible: true });
     setTimeout(() => setToast((prev) => ({ ...prev, isVisible: false })), 3000);
   };
 
-  const handleAccept = (request: FriendRequest) => {
-    // TODO: Backend integration - POST /api/friends/requests/:id/accept
-    console.log('Accepting friend request from:', request.userName);
-    
-    setRequests(prev => prev.filter(r => r.id !== request.id));
-    showToast(`${request.name} is now your friend!`, 'success');
+  const handleAccept = async (request: FriendRequest) => {
+    if (!apiFetch) {
+      showToast('API not available', 'error');
+      return;
+    }
+
+    try {
+      await acceptRequest(request.requesterId, apiFetch);
+      setRequests(prev => prev.filter(r => r.requesterId !== request.requesterId));
+      // Reload friends list to include the new friend
+      const friendsList = await getFriends(apiFetch);
+      setFriends(friendsList);
+      showToast(`${request.requesterUsername} is now your friend!`, 'success');
+    } catch (err) {
+      console.error('Failed to accept request:', err);
+      showToast(err instanceof Error ? err.message : 'Failed to accept request', 'error');
+    }
   };
 
-  const handleDeny = (request: FriendRequest) => {
-    // TODO: Backend integration - POST /api/friends/requests/:id/deny
-    console.log('Denying friend request from:', request.userName);
-    
-    setRequests(prev => prev.filter(r => r.id !== request.id));
-    showToast('Friend request declined', 'info');
+  const handleDeny = async (request: FriendRequest) => {
+    if (!apiFetch) {
+      showToast('API not available', 'error');
+      return;
+    }
+
+    try {
+      await discardRequest(request.requesterId, apiFetch);
+      setRequests(prev => prev.filter(r => r.requesterId !== request.requesterId));
+      showToast('Friend request declined', 'info');
+    } catch (err) {
+      console.error('Failed to discard request:', err);
+      showToast(err instanceof Error ? err.message : 'Failed to decline request', 'error');
+    }
   };
 
   const handleRemoveFriend = (friend: Friend) => {
-    // TODO: Backend integration - DELETE /api/friends/:userId
-    console.log('Removing friend:', friend.userName);
-    
-    setFriends(prev => prev.filter(f => f.userId !== friend.userId));
-    showToast(`${friend.name} removed from friends`, 'info');
+    // Backend doesn't have a direct unfriend endpoint
+    // This would require additional backend support
+    showToast('Remove friend feature not yet supported', 'info');
   };
 
   const handleViewProfile = (userId: number) => {
     router.push(`/profile/${userId}`);
     onClose();
+  };
+
+  const getDisplayName = (username: string): string => {
+    // Backend only provides username, use it as display name
+    return username;
   };
 
   if (!isOpen) return null;
@@ -235,71 +225,64 @@ export const FriendRequestsModal = ({ isOpen, onClose, requestCount = 0, friendC
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {requests.map((request) => (
-                    <div
-                      key={request.id}
-                      className="bg-slate-800/50 rounded-lg p-4 border border-blue-900/30 hover:border-blue-900/60 transition-colors"
-                    >
-                      <div className="flex items-start gap-3">
-                        {/* Avatar */}
-                        <button
-                          onClick={() => handleViewProfile(request.userId)}
-                          className="flex-shrink-0"
-                        >
-                          <div className="w-12 h-12 rounded-full bg-slate-700 border border-blue-900/40 flex items-center justify-center overflow-hidden hover:border-blue-500 transition-colors">
-                            {request.avatar ? (
-                              <Image
-                                src={request.avatar}
-                                alt={request.name}
-                                width={48}
-                                height={48}
-                                className="object-cover"
-                                unoptimized
-                              />
-                            ) : (
-                              <span className="text-xl text-slate-400">
-                                {request.name.charAt(0).toUpperCase()}
-                              </span>
-                            )}
-                          </div>
-                        </button>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
+                  {isLoading ? (
+                    <div className="text-center py-8">
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+                      <p className="text-slate-400 text-sm mt-2">Loading requests...</p>
+                    </div>
+                  ) : (
+                    requests.map((request) => (
+                      <div
+                        key={request.requesterId}
+                        className="bg-slate-800/50 rounded-lg p-4 border border-blue-900/30 hover:border-blue-900/60 transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Avatar */}
                           <button
-                            onClick={() => handleViewProfile(request.userId)}
-                            className="text-left hover:underline"
+                            onClick={() => handleViewProfile(request.requesterId)}
+                            className="flex-shrink-0"
                           >
-                            <h3 className="text-white font-semibold truncate">
-                              {request.name}
-                            </h3>
-                            <p className="text-slate-400 text-sm truncate">
-                              @{request.userName}
-                            </p>
+                            <div className="w-12 h-12 rounded-full bg-slate-700 border border-blue-900/40 flex items-center justify-center overflow-hidden hover:border-blue-500 transition-colors">
+                              <span className="text-xl text-slate-400">
+                                {getDisplayName(request.requesterUsername).charAt(0).toUpperCase()}
+                              </span>
+                            </div>
                           </button>
-                          <p className="text-slate-500 text-xs mt-1">
-                            {request.requestedAt}
-                          </p>
 
-                          {/* Action Buttons */}
-                          <div className="flex gap-2 mt-3">
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
                             <button
-                              onClick={() => handleAccept(request)}
-                              className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors"
+                              onClick={() => handleViewProfile(request.requesterId)}
+                              className="text-left hover:underline"
                             >
-                              Accept
+                              <h3 className="text-white font-semibold truncate">
+                                {getDisplayName(request.requesterUsername)}
+                              </h3>
+                              <p className="text-slate-400 text-sm truncate">
+                                @{request.requesterUsername}
+                              </p>
                             </button>
-                            <button
-                              onClick={() => handleDeny(request)}
-                              className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold text-sm transition-colors"
-                            >
-                              Deny
-                            </button>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 mt-3">
+                              <button
+                                onClick={() => handleAccept(request)}
+                                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors"
+                              >
+                                Accept
+                              </button>
+                              <button
+                                onClick={() => handleDeny(request)}
+                                className="flex-1 px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-semibold text-sm transition-colors"
+                              >
+                                Deny
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               )
             ) : (
@@ -324,71 +307,64 @@ export const FriendRequestsModal = ({ isOpen, onClose, requestCount = 0, friendC
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {friends.map((friend) => (
-                    <div
-                      key={friend.userId}
-                      className="bg-slate-800/50 rounded-lg p-4 border border-blue-900/30 hover:border-blue-900/60 transition-colors"
-                    >
-                      <div className="flex items-start gap-3">
-                        {/* Avatar */}
-                        <button
-                          onClick={() => handleViewProfile(friend.userId)}
-                          className="flex-shrink-0"
-                        >
-                          <div className="w-12 h-12 rounded-full bg-slate-700 border border-blue-900/40 flex items-center justify-center overflow-hidden hover:border-blue-500 transition-colors">
-                            {friend.avatar ? (
-                              <Image
-                                src={friend.avatar}
-                                alt={friend.name}
-                                width={48}
-                                height={48}
-                                className="object-cover"
-                                unoptimized
-                              />
-                            ) : (
-                              <span className="text-xl text-slate-400">
-                                {friend.name.charAt(0).toUpperCase()}
-                              </span>
-                            )}
-                          </div>
-                        </button>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
+                  {isLoading ? (
+                    <div className="text-center py-8">
+                      <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+                      <p className="text-slate-400 text-sm mt-2">Loading friends...</p>
+                    </div>
+                  ) : (
+                    friends.map((friend) => (
+                      <div
+                        key={friend.userId}
+                        className="bg-slate-800/50 rounded-lg p-4 border border-blue-900/30 hover:border-blue-900/60 transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          {/* Avatar */}
                           <button
                             onClick={() => handleViewProfile(friend.userId)}
-                            className="text-left hover:underline"
+                            className="flex-shrink-0"
                           >
-                            <h3 className="text-white font-semibold truncate">
-                              {friend.name}
-                            </h3>
-                            <p className="text-slate-400 text-sm truncate">
-                              @{friend.userName}
-                            </p>
+                            <div className="w-12 h-12 rounded-full bg-slate-700 border border-blue-900/40 flex items-center justify-center overflow-hidden hover:border-blue-500 transition-colors">
+                              <span className="text-xl text-slate-400">
+                                {getDisplayName(friend.username).charAt(0).toUpperCase()}
+                              </span>
+                            </div>
                           </button>
-                          <p className="text-slate-500 text-xs mt-1">
-                            Friends since {friend.friendSince}
-                          </p>
 
-                          {/* Action Buttons */}
-                          <div className="flex gap-2 mt-3">
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
                             <button
                               onClick={() => handleViewProfile(friend.userId)}
-                              className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors"
+                              className="text-left hover:underline"
                             >
-                              View Profile
+                              <h3 className="text-white font-semibold truncate">
+                                {getDisplayName(friend.username)}
+                              </h3>
+                              <p className="text-slate-400 text-sm truncate">
+                                @{friend.username}
+                              </p>
                             </button>
-                            <button
-                              onClick={() => handleRemoveFriend(friend)}
-                              className="px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg font-semibold text-sm transition-colors border border-red-600/30"
-                            >
-                              Remove
-                            </button>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 mt-3">
+                              <button
+                                onClick={() => handleViewProfile(friend.userId)}
+                                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-sm transition-colors"
+                              >
+                                View Profile
+                              </button>
+                              <button
+                                onClick={() => handleRemoveFriend(friend)}
+                                className="px-3 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg font-semibold text-sm transition-colors border border-red-600/30"
+                              >
+                                Remove
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               )
             )}
