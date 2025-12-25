@@ -289,7 +289,7 @@ export default function TournamentDetailsPage() {
       // Navigate to game page with the game ID
       router.push(`/game?gameId=${gameData.id}&tournament=${tournamentId}&playlist=${gameData.playlistId}`);
     } catch (error) {
-      showToast('Failed to start tournament game', 'error');
+      showToast('You already played this tournament', 'error');
       console.error('Error creating tournament game:', error);
     }
   };
