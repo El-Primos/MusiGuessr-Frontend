@@ -19,6 +19,7 @@ import {
 
 interface TournamentDetails {
   tournamentId: string;
+  playlistId: number;
   name: string;
   description: string;
   startDate: string;
@@ -127,6 +128,7 @@ export default function TournamentDetailsPage() {
 
       setTournament({
         tournamentId: tournamentData.id.toString(),
+        playlistId: tournamentData.playlistId,
         name: tournamentData.name,
         description: tournamentData.description,
         startDate: formatTournamentDate(tournamentData.startDate),
@@ -314,7 +316,7 @@ export default function TournamentDetailsPage() {
                   {canPlay && (
                     <Button
                       className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-semibold"
-                      onClick={() => router.push(`/game?tournament=${tournament.tournamentId}`)}
+                      onClick={() => router.push(`/game?tournament=${tournament.tournamentId}&playlist=${tournament.playlistId}`)}
                     >
                       Play Now
                     </Button>

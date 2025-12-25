@@ -150,6 +150,7 @@ export default function TournamentsPage() {
         
         return {
           tournamentId: dto.id.toString(),
+          playlistId: dto.playlistId,
           name: dto.name,
           description: dto.description,
           startDate: formatTournamentDate(dto.startDate),
@@ -252,7 +253,12 @@ export default function TournamentsPage() {
 
   // Handle playing a tournament
   const handlePlayTournament = (tournamentId: string) => {
-    router.push(`/game?tournament=${tournamentId}`);
+    const tournament = tournamentData?.tournaments.find(t => t.tournamentId === tournamentId);
+    if (tournament) {
+      router.push(`/game?tournament=${tournamentId}&playlist=${tournament.playlistId}`);
+    } else {
+      router.push(`/game?tournament=${tournamentId}`);
+    }
   };
 
   if (isLoading) {

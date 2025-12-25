@@ -5,6 +5,7 @@ import { calculateTournamentStatus, hasTournamentStarted, hasTournamentEnded } f
 
 export interface TournamentCardData {
   tournamentId: string;
+  playlistId: number;
   name: string;
   description: string;
   startDate: string; // "01.01.25"
