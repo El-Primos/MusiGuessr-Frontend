@@ -279,8 +279,8 @@ export default function TournamentDetailsPage() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('You already played this tournament:', errorText);
-        throw new Error('You already played this tournament');
+        console.error('Failed to create tournament game:', errorText);
+        throw new Error('Failed to create tournament game');
       }
 
       const gameData = await response.json();
@@ -290,7 +290,7 @@ export default function TournamentDetailsPage() {
       router.push(`/game?gameId=${gameData.id}&tournament=${tournamentId}&playlist=${gameData.playlistId}`);
     } catch (error) {
       showToast('You already played this tournament', 'error');
-      console.error('You already played this tournament:', error);
+      console.error('Error creating tournament game:', error);
     }
   };
 

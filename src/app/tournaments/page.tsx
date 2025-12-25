@@ -289,8 +289,8 @@ export default function TournamentsPage() {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('You already played this tournament:', errorText);
-        throw new Error('You already played this tournament');
+        console.error('Failed to create tournament game:', errorText);
+        throw new Error('Failed to create tournament game');
       }
 
       const gameData = await response.json();
