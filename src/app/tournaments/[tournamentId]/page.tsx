@@ -94,11 +94,15 @@ export default function TournamentDetailsPage() {
       
       if (leaderboardResponse.ok) {
         const leaderboardData: TournamentLeaderboardEntryDTO[] = await leaderboardResponse.json();
+        console.log('Leaderboard data from API:', leaderboardData);
         leaderboard = leaderboardData.map(entry => ({
           rank: entry.rank,
           playerName: entry.username,
           score: entry.score,
         }));
+        console.log('Transformed leaderboard:', leaderboard);
+      } else {
+        console.warn('Failed to fetch leaderboard, status:', leaderboardResponse.status);
       }
 
       console.log('DEBUG: Starting registration check. userId:', userId, 'tournamentId:', tournamentId);
@@ -227,6 +231,69 @@ export default function TournamentDetailsPage() {
     }
   };
 
+  const handleLeaveTournament = async () => {
+    try {
+      const response = await apiFetch(`/api/tournaments/${tournamentId}/leave`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to leave tournament');
+      }
+
+      showToast('Successfully left tournament', 'success');
+      if (tournament) {
+        setTournament({ 
+          ...tournament, 
+          isRegistered: false, 
+          participants: Math.max(0, tournament.participants - 1)
+        });
+        
+        // Remove from localStorage fallback
+        try {
+          const recentJoins = localStorage.getItem('recentTournamentJoins');
+          if (recentJoins) {
+            const joins: number[] = JSON.parse(recentJoins);
+            const tournamentIdNum = parseInt(tournamentId);
+            const updatedJoins = joins.filter(id => id !== tournamentIdNum);
+            localStorage.setItem('recentTournamentJoins', JSON.stringify(updatedJoins));
+          }
+        } catch (e) {
+          console.warn('Could not update localStorage');
+        }
+      }
+    } catch (error) {
+      showToast('Failed to leave tournament', 'error');
+    }
+  };
+
+  const handlePlayTournament = async () => {
+    try {
+      // Create tournament game
+      const response = await apiFetch(`/api/games/tournament?tournamentId=${tournamentId}`, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Failed to create tournament game:', errorText);
+        throw new Error('Failed to create tournament game');
+      }
+
+      const gameData = await response.json();
+      console.log('Tournament game created:', gameData);
+      
+      // Navigate to game page with the game ID
+      router.push(`/game?gameId=${gameData.id}&tournament=${tournamentId}&playlist=${gameData.playlistId}`);
+    } catch (error) {
+      showToast('Failed to start tournament game', 'error');
+      console.error('Error creating tournament game:', error);
+    }
+  };
+
   if (isLoading) {
     return <Loading fullScreen message="Loading tournament details..." />;
   }
@@ -264,6 +331,7 @@ export default function TournamentDetailsPage() {
   const canJoin = !tournament.isRegistered && !hasEnded;
   const isFull = tournament.maxParticipants && tournament.participants >= tournament.maxParticipants;
   const canPlay = tournament.isRegistered && hasStarted && !hasEnded;
+  const canLeave = tournament.isRegistered && !hasEnded;
 
   // Debug log to check button states
   console.log('Tournament button states:', {
@@ -354,10 +422,13 @@ export default function TournamentDetailsPage() {
                       Play Now
                     </Button>
                   )}
-                  {tournament.isRegistered && !canPlay && !hasEnded && (
-                    <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
-                      Already Joined
-                    </div>
+                  {canLeave && (
+                    <Button
+                      className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg font-semibold"
+                      onClick={handleLeaveTournament}
+                    >
+                      Leave Tournament
+                    </Button>
                   )}
                   {tournament.isRegistered && hasEnded && (
                     <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
@@ -421,7 +492,7 @@ export default function TournamentDetailsPage() {
                               {entry.playerName}
                             </div>
                             <div className="text-xs text-slate-400">
-                              {entry.score.toLocaleString()} pts
+                              {entry.score ? entry.score.toLocaleString() : '0'} pts
                             </div>
                           </div>
                         </div>
