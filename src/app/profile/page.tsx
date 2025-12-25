@@ -187,13 +187,51 @@ export default function ProfilePage() {
               isOwnProfile={true}
               isAuthenticated={isAuthenticated}
               apiFetch={apiFetch}
-              onProfileUpdate={(updatedData) => {
+              onProfileUpdate={async (updatedData) => {
                 if (profileData) {
-                  setProfileData({
-                    ...profileData,
-                    name: updatedData.name,
-                    avatar: updatedData.avatar,
-                  });
+                  console.log('Updating profile data:', updatedData);
+                  
+                  // If avatar was updated, refresh profile data from backend to get the latest URL
+                  if (updatedData.avatar && updatedData.avatar !== profileData.avatar) {
+                    try {
+                      const raw = localStorage.getItem('user');
+                      if (raw) {
+                        const parsed = JSON.parse(raw);
+                        const userId = parsed?.userId || parsed?.id;
+                        if (userId) {
+                          // Wait a bit for backend to process
+                          await new Promise(resolve => setTimeout(resolve, 500));
+                          
+                          const refreshedData = await fetchOwnProfile(userId, apiFetch);
+                          console.log('Refreshed profile data:', refreshedData);
+                          console.log('Refreshed avatar URL:', refreshedData.avatar);
+                          
+                          // Update with refreshed data
+                          setProfileData(prev => ({
+                            ...refreshedData,
+                            gameHistory: prev?.gameHistory || [], // Keep existing game history
+                            avatar: refreshedData.avatar || updatedData.avatar, // Use refreshed avatar
+                          }));
+                          console.log('Profile data state updated with avatar:', refreshedData.avatar);
+                        }
+                      }
+                    } catch (err) {
+                      console.error('Failed to refresh profile:', err);
+                      // Fallback to immediate update
+                      setProfileData({
+                        ...profileData,
+                        name: updatedData.name,
+                        avatar: updatedData.avatar,
+                      });
+                    }
+                  } else {
+                    // Just update name, no avatar change
+                    setProfileData({
+                      ...profileData,
+                      name: updatedData.name,
+                      avatar: updatedData.avatar || profileData.avatar,
+                    });
+                  }
                 }
               }}
             />

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Toast } from '@/components/Toast';
-import { getIncomingRequests, getFriends, acceptRequest, discardRequest, markInboxSeen, type FriendRequest as BackendFriendRequest, type Friend as BackendFriend } from '@/services/friendsService';
+import { getIncomingRequests, getFriends, acceptRequest, discardRequest, markInboxSeen, removeFriend, type FriendRequest as BackendFriendRequest, type Friend as BackendFriend } from '@/services/friendsService';
 
 interface FriendRequest {
   requesterId: number;
@@ -109,10 +109,20 @@ export const FriendRequestsModal = ({ isOpen, onClose, requestCount = 0, friendC
     }
   };
 
-  const handleRemoveFriend = (friend: Friend) => {
-    // Backend doesn't have a direct unfriend endpoint
-    // This would require additional backend support
-    showToast('Remove friend feature not yet supported', 'info');
+  const handleRemoveFriend = async (friend: Friend) => {
+    if (!apiFetch) {
+      showToast('API not available', 'error');
+      return;
+    }
+
+    try {
+      await removeFriend(friend.userId, apiFetch);
+      setFriends(prev => prev.filter(f => f.userId !== friend.userId));
+      showToast(`${friend.username} removed from friends`, 'success');
+    } catch (err) {
+      console.error('Failed to remove friend:', err);
+      showToast(err instanceof Error ? err.message : 'Failed to remove friend', 'error');
+    }
   };
 
   const handleViewProfile = (userId: number) => {

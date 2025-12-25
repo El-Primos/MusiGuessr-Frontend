@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Button from '@/components/Button';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
-import { updateProfile, uploadProfileImage } from '@/services/profileService';
+import { updateProfile, updatePassword, uploadProfileImage } from '@/services/profileService';
 
 interface ProfileData {
   userId: number;
@@ -25,7 +25,8 @@ interface EditProfileModalProps {
 
 export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSave }: EditProfileModalProps) => {
   const [name, setName] = useState(profileData.name);
-  const [password, setPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(profileData.avatar || null);
@@ -35,7 +36,8 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSav
   useEffect(() => {
     if (isOpen) {
       setName(profileData.name);
-      setPassword('');
+      setCurrentPassword('');
+      setNewPassword('');
       setConfirmPassword('');
       setSelectedImage(null);
       setImagePreview(profileData.avatar || null);
@@ -56,14 +58,24 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSav
 
   const handleSave = async () => {
     // Validate password if provided
-    if (password && password !== confirmPassword) {
-      showToast('Passwords do not match', 'error');
-      return;
-    }
-
-    if (password && password.length < 6) {
-      showToast('Password must be at least 6 characters', 'error');
-      return;
+    const isPasswordChange = newPassword || currentPassword;
+    if (isPasswordChange) {
+      if (!currentPassword) {
+        showToast('Current password is required', 'error');
+        return;
+      }
+      if (!newPassword) {
+        showToast('New password is required', 'error');
+        return;
+      }
+      if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+      }
+      if (newPassword.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        return;
+      }
     }
     
     setIsLoading(true);
@@ -75,7 +87,7 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSav
       if (selectedImage) {
         try {
           const uploadResult = await uploadProfileImage(selectedImage, apiFetch);
-          newAvatarUrl = uploadResult.avatarUrl;
+          newAvatarUrl = uploadResult.profilePictureUrl || profileData.avatar;
         } catch (err) {
           console.error('Failed to upload image:', err);
           showToast('Failed to upload profile picture', 'error');
@@ -83,17 +95,17 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSav
         }
       }
       
-      // Update profile data
-      const updateData: { name?: string; password?: string } = {};
+      // Update profile name if changed
       if (name !== profileData.name) {
-        updateData.name = name;
-      }
-      if (password) {
-        updateData.password = password;
+        await updateProfile({ name }, apiFetch);
       }
       
-      if (Object.keys(updateData).length > 0 || selectedImage) {
-        await updateProfile(updateData, apiFetch);
+      // Update password if provided
+      if (isPasswordChange && currentPassword && newPassword) {
+        await updatePassword(
+          { currentPassword, newPassword },
+          apiFetch
+        );
       }
       
       // Update parent component with new data
@@ -110,10 +122,8 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSav
       }, 1000);
     } catch (err) {
       console.error('Failed to save profile:', err);
-      showToast(
-        err instanceof Error ? err.message : 'Failed to update profile',
-        'error'
-      );
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update profile';
+      showToast(errorMessage, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -196,24 +206,38 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSav
                 </div>
               </div>
 
-              {/* Password */}
+              {/* Current Password */}
               <div>
                 <label className="block text-sm font-semibold text-blue-200 mb-2">
-                  Password:
+                  Current Password:
                 </label>
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
                   className="w-full px-4 py-2 bg-slate-800 border border-blue-900/40 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                  placeholder="Enter new password"
+                  placeholder="Enter current password"
+                />
+              </div>
+
+              {/* New Password */}
+              <div>
+                <label className="block text-sm font-semibold text-blue-200 mb-2">
+                  New Password:
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-2 bg-slate-800 border border-blue-900/40 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                  placeholder="Enter new password (min 6 characters)"
                 />
               </div>
 
               {/* Confirm Password */}
               <div>
                 <label className="block text-sm font-semibold text-blue-200 mb-2">
-                  Confirm:
+                  Confirm New Password:
                 </label>
                 <input
                   type="password"
