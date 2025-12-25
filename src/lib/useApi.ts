@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 function getTokenFromLocalStorage(): string {
+  if (typeof window === 'undefined') return "";
+  
   try {
     const raw = localStorage.getItem("user");
     
@@ -16,11 +18,16 @@ function getTokenFromLocalStorage(): string {
 }
 
 export function useApi(apiBase: string) {
-  const [token, setToken] = useState("");
+  // Initialize token immediately from localStorage instead of empty string
+  const [token, setToken] = useState(() => getTokenFromLocalStorage());
 
   useEffect(() => {
-    setToken(getTokenFromLocalStorage());
-  }, []);
+    // Update token if it changes
+    const currentToken = getTokenFromLocalStorage();
+    if (currentToken !== token) {
+      setToken(currentToken);
+    }
+  }, [token]);
 
   const authHeaders = useMemo(() => {
     return {
