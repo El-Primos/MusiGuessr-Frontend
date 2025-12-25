@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Button from '@/components/Button';
 import { EditProfileModal } from './EditProfileModal';
 import { useToast } from '@/hooks/useToast';
@@ -166,7 +167,7 @@ export const ProfileSidebar = ({
         <div className="flex justify-center mb-4 relative">
           <div className="w-32 h-32 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-blue-900/40 flex items-center justify-center overflow-hidden relative">
             {profileData.avatar ? (
-              <img
+              <Image
                 key={profileData.avatar} // Force re-render when avatar URL changes
                 src={`${profileData.avatar}?t=${Date.now()}`} // Add timestamp to bypass cache
                 alt={profileData.name}
