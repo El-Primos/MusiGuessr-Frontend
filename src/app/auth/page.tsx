@@ -53,13 +53,6 @@ export default function Auth() {
    * Kullanıcıyı kaydetmeden önce BANNED olup olmadığını kontrol eder.
    */
   function storeUserAndGoHome(res: AuthRes) {
-    // KRİTİK KONTROL: Eğer kullanıcı BANNED rolündeyse giriş yapmasına izin verme
-    if (res.role === "BANNED") {
-      setError("Hesabınız banlanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.");
-      setLoading(false); // Loading state'i kapat ki buton tekrar aktif olsun
-      return;
-    }
-
     localStorage.setItem(
       "user",
       JSON.stringify({ 
@@ -106,7 +99,11 @@ export default function Auth() {
         storeUserAndGoHome(data);
       })
       .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : "Login failed.");
+        if (err instanceof Error && err.message.includes("disabled")) {
+          setError("Hesabınız banlanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.");
+        } else {
+          setError(err instanceof Error ? err.message : "Login failed.");
+        }
       })
       .finally(() => {
         // Eğer banlandıysa storeUserAndGoHome zaten loading'i false yapacak, 
