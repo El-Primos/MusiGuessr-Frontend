@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Button from '@/components/Button';
 import { EditProfileModal } from './EditProfileModal';
@@ -43,6 +43,13 @@ export const ProfileSidebar = ({
   const [editedName, setEditedName] = useState(profileData.name);
   const { toast, showToast, hideToast } = useToast();
 
+  // Update editedName when profileData.name changes
+  useEffect(() => {
+    if (!isEditingName) {
+      setEditedName(profileData.name);
+    }
+  }, [profileData.name, isEditingName]);
+
   const handleShareProfile = () => {
     const profileUrl = `${window.location.origin}/profile/${profileData.userId}`;
     navigator.clipboard.writeText(profileUrl);
@@ -67,17 +74,43 @@ export const ProfileSidebar = ({
     }
   };
 
-  const handleNameSave = () => {
-    if (editedName.trim() && editedName !== profileData.name) {
+  const handleNameSave = async () => {
+    if (!editedName.trim() || editedName.trim() === profileData.name) {
+      setIsEditingName(false);
+      return;
+    }
+
+    if (!apiFetch) {
+      showToast('API not available', 'error');
+      return;
+    }
+
+    try {
+      const { updateProfile } = await import('@/services/profileService');
+      const updatedUser = await updateProfile(
+        { name: editedName.trim() },
+        apiFetch
+      );
+
+      // Update local state
       if (onProfileUpdate) {
         onProfileUpdate({
-          name: editedName.trim(),
-          avatar: profileData.avatar,
+          name: updatedUser.name,
+          avatar: updatedUser.profilePictureUrl || profileData.avatar,
         });
       }
-      showToast('Name updated!', 'success');
+
+      showToast('Name updated successfully!', 'success');
+      setIsEditingName(false);
+    } catch (err) {
+      console.error('Failed to update name:', err);
+      showToast(
+        err instanceof Error ? err.message : 'Failed to update name',
+        'error'
+      );
+      // Revert to original name on error
+      setEditedName(profileData.name);
     }
-    setIsEditingName(false);
   };
 
   const handleNameCancel = () => {
