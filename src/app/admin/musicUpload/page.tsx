@@ -2,12 +2,42 @@
 
 import MusicUpdate from '@/components/AdminOps/MusicUpdate';
 import MusicUpload from '@/components/AdminOps/MusicUpload';
+import TournamentManage from '@/components/AdminOps/TournamentManage';
+import { useState } from 'react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function MusicUploadPage() {
+  const [activeTab, setActiveTab] = useState<'add' | 'update'>('add');
+  
   return (
     <div className="p-8">
+      {/* Tabs */}
+      <div className="mb-6 border-b border-slate-700">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab('add')}
+            className={`px-4 py-2 font-semibold transition-colors ${
+              activeTab === 'add'
+                ? 'border-b-2 border-blue-500 text-blue-400'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Add Music
+          </button>
+          <button
+            onClick={() => setActiveTab('update')}
+            className={`px-4 py-2 font-semibold transition-colors ${
+              activeTab === 'update'
+                ? 'border-b-2 border-blue-500 text-blue-400'
+                : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Update Music
+          </button>
+        </div>
+      </div>
+
       {/** 
        * We may add that to header?
         rightContent={
@@ -39,11 +69,11 @@ export default function MusicUploadPage() {
       }
       */}
 
-      <div className="mx-auto w-full max-w-6xl px-6 py-10 space-y-10 flex justify-center">
-        <MusicUpload apiBase={API_BASE} />
-        <div className='p-2'></div>
-        <MusicUpdate apiBase={API_BASE} />
-      </div>
+      {activeTab === 'add' ? (     
+          <MusicUpload apiBase={API_BASE} />
+        ) : (
+          <MusicUpdate apiBase={API_BASE} />
+        )}
     </div>
   );
 }

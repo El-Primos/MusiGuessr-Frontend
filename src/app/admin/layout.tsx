@@ -21,7 +21,7 @@ export default function AdminLayout({
     { name: 'Dashboard', href: '/admin', icon: '📊' },
     { name: 'Artists', href: '/admin/artist', icon: '🎤' },
     { name: 'Genres', href: '/admin/genre', icon: '🎵' },
-    { name: 'Music Upload', href: '/admin/musicUpload', icon: '⬆️' },
+    { name: 'Music', href: '/admin/musicUpload', icon: '⬆️' },
     { name: 'Playlists', href: '/admin/playlist', icon: '📝' },
     { name: 'Tournaments', href: '/admin/tournament', icon: '🏆' },
     { name: 'Users', href: '/admin/users', icon: '👥' },
