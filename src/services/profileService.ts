@@ -3,6 +3,16 @@
  * Handles all profile-related API calls
  */
 
+export interface GameHistoryEntry {
+  gameHistoryId: number;
+  gameId: string;
+  date: string;
+  mode: 'Normal' | 'Tournament';
+  score: number;
+  playlistId?: number;
+  playedAt?: string;
+}
+
 export interface ProfileData {
   userId: number;
   userName: string;
@@ -14,12 +24,7 @@ export interface ProfileData {
     totalGames: number;
     guessAccuracy: number;
   };
-  gameHistory: {
-    gameId: string;
-    date: string;
-    mode: 'Normal' | 'Tournament';
-    score: number;
-  }[];
+  gameHistory: GameHistoryEntry[];
 }
 
 export interface UpdateProfileData {
@@ -34,10 +39,13 @@ export interface ProfileStats {
 }
 
 export interface GameHistoryItem {
-  gameId: string;
+  gameHistoryId: number;
+  gameId: string; // For backward compatibility, derived from gameHistoryId
   date: string;
   mode: 'Normal' | 'Tournament';
   score: number;
+  playlistId?: number;
+  playedAt?: string;
 }
 
 /**
@@ -166,12 +174,14 @@ export async function uploadProfileImage(
 
 /**
  * Fetch user's game history
+ * Note: userId parameter is kept for backward compatibility but not used in the request
  */
 export async function fetchUserGameHistory(
   userId: number,
   apiFetch: (path: string, init?: RequestInit) => Promise<Response>
 ): Promise<GameHistoryItem[]> {
-  const response = await apiFetch(`/api/users/me/history/games?userId=${userId}`);
+  // Backend endpoint doesn't need userId parameter, it gets it from the token
+  const response = await apiFetch(`/api/users/me/history/games`);
   
   if (!response.ok) {
     throw new Error(`Failed to fetch game history: ${response.statusText}`);
@@ -179,13 +189,25 @@ export async function fetchUserGameHistory(
   
   const data = await response.json();
   
-  // Map backend game history to frontend format
-  return data.map((game: { id?: number; playedAt?: string; score?: number }) => ({
-    gameId: game.id?.toString() || '',
-    date: new Date(game.playedAt || '').toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }),
-    mode: 'Normal' as const, // Backend doesn't distinguish yet
-    score: game.score || 0,
-  }));
+  // Map backend GameHistoryDTO to frontend format
+  // Backend format: { gameHistoryId, playlistId, totalScore, playedAt }
+  return data.map((game: { 
+    gameHistoryId?: number; 
+    playlistId?: number;
+    totalScore?: number; 
+    playedAt?: string;
+  }) => {
+    const playedAtDate = game.playedAt ? new Date(game.playedAt) : new Date();
+    return {
+      gameHistoryId: game.gameHistoryId || 0,
+      gameId: game.gameHistoryId?.toString() || '', // For backward compatibility
+      date: playedAtDate.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: '2-digit' }),
+      mode: 'Normal' as const, // Backend doesn't distinguish yet
+      score: game.totalScore || 0,
+      playlistId: game.playlistId,
+      playedAt: game.playedAt,
+    };
+  });
 }
 
 /**

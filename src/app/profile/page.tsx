@@ -169,6 +169,13 @@ export default function ProfilePage() {
         exitVisible={true}
         onExit={() => router.push('/')}
         className="top-0 left-0"
+        rightContent={
+          isAuthenticated ? (
+            <div className="flex items-center gap-2 mr-2 md:mr-4">
+              <FriendRequestsButton apiFetch={apiFetch} variant="inline" />
+            </div>
+          ) : null
+        }
       />
 
       <main className="max-w-7xl mx-auto px-4 py-8">
@@ -199,16 +206,13 @@ export default function ProfilePage() {
               <ProfileStats stats={profileData.stats} />
 
               {/* Game History */}
-              <GameHistory gameHistory={profileData.gameHistory} />
+              <GameHistory gameHistory={profileData.gameHistory} apiFetch={apiFetch} />
             </div>
           </div>
         </div>
       </main>
 
       <SettingsButton />
-      
-      {/* Friend Requests Button - Mock data: 3 requests, 4 friends */}
-      {isAuthenticated && <FriendRequestsButton requestCount={3} friendCount={4} />}
 
       {/* Toast Notification */}
       <Toast

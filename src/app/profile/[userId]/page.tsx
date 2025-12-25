@@ -19,7 +19,7 @@ export default function OtherUserProfilePage() {
   const router = useRouter();
   const params = useParams();
   const userId = parseInt(params.userId as string, 10);
-  const { apiFetch } = useApi(API_BASE);
+  const { apiFetch, token } = useApi(API_BASE);
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,8 +34,13 @@ export default function OtherUserProfilePage() {
       const raw = localStorage.getItem('user');
       if (raw) {
         const parsed = JSON.parse(raw);
-        setIsAuthenticated(Boolean(parsed && parsed.userId && parsed.userName));
-        setCurrentUserId(parsed.userId);
+        const hasToken = Boolean(token);
+        // Support both userId/userName and id/username formats
+        const userId = parsed.userId || parsed.id;
+        const userName = parsed.userName || parsed.username;
+        const hasUserData = Boolean(userId && userName);
+        setIsAuthenticated(hasToken && hasUserData);
+        setCurrentUserId(userId);
       } else {
         setIsAuthenticated(false);
         setCurrentUserId(null);
@@ -44,7 +49,7 @@ export default function OtherUserProfilePage() {
       setIsAuthenticated(false);
       setCurrentUserId(null);
     }
-  }, []);
+  }, [token]);
 
   // Check if viewing own profile
   useEffect(() => {
@@ -125,10 +130,6 @@ export default function OtherUserProfilePage() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    router.push('/');
-  };
 
   if (isLoading) {
     return (
@@ -159,27 +160,7 @@ export default function OtherUserProfilePage() {
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                  <span className="hidden sm:inline">My Profile</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="px-2 md:px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-1 transition-colors"
-                  title="Logout"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  <span className="hidden md:inline">Logout</span>
+                  <span className="hidden sm:inline">Profile</span>
                 </button>
               </div>
             ) : null
@@ -221,27 +202,7 @@ export default function OtherUserProfilePage() {
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                  <span className="hidden sm:inline">My Profile</span>
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="px-2 md:px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-1 transition-colors"
-                  title="Logout"
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  <span className="hidden md:inline">Logout</span>
+                  <span className="hidden sm:inline">Profile</span>
                 </button>
               </div>
             ) : null
@@ -264,6 +225,7 @@ export default function OtherUserProfilePage() {
         rightContent={
           isAuthenticated ? (
             <div className="flex items-center gap-2 mr-2 md:mr-4">
+              <FriendRequestsButton apiFetch={apiFetch} variant="inline" />
               <button
                 onClick={() => router.push("/profile")}
                 className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
@@ -282,27 +244,7 @@ export default function OtherUserProfilePage() {
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-                <span className="hidden sm:inline">My Profile</span>
-              </button>
-              <button
-                onClick={handleLogout}
-                className="px-2 md:px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-1 transition-colors"
-                title="Logout"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-                <span className="hidden md:inline">Logout</span>
+                <span className="hidden sm:inline">Profile</span>
               </button>
             </div>
           ) : null
@@ -338,9 +280,6 @@ export default function OtherUserProfilePage() {
       </main>
 
       <SettingsButton />
-
-      {/* Friend Requests Button - Mock data: 3 requests, 4 friends */}
-      {isAuthenticated && <FriendRequestsButton requestCount={3} friendCount={4} />}
 
       {/* Toast Notification */}
       <Toast
