@@ -166,18 +166,24 @@ export async function addFriend(
 
 /**
  * Remove a friend (unfriend)
- * NOTE: Backend doesn't have a direct "unfriend" endpoint yet
- * This would require deleting both directions of the following relationship
- * For now, this is a placeholder
+ * @param friendId - The user ID to unfriend
+ * @param apiFetch - API fetch function from useApi hook
+ * @returns Success status and message
  */
 export async function removeFriend(
-  userId: number,
+  friendId: number,
   apiFetch: (path: string, init?: RequestInit) => Promise<Response>
 ): Promise<{ success: boolean; message?: string }> {
-  // Backend doesn't have a direct unfriend endpoint
-  // Would need to delete following relationships in both directions
-  // TODO: Implement when backend adds unfriend endpoint
-  throw new Error('Remove friend feature not yet implemented. Backend needs unfriend endpoint.');
+  const response = await apiFetch(`/api/followings/unfriend?friendId=${friendId}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => response.statusText);
+    throw new Error(`Failed to remove friend: ${errorText}`);
+  }
+
+  return { success: true, message: await response.text() };
 }
 
 /**

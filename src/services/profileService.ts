@@ -32,6 +32,11 @@ export interface UpdateProfileData {
   password?: string;
 }
 
+export interface PasswordUpdateData {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface UserResponseDTO {
   id: number;
   username: string;
@@ -150,6 +155,32 @@ export async function updateProfile(
   }
   
   return response.json();
+}
+
+/**
+ * Update user password
+ * @param data - Password update data (currentPassword, newPassword)
+ * @param apiFetch - API fetch function from useApi hook
+ * @returns Success message
+ */
+export async function updatePassword(
+  data: PasswordUpdateData,
+  apiFetch: (path: string, init?: RequestInit) => Promise<Response>
+): Promise<string> {
+  const response = await apiFetch('/api/users/me/password', {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => response.statusText);
+    throw new Error(`Failed to update password: ${errorText}`);
+  }
+  
+  return await response.text();
 }
 
 /**
