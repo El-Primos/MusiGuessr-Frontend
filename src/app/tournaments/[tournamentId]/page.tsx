@@ -281,6 +281,8 @@ export default function TournamentDetailsPage() {
         const errorText = await response.text();
         console.error('Failed to create tournament game:', errorText);
         throw new Error('Failed to create tournament game');
+        console.error('Failed to create tournament game:', errorText);
+        throw new Error('Failed to create tournament game');
       }
 
       const gameData = await response.json();
