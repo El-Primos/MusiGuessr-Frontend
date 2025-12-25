@@ -10,25 +10,14 @@ export interface LeaderboardEntry {
   score: number;
 }
 
-export type LeaderboardPeriod = 'all' | 'weekly' | 'monthly';
-
 /**
  * Fetch global leaderboard
- * @param period - Time period: 'all', 'weekly', or 'monthly'
- * @param limit - Maximum number of entries to return (default: 100)
  * @param apiFetch - API fetch function from useApi hook
  */
 export async function fetchGlobalLeaderboard(
-  period: LeaderboardPeriod = 'all',
-  limit: number = 100,
   apiFetch: (path: string, init?: RequestInit) => Promise<Response>
 ): Promise<LeaderboardEntry[]> {
-  const params = new URLSearchParams({
-    period,
-    limit: limit.toString(),
-  });
-
-  const response = await apiFetch(`/api/leaderboards/global?${params.toString()}`);
+  const response = await apiFetch(`/api/leaderboards/global`);
 
   if (!response.ok) {
     const errorText = await response.text().catch(() => response.statusText);
@@ -40,34 +29,44 @@ export async function fetchGlobalLeaderboard(
   // Map backend DTO to frontend format
   // Backend: { rank, userId, username, score }
   // Frontend: { rank, userId, playerName, score }
-  return data.map((entry: { rank: number; userId: number; username: string; score: number }) => ({
-    rank: entry.rank,
-    userId: entry.userId,
-    playerName: entry.username || 'Unknown',
-    score: entry.score || 0,
-  }));
+  // Filter out system user (id: 0)
+  return data
+    .filter((entry: { rank: number; userId: number; username: string; score: number }) => entry.userId !== 0)
+    .map((entry: { rank: number; userId: number; username: string; score: number }, index: number) => ({
+      rank: index + 1, // Recalculate rank after filtering
+      userId: entry.userId,
+      playerName: entry.username || 'Unknown',
+      score: entry.score || 0,
+    }));
 }
 
 /**
  * Fetch friends leaderboard
- * NOTE: This endpoint is not implemented in the backend yet.
- * Expected endpoint: GET /api/leaderboards/friends
- * For now, returns empty array
+ * @param apiFetch - API fetch function from useApi hook
  */
 export async function fetchFriendsLeaderboard(
-  period: LeaderboardPeriod = 'all', // eslint-disable-line @typescript-eslint/no-unused-vars
-  limit: number = 100, // eslint-disable-line @typescript-eslint/no-unused-vars
-  apiFetch: (path: string, init?: RequestInit) => Promise<Response> // eslint-disable-line @typescript-eslint/no-unused-vars
+  apiFetch: (path: string, init?: RequestInit) => Promise<Response>
 ): Promise<LeaderboardEntry[]> {
-  // TODO: Implement when backend endpoint is ready
-  // const params = new URLSearchParams({
-  //   period,
-  //   limit: limit.toString(),
-  // });
-  // const response = await apiFetch(`/api/leaderboards/friends?${params.toString()}`);
-  // ... similar mapping logic
+  const response = await apiFetch(`/api/leaderboards/friends`);
 
-  console.warn('Friends leaderboard endpoint not implemented in backend yet');
-  return [];
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => response.statusText);
+    throw new Error(`Failed to fetch friends leaderboard: ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Map backend DTO to frontend format
+  // Backend: { rank, userId, username, score }
+  // Frontend: { rank, userId, playerName, score }
+  // Filter out system user (id: 0)
+  return data
+    .filter((entry: { rank: number; userId: number; username: string; score: number }) => entry.userId !== 0)
+    .map((entry: { rank: number; userId: number; username: string; score: number }, index: number) => ({
+      rank: index + 1, // Recalculate rank after filtering
+      userId: entry.userId,
+      playerName: entry.username || 'Unknown',
+      score: entry.score || 0,
+    }));
 }
 

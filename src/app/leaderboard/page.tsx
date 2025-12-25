@@ -7,7 +7,7 @@ import { SettingsButton } from '@/components/SettingsButton';
 import { LeaderboardTabs } from '@/components/Leaderboard/LeaderboardTabs';
 import { LeaderboardTable } from '@/components/Leaderboard/LeaderboardTable';
 import { useApi } from '@/lib/useApi';
-import { fetchGlobalLeaderboard, fetchFriendsLeaderboard, type LeaderboardEntry, type LeaderboardPeriod } from '@/services/leaderboardService';
+import { fetchGlobalLeaderboard, fetchFriendsLeaderboard, type LeaderboardEntry } from '@/services/leaderboardService';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
@@ -21,9 +21,6 @@ export default function LeaderboardPage() {
   const [error, setError] = useState<string | null>(null);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
   const [hasUser, setHasUser] = useState<boolean>(false);
-  
-  // Period is fixed to 'all' for now
-  const period: LeaderboardPeriod = 'all';
 
   // Check authentication and get current user ID
   useEffect(() => {
@@ -64,10 +61,10 @@ export default function LeaderboardPage() {
         let result: LeaderboardEntry[];
         
         if (activeTab === 'global') {
-          result = await fetchGlobalLeaderboard(period, 100, apiFetch);
+          result = await fetchGlobalLeaderboard(apiFetch);
         } else {
-          // Friends leaderboard - backend endpoint not ready yet
-          result = await fetchFriendsLeaderboard(period, 100, apiFetch);
+          // Friends leaderboard
+          result = await fetchFriendsLeaderboard(apiFetch);
         }
 
         setData(result);
@@ -81,7 +78,7 @@ export default function LeaderboardPage() {
     };
 
     loadLeaderboard();
-  }, [activeTab, apiFetch, isAuthenticated, period]);
+  }, [activeTab, apiFetch, isAuthenticated]);
 
   const handleLogout = () => {
     localStorage.removeItem('user');
