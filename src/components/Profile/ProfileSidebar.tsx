@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Button from '@/components/Button';
 import { EditProfileModal } from './EditProfileModal';
 import Image from 'next/image';
@@ -51,6 +50,11 @@ export const ProfileSidebar = ({
       setEditedName(profileData.name);
     }
   }, [profileData.name, isEditingName]);
+
+  // Debug: Log avatar changes
+  useEffect(() => {
+    console.log('ProfileSidebar - profileData.avatar changed:', profileData.avatar);
+  }, [profileData.avatar]);
 
   const handleShareProfile = () => {
     const profileUrl = `${window.location.origin}/profile/${profileData.userId}`;
