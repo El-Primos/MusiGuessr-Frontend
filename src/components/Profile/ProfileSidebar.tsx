@@ -20,9 +20,10 @@ interface ProfileSidebarProps {
   isOwnProfile: boolean;
   isAuthenticated: boolean;
   apiFetch?: (path: string, init?: RequestInit) => Promise<Response>;
-  isFriend?: boolean; // For other user's profile
+  friendshipStatus?: 'none' | 'pending' | 'friend'; // For other user's profile
   onAddFriend?: () => void;
   onRemoveFriend?: () => void;
+  onCancelRequest?: () => void;
   onProfileUpdate?: (updatedData: { name: string; avatar?: string }) => void;
 }
 
@@ -31,9 +32,10 @@ export const ProfileSidebar = ({
   isOwnProfile,
   isAuthenticated,
   apiFetch,
-  isFriend,
+  friendshipStatus = 'none',
   onAddFriend,
   onRemoveFriend,
+  onCancelRequest,
   onProfileUpdate,
 }: ProfileSidebarProps) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -238,12 +240,19 @@ export const ProfileSidebar = ({
                 >
                   Login to add friend
                 </Button>
-              ) : isFriend ? (
+              ) : friendshipStatus === 'friend' ? (
                 <Button
                   className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold"
                   onClick={onRemoveFriend}
                 >
                   Remove Friend
+                </Button>
+              ) : friendshipStatus === 'pending' ? (
+                <Button
+                  className="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold"
+                  onClick={onCancelRequest}
+                >
+                  Cancel Request
                 </Button>
               ) : (
                 <Button
