@@ -60,8 +60,13 @@ export default function TournamentsPage() {
 
   // Fetch tournaments and user registrations together
   useEffect(() => {
-    if (typeof window !== 'undefined' && token && userId) {
-      fetchAllData();
+    if (typeof window !== 'undefined') {
+      if (token && userId) {
+        fetchAllData();
+      } else {
+        // User is not authenticated, stop loading
+        setIsLoading(false);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, currentPage, token, userId]);
@@ -263,6 +268,49 @@ export default function TournamentsPage() {
 
   if (isLoading) {
     return <Loading fullScreen message="Loading tournaments..." />;
+  }
+
+  // Check if user is not authenticated
+  if (!token || !userId) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+        <Header
+          logoSrc="/logo.png"
+          exitVisible={true}
+          onExit={() => router.push('/')}
+          className="top-0 left-0"
+        />
+        <main className="max-w-7xl mx-auto px-4 py-8">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+            <div className="mb-8">
+              <svg
+                className="w-24 h-24 mx-auto text-slate-600 mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+              <h2 className="text-2xl font-bold text-white mb-2">Authentication Required</h2>
+              <p className="text-slate-400 mb-6">
+                You need to sign in or register to view and participate in tournaments
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/auth')}
+              className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg"
+            >
+              Sign In or Register
+            </button>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   if (!tournamentData) {
