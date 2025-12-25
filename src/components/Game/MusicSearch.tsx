@@ -29,7 +29,7 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
       setIsLoading(true);
       try {
         // Tüm müzikleri çekmek için size'ı yine de yüksek tutalım
-        const res = await apiFetch(`/api/musics?size=1000`);
+        const res = await apiFetch(`/api/musics?limit=1000`);
         const data = await res.json();
         
         // --- KRİTİK DÜZELTME BAŞLANGICI ---

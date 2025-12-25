@@ -87,6 +87,8 @@ export default function TournamentsPage() {
         const userResponse = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
         if (userResponse.ok) {
           const userData = await userResponse.json();
+          console.log('User tournament history data:', userData);
+          
           userRegisteredIds = new Set<number>(userData.map((t: { tournamentId: number }) => t.tournamentId));
           setRegisteredTournamentIds(userRegisteredIds);
           console.log('Loaded registered tournament IDs:', Array.from(userRegisteredIds));
@@ -94,18 +96,36 @@ export default function TournamentsPage() {
           // Calculate stats from user tournament history
           calculatedStats.tournamentsPlayed = userData.length;
           
-          // Calculate tournaments won, best rank, and total points
-          userData.forEach((tournament: { rank: number; score: number }) => {
-            if (tournament.rank === 1) {
-              calculatedStats.tournamentsWon++;
+          // Calculate total points and fetch rank data
+          for (const tournament of userData) {
+            console.log('Processing tournament:', tournament);
+            if (tournament.userScore) {
+              calculatedStats.totalPoints += tournament.userScore;
             }
-            if (tournament.rank && (calculatedStats.bestRank === 0 || tournament.rank < calculatedStats.bestRank)) {
-              calculatedStats.bestRank = tournament.rank;
+            
+            // Fetch leaderboard to get user's rank for this tournament
+            try {
+              const leaderboardRes = await apiFetch(`/api/tournaments/${tournament.tournamentId}/leaderboard`);
+              if (leaderboardRes.ok) {
+                const leaderboard = await leaderboardRes.json();
+                const userEntry = leaderboard.find((entry: { userId: number }) => entry.userId === userId);
+                if (userEntry) {
+                  // Check if user won this tournament
+                  if (userEntry.rank === 1) {
+                    calculatedStats.tournamentsWon++;
+                  }
+                  // Update best rank
+                  if (calculatedStats.bestRank === 0 || userEntry.rank < calculatedStats.bestRank) {
+                    calculatedStats.bestRank = userEntry.rank;
+                  }
+                }
+              }
+            } catch (err) {
+              console.warn('Could not fetch leaderboard for tournament', tournament.tournamentId);
             }
-            if (tournament.score) {
-              calculatedStats.totalPoints += tournament.score;
-            }
-          });
+          }
+          
+          console.log('Calculated stats:', calculatedStats);
         } else {
           console.warn('Could not fetch user tournaments (status:', userResponse.status, '). Registration status will be updated after joining.');
           // Continue anyway - registration status will be determined by join attempts

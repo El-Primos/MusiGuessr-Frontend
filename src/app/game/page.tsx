@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CircularCountdown } from "@/components/Game/CircularCountdown";
 import { Header } from "@/components/Header";
 import { MusicPlayer } from "@/components/Game/MusicPlayer";
@@ -12,6 +12,9 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function Game() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const playlistId = searchParams?.get('playlist');
+  const tournamentId = searchParams?.get('tournament');
   const { apiFetch } = useApi(API_BASE);
 
   // API State
@@ -39,14 +42,19 @@ export default function Game() {
     try {
       // 1. Create Game
       // Body kısmını tamamen boş bırakıyoruz (Swagger'daki gibi)
+      // Ama eğer playlistId varsa onu da gönderiyoruz
+      const createBody = playlistId ? JSON.stringify({ playlistId: parseInt(playlistId) }) : "";
+      
       const createRes = await apiFetch("/api/games", {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",
           "Accept": "application/json" 
         },
-        body: "", // {} yerine boş string gönderiyoruz
+        body: createBody,
       });
+      
+      console.log('Creating game with playlist:', playlistId, 'tournament:', tournamentId);
 
       if (!createRes.ok) {
         const errorText = await createRes.text();
@@ -79,7 +87,7 @@ export default function Game() {
     } finally {
       setLoading(false);
     }
-  }, [apiFetch]);
+  }, [apiFetch, playlistId, tournamentId]);
 
   /**
    * 2. Tahmin Gönder (Guess)
@@ -162,7 +170,7 @@ export default function Game() {
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
-        onExit={() => router.push("/")}
+        onExit={() => router.push(tournamentId ? `/tournaments/${tournamentId}` : "/")}
       />
 
       <main className="pt-8 pb-1 px-4 max-w-5xl mx-auto flex flex-col items-center">
@@ -207,7 +215,7 @@ export default function Game() {
       {gameOver && (
         <ResultModal
           score={totalScore}
-          onContinue={() => router.push("/")}
+          onContinue={() => router.push(tournamentId ? `/tournaments/${tournamentId}` : "/")}
         />
       )}
     </div>

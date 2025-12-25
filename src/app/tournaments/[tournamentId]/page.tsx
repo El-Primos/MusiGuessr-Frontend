@@ -94,11 +94,15 @@ export default function TournamentDetailsPage() {
       
       if (leaderboardResponse.ok) {
         const leaderboardData: TournamentLeaderboardEntryDTO[] = await leaderboardResponse.json();
+        console.log('Leaderboard data from API:', leaderboardData);
         leaderboard = leaderboardData.map(entry => ({
           rank: entry.rank,
           playerName: entry.username,
           score: entry.score,
         }));
+        console.log('Transformed leaderboard:', leaderboard);
+      } else {
+        console.warn('Failed to fetch leaderboard, status:', leaderboardResponse.status);
       }
 
       console.log('DEBUG: Starting registration check. userId:', userId, 'tournamentId:', tournamentId);
@@ -421,7 +425,7 @@ export default function TournamentDetailsPage() {
                               {entry.playerName}
                             </div>
                             <div className="text-xs text-slate-400">
-                              {entry.score.toLocaleString()} pts
+                              {entry.score ? entry.score.toLocaleString() : '0'} pts
                             </div>
                           </div>
                         </div>
