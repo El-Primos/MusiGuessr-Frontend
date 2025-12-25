@@ -469,16 +469,16 @@ export default function TournamentManage({
   }, [apiFetch, detail?.id, ep, fetchTournaments]);
 
   return (
-    <div className="w-full max-w-6xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-slate-900">
+    <div className="w-full max-w-6xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm text-slate-900 dark:text-white">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Tournament Management</h2>
-          <p className="mt-1 text-sm text-slate-500">View all tournaments and update selected tournament.</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">View all tournaments and update selected tournament.</p>
         </div>
         <button
           type="button"
           onClick={fetchTournaments}
-          className="h-10 rounded-xl border border-slate-200 px-4 text-sm hover:bg-slate-50"
+          className="h-10 rounded-xl border border-slate-200 dark:border-slate-600 px-4 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
           Reload
         </button>
@@ -486,10 +486,10 @@ export default function TournamentManage({
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* LEFT: list */}
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-600 p-4">
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm font-semibold">All tournaments</div>
-            <div className="text-xs text-slate-500">{filtered.length} total</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400">{filtered.length} total</div>
           </div>
 
           <div className="mt-3 flex gap-2">
@@ -500,7 +500,7 @@ export default function TournamentManage({
                 setPage(1);
               }}
               placeholder="Search (id, name, status, creator)..."
-              className="h-10 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
             />
             <select
               value={pageSize}
@@ -508,7 +508,7 @@ export default function TournamentManage({
                 setPageSize(Number(e.target.value));
                 setPage(1);
               }}
-              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none"
+              className="h-10 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm outline-none text-slate-900 dark:text-white"
             >
               {[5, 8, 12, 20].map((n) => (
                 <option key={n} value={n}>
@@ -519,13 +519,13 @@ export default function TournamentManage({
           </div>
 
           {listErr && (
-            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="mt-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
               {listErr}
             </div>
           )}
 
           {listLoading ? (
-            <div className="mt-3 text-sm text-slate-600">Loading tournaments...</div>
+            <div className="mt-3 text-sm text-slate-600 dark:text-slate-400">Loading tournaments...</div>
           ) : (
             <div className="mt-3 space-y-2">
               {pageItems.map((t) => {
@@ -537,17 +537,17 @@ export default function TournamentManage({
                     onClick={() => setSelectedId(t.id)}
                     className={[
                       "w-full rounded-2xl border p-3 text-left transition-colors",
-                      active ? "border-slate-900 bg-slate-900 text-white" : "border-slate-200 hover:bg-slate-50",
+                      active ? "border-slate-900 dark:border-slate-600 bg-slate-900 dark:bg-slate-700 text-white" : "border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700",
                     ].join(" ")}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="text-sm font-semibold truncate">{t.name}</div>
-                        <div className={active ? "text-xs text-white/70" : "text-xs text-slate-500"}>
+                        <div className={active ? "text-xs text-white/70" : "text-xs text-slate-500 dark:text-slate-400"}>
                           #{t.id} • {t.status ?? "-"} • playlist #{t.playlistId}
                         </div>
                         {(t.startDate || t.endDate) && (
-                          <div className={active ? "mt-1 text-xs text-white/70" : "mt-1 text-xs text-slate-500"}>
+                          <div className={active ? "mt-1 text-xs text-white/70" : "mt-1 text-xs text-slate-500 dark:text-slate-400"}>
                             {t.startDate ? `Start: ${t.startDate}` : ""}{" "}
                             {t.endDate ? `• End: ${t.endDate}` : ""}
                           </div>
@@ -560,7 +560,7 @@ export default function TournamentManage({
                 );
               })}
 
-              {pageItems.length === 0 && <div className="text-sm text-slate-600">No tournaments found.</div>}
+              {pageItems.length === 0 && <div className="text-sm text-slate-600 dark:text-slate-400">No tournaments found.</div>}
             </div>
           )}
 
@@ -569,18 +569,18 @@ export default function TournamentManage({
               type="button"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+              className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
             >
               Prev
             </button>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-slate-600 dark:text-slate-400">
               {page} / {totalPages}
             </div>
             <button
               type="button"
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+              className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
             >
               Next
             </button>
@@ -588,34 +588,34 @@ export default function TournamentManage({
         </div>
 
         {/* RIGHT: detail */}
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-600 p-4">
           <div className="text-sm font-semibold">Selected tournament</div>
 
           {detailLoading ? (
-            <div className="mt-3 text-sm text-slate-600">Loading details...</div>
+            <div className="mt-3 text-sm text-slate-600 dark:text-slate-400">Loading details...</div>
           ) : detailErr ? (
-            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="mt-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
               {detailErr}
             </div>
           ) : !detail ? (
-            <div className="mt-3 rounded-xl border border-dashed border-slate-200 p-6 text-sm text-slate-500">
+            <div className="mt-3 rounded-xl border border-dashed border-slate-200 dark:border-slate-600 p-6 text-sm text-slate-500 dark:text-slate-400">
               Select a tournament from the list.
             </div>
           ) : (
             <>
               {/* header */}
-              <div className="mt-3 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+              <div className="mt-3 rounded-2xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="text-sm font-semibold truncate">{detail.name}</div>
-                    <div className="mt-0.5 text-xs text-slate-600">
+                    <div className="mt-0.5 text-xs text-slate-600 dark:text-slate-400">
                       #{detail.id} • {detail.status ?? "-"} • playlist #{detail.playlistId}
                     </div>
-                    {detail.description && <div className="mt-1 text-xs text-slate-600">{detail.description}</div>}
+                    {detail.description && <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">{detail.description}</div>}
                   </div>
 
                   {detail.coverUrl && (
-                    <div className="h-14 w-24 overflow-hidden rounded-xl border border-slate-200 bg-white">
+                    <div className="h-14 w-24 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={detail.coverUrl} alt="cover" className="h-full w-full object-cover" />
                     </div>
@@ -624,37 +624,37 @@ export default function TournamentManage({
               </div>
 
               {/* time update */}
-              <div className="mt-4 rounded-2xl border border-slate-200 p-3">
+              <div className="mt-4 rounded-2xl border border-slate-200 dark:border-slate-600 p-3">
                 <div className="text-sm font-semibold">Update time</div>
                 <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">Start</label>
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">Start</label>
                     <input
                       type="datetime-local"
                       value={startLocal}
                       onChange={(e) => setStartLocal(e.target.value)}
-                      className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-slate-400"
+                      className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-slate-600">End</label>
+                    <label className="mb-1 block text-xs font-medium text-slate-600 dark:text-slate-400">End</label>
                     <input
                       type="datetime-local"
                       value={endLocal}
                       onChange={(e) => setEndLocal(e.target.value)}
-                      className="h-10 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-slate-400"
+                      className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                     />
                   </div>
                 </div>
 
-                {timeError && <div className="mt-2 text-xs font-medium text-red-600">{timeError}</div>}
+                {timeError && <div className="mt-2 text-xs font-medium text-red-600 dark:text-red-400">{timeError}</div>}
                 {saveErr && (
-                  <div className="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <div className="mt-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
                     {saveErr}
                   </div>
                 )}
                 {saveOk && (
-                  <div className="mt-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                  <div className="mt-2 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-3 py-2 text-sm text-emerald-800 dark:text-emerald-400">
                     {saveOk}
                   </div>
                 )}
@@ -664,112 +664,112 @@ export default function TournamentManage({
                     type="button"
                     onClick={saveTimes}
                     disabled={!canSaveTimes}
-                    className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+                    className="h-10 rounded-xl bg-slate-900 dark:bg-slate-700 px-4 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-60"
                   >
                     {saving ? "Saving..." : "Save times"}
                   </button>
                 </div>
 
-                <div className="mt-2 text-xs text-slate-500">
+                <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   Not: Eğer backend PATCH desteklemiyorsa, `endpoints.update` ile doğru endpoint ver.
                 </div>
               </div>
 
               {/* participants */}
-              <div className="mt-4 rounded-2xl border border-slate-200 p-3">
+              <div className="mt-4 rounded-2xl border border-slate-200 dark:border-slate-600 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold">Participants</div>
                   <button
                     type="button"
                     onClick={() => fetchParticipants(detail.id)}
-                    className="h-9 rounded-xl border border-slate-200 px-3 text-sm hover:bg-slate-50"
+                    className="h-9 rounded-xl border border-slate-200 dark:border-slate-600 px-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                   >
                     Reload
                   </button>
                 </div>
 
                 {partErr && (
-                  <div className="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <div className="mt-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
                     {partErr}
                   </div>
                 )}
 
                 {partLoading ? (
-                  <div className="mt-2 text-sm text-slate-600">Loading participants...</div>
+                  <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Loading participants...</div>
                 ) : (
-                  <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-slate-200">
-                    <ul className="divide-y divide-slate-100">
+                  <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-slate-200 dark:border-slate-600">
+                    <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                       {participants.map((p) => (
                         <li key={p.userId} className="flex items-center justify-between gap-3 px-3 py-2">
                           <div className="min-w-0">
                             <div className="text-sm font-medium truncate">{p.username}</div>
-                            <div className="text-xs text-slate-500">userId: {p.userId}</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">userId: {p.userId}</div>
                           </div>
 
                           <button
                             type="button"
                             onClick={() => removeParticipant(detail.id, p.userId)}
-                            className="h-9 rounded-xl border border-red-200 px-3 text-sm text-red-700 hover:bg-red-50"
+                            className="h-9 rounded-xl border border-red-200 dark:border-red-700 px-3 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
                           >
                             Remove
                           </button>
                         </li>
                       ))}
                       {participants.length === 0 && (
-                        <li className="px-3 py-3 text-sm text-slate-600">No participants.</li>
+                        <li className="px-3 py-3 text-sm text-slate-600 dark:text-slate-400">No participants.</li>
                       )}
                     </ul>
                   </div>
                 )}
 
-                <div className="mt-2 text-xs text-slate-500">
+                <div className="mt-2 text-xs text-slate-500 dark:text-slate-400">
                   Not: Participant remove endpoint farklıysa `endpoints.participantRemove` override et.
                 </div>
               </div>
 
               {/* playlist read-only */}
-              <div className="mt-4 rounded-2xl border border-slate-200 p-3">
+              <div className="mt-4 rounded-2xl border border-slate-200 dark:border-slate-600 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold">Playlist (read-only)</div>
                   <button
                     type="button"
                     onClick={() => router.push(`${playlistEditPath}?id=${detail.playlistId}`)}
-                    className="h-9 rounded-xl bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800"
+                    className="h-9 rounded-xl bg-slate-900 dark:bg-slate-700 px-3 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600"
                   >
                     Open playlist editor
                   </button>
                 </div>
 
                 {plistErr && (
-                  <div className="mt-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                  <div className="mt-2 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
                     {plistErr}
                   </div>
                 )}
 
                 {plistLoading ? (
-                  <div className="mt-2 text-sm text-slate-600">Loading playlist...</div>
+                  <div className="mt-2 text-sm text-slate-600 dark:text-slate-400">Loading playlist...</div>
                 ) : (
                   <>
-                    <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+                    <div className="mt-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-3 py-2 text-sm">
                       <div className="font-medium">{playlist?.name ?? "-"}</div>
-                      <div className="mt-1 text-xs text-slate-600">
+                      <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                         Playlist #{detail.playlistId} • ownerId: {playlist?.ownerId ?? "-"} • songs:{" "}
                         {playlistSongs.length}
                       </div>
                     </div>
 
-                    <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-slate-200">
-                      <ul className="divide-y divide-slate-100">
+                    <div className="mt-2 max-h-64 overflow-auto rounded-xl border border-slate-200 dark:border-slate-600">
+                      <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                         {playlistSongs.map((m) => (
                           <li key={m.id} className="px-3 py-2">
                             <div className="text-sm font-medium truncate">{m.name}</div>
-                            <div className="text-xs text-slate-500 truncate">
+                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                               #{m.id} • {m.artist?.name ?? "-"} • {m.genre?.name ?? "-"}
                             </div>
                           </li>
                         ))}
                         {playlistSongs.length === 0 && (
-                          <li className="px-3 py-3 text-sm text-slate-600">Playlist has no songs.</li>
+                          <li className="px-3 py-3 text-sm text-slate-600 dark:text-slate-400">Playlist has no songs.</li>
                         )}
                       </ul>
                     </div>
@@ -778,14 +778,14 @@ export default function TournamentManage({
               </div>
 
               {/* delete tournament */}
-              <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-3">
-                <div className="text-sm font-semibold text-red-800">Danger zone</div>
-                <div className="mt-1 text-xs text-red-700">
+              <div className="mt-4 rounded-2xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 p-3">
+                <div className="text-sm font-semibold text-red-800 dark:text-red-400">Danger zone</div>
+                <div className="mt-1 text-xs text-red-700 dark:text-red-400">
                   This will permanently delete the tournament (backend must support it).
                 </div>
 
                 {deleteErr && (
-                  <div className="mt-2 rounded-xl border border-red-200 bg-white px-3 py-2 text-sm text-red-700">
+                  <div className="mt-2 rounded-xl border border-red-200 dark:border-red-700 bg-white dark:bg-slate-900 px-3 py-2 text-sm text-red-700 dark:text-red-400">
                     {deleteErr}
                   </div>
                 )}
@@ -804,7 +804,7 @@ export default function TournamentManage({
                   </button>
                 </div>
 
-                <div className="mt-2 text-xs text-red-700/80">
+                <div className="mt-2 text-xs text-red-700/80 dark:text-red-400/80">
                   Not: Tournament delete endpoint farklıysa `endpoints.del` override et.
                 </div>
               </div>

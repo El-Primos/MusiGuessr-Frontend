@@ -13,14 +13,14 @@ export default function MusicUploadPage() {
   return (
     <div className="p-8">
       {/* Tabs */}
-      <div className="mb-6 border-b border-slate-700">
+      <div className="mb-6 border-b border-slate-200 dark:border-slate-700">
         <div className="flex gap-4">
           <button
             onClick={() => setActiveTab('add')}
             className={`px-4 py-2 font-semibold transition-colors ${
               activeTab === 'add'
-                ? 'border-b-2 border-blue-500 text-blue-400'
-                : 'text-slate-400 hover:text-white'
+                ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Add Music
@@ -29,8 +29,8 @@ export default function MusicUploadPage() {
             onClick={() => setActiveTab('update')}
             className={`px-4 py-2 font-semibold transition-colors ${
               activeTab === 'update'
-                ? 'border-b-2 border-blue-500 text-blue-400'
-                : 'text-slate-400 hover:text-white'
+                ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Update Music

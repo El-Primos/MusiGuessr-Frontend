@@ -89,7 +89,7 @@ export default function LeaderboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
@@ -144,7 +144,7 @@ export default function LeaderboardPage() {
       />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-4">Leaderboard</h1>
+        <h1 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Leaderboard</h1>
         
         {/* Tab buttons */}
         <LeaderboardTabs
@@ -154,7 +154,7 @@ export default function LeaderboardPage() {
 
         {/* Error message */}
         {error && (
-          <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          <div className="mb-4 rounded-xl border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-4 py-3 text-sm text-red-700 dark:text-red-100">
             {error}
           </div>
         )}
@@ -162,8 +162,8 @@ export default function LeaderboardPage() {
         {/* Loading state */}
         {loading ? (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
-            <p className="text-slate-400 text-sm">Loading leaderboard...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">Loading leaderboard...</p>
           </div>
         ) : (
           /* Leaderboard Table */

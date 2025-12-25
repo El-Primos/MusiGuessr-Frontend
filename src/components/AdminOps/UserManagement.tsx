@@ -117,47 +117,47 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
       </div>
 
       {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg">
+        <div className="bg-red-500/10 border border-red-500 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg">
           {error}
         </div>
       )}
 
-      <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+      <div className="bg-white/50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
         <input 
           type="text" 
           placeholder="Search users..." 
-          className="bg-slate-900 border border-slate-600 p-2 rounded-lg w-full outline-none focus:border-blue-500 transition-colors"
+          className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 p-2 rounded-lg w-full outline-none focus:border-blue-500 transition-colors text-slate-900 dark:text-white"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="bg-slate-800/50 border border-slate-700 rounded-xl overflow-hidden shadow-2xl">
+      <div className="bg-white/50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden shadow-lg dark:shadow-2xl">
         {!loading && sortedUsers.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-slate-900/50 border-b border-slate-700">
+              <thead className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-700 transition-colors"
+                    className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                     onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                   >
                     ID {sortOrder === 'asc' ? '🔼' : '🔽'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Username</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Score</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">Username</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">Role</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">Score</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-700">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                 {sortedUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-slate-700/30 transition-colors">
-                    <td className="px-6 py-4 text-sm text-slate-300">{user.id}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-white">{user.name}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{user.username}</td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{user.email}</td>
+                  <tr key={user.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{user.id}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-slate-900 dark:text-white">{user.name}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{user.username}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{user.email}</td>
                     <td className="px-6 py-4 text-sm">
                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                          user.role === 'ADMIN' ? 'bg-purple-500/20 text-purple-400' : 
@@ -167,7 +167,7 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
                         {user.role}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-300">{user.totalScore}</td>
+                    <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">{user.totalScore}</td>
                     <td className="px-6 py-4 text-sm">
                       {/* Kendini, sistem kullanıcısını ve ADMIN'leri değiştiremezsin */}
                       {user.id !== 0 && user.id !== myId && user.role !== "ADMIN" && (
@@ -189,7 +189,7 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
             </table>
           </div>
         )}
-        {loading && <div className="p-20 text-center text-slate-400">Loading users...</div>}
+        {loading && <div className="p-20 text-center text-slate-500 dark:text-slate-400">Loading users...</div>}
       </div>
     </div>
   );

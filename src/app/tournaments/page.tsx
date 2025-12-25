@@ -267,7 +267,7 @@ export default function TournamentsPage() {
 
   if (!tournamentData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -275,14 +275,14 @@ export default function TournamentsPage() {
           className="top-0 left-0"
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-400">No tournament data available</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">No tournament data available</div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white animate-in fade-in duration-300">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white animate-in fade-in duration-300">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
@@ -293,8 +293,8 @@ export default function TournamentsPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2">Tournaments</h1>
-          <p className="text-slate-400">Join tournaments and compete for prizes!</p>
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">Tournaments</h1>
+          <p className="text-slate-600 dark:text-slate-400">Join tournaments and compete for prizes!</p>
         </div>
 
         {/* Tournament Statistics - Compact at top */}
@@ -319,17 +319,17 @@ export default function TournamentsPage() {
             <button
               onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
               disabled={currentPage === 0}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors"
             >
               Previous
             </button>
-            <span className="text-slate-300">
+            <span className="text-slate-600 dark:text-slate-300">
               Page {currentPage + 1} of {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={currentPage === totalPages - 1}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:text-gray-500 dark:disabled:text-gray-400 disabled:cursor-not-allowed hover:bg-purple-700 transition-colors"
             >
               Next
             </button>

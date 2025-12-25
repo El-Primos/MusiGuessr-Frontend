@@ -12,14 +12,14 @@ export default function TournamentPage() {
   return (
     <div className="p-8">
       {/* Tabs */}
-      <div className="mb-6 border-b border-slate-700">
+      <div className="mb-6 border-b border-slate-200 dark:border-slate-700">
         <div className="flex gap-4">
           <button
             onClick={() => setActiveTab('manage')}
             className={`px-4 py-2 font-semibold transition-colors ${
               activeTab === 'manage'
-                ? 'border-b-2 border-blue-500 text-blue-400'
-                : 'text-slate-400 hover:text-white'
+                ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Manage Tournaments
@@ -28,8 +28,8 @@ export default function TournamentPage() {
             onClick={() => setActiveTab('create')}
             className={`px-4 py-2 font-semibold transition-colors ${
               activeTab === 'create'
-                ? 'border-b-2 border-blue-500 text-blue-400'
-                : 'text-slate-400 hover:text-white'
+                ? 'border-b-2 border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             Create Tournament

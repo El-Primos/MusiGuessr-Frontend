@@ -66,7 +66,7 @@ export const CircularCountdown = ({
         >
           {/* Background circle */}
           <circle
-            stroke="#eee"
+            className="stroke-slate-200 dark:stroke-slate-700"
             fill="transparent"
             strokeWidth={strokeWidth}
             r={normalizedRadius}
@@ -92,10 +92,10 @@ export const CircularCountdown = ({
         </svg>
 
         <div className="absolute text-center">
-          <div className="text-2xl font-semibold">
+          <div className="text-2xl font-semibold text-slate-900 dark:text-white">
             {remaining > 0 ? remaining : 0}
           </div>
-          <div className="text-xs opacity-70">saniye</div>
+          <div className="text-xs opacity-70 text-slate-600 dark:text-slate-400">saniye</div>
         </div>
       </div>
     </div>

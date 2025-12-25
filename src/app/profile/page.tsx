@@ -108,7 +108,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -116,7 +116,7 @@ export default function ProfilePage() {
           className="top-0 left-0"
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-400">Loading...</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">Loading...</div>
         </main>
       </div>
     );
@@ -124,7 +124,7 @@ export default function ProfilePage() {
 
   if (error && !profileData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -133,10 +133,10 @@ export default function ProfilePage() {
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
-            <div className="text-red-400 mb-4">{error}</div>
+            <div className="text-red-600 dark:text-red-400 mb-4">{error}</div>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               Retry
             </button>
@@ -148,7 +148,7 @@ export default function ProfilePage() {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -156,14 +156,14 @@ export default function ProfilePage() {
           className="top-0 left-0"
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-400">Profile not found</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">Profile not found</div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}

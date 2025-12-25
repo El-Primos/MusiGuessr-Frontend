@@ -14,7 +14,7 @@ export const LeaderboardTabs = ({ activeTab, onTabChange }: LeaderboardTabsProps
           px-6 py-2 rounded-lg font-semibold transition-colors
           ${activeTab === 'global'
             ? 'bg-blue-600 hover:bg-blue-700 text-white'
-            : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-blue-900/40'
+            : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-blue-900/40'
           }
         `}
       >
@@ -26,7 +26,7 @@ export const LeaderboardTabs = ({ activeTab, onTabChange }: LeaderboardTabsProps
           px-6 py-2 rounded-lg font-semibold transition-colors
           ${activeTab === 'friends'
             ? 'bg-blue-600 hover:bg-blue-700 text-white'
-            : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-blue-900/40'
+            : 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-blue-900/40'
           }
         `}
       >

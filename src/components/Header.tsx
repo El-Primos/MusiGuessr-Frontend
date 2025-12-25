@@ -19,7 +19,8 @@ export const Header = ({ logoSrc, exitVisible = false, onExit, className = "", e
       className={`
         w-full h-20 md:h-32 
         flex items-center justify-between
-        bg-slate-950/80 border-b border-blue-900/40
+        bg-blue-200 dark:bg-slate-950/80 
+        border-b border-gray-300 dark:border-blue-900/40
         ${className}
       `}
     >
@@ -31,7 +32,7 @@ export const Header = ({ logoSrc, exitVisible = false, onExit, className = "", e
           ) : (
             <button
               onClick={onExit}
-              className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
+              className="px-2 md:px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
               title="Go Home"
             >
               <svg
@@ -55,7 +56,7 @@ export const Header = ({ logoSrc, exitVisible = false, onExit, className = "", e
 
       {/* Logo - Centered */}
       <div className="flex-1 flex justify-center pointer-events-none">
-        <div className="relative w-32 md:w-48 h-16 md:h-20 p-2 md:p-4 bg-green-300 rounded-lg">
+        <div className="relative w-32 md:w-48 h-16 md:h-20 p-2 md:p-4 bg-green-400 dark:bg-green-300 rounded-lg">
           <Image 
             src={logoSrc}
             className="p-1" 
@@ -73,3 +74,4 @@ export const Header = ({ logoSrc, exitVisible = false, onExit, className = "", e
     </header>
   );
 };
+

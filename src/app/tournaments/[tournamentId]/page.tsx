@@ -233,7 +233,7 @@ export default function TournamentDetailsPage() {
 
   if (!tournament) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -242,8 +242,8 @@ export default function TournamentDetailsPage() {
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-white mb-4">Tournament Not Found</h2>
-            <p className="text-slate-400 mb-6">The tournament you are looking for does not exist.</p>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Tournament Not Found</h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">The tournament you are looking for does not exist.</p>
             <Button
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
               onClick={() => router.push('/tournaments')}
@@ -276,7 +276,7 @@ export default function TournamentDetailsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white animate-in fade-in duration-300">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white animate-in fade-in duration-300">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
@@ -287,7 +287,7 @@ export default function TournamentDetailsPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         <button
           onClick={() => router.push('/tournaments')}
-          className="mb-6 text-blue-400 hover:text-blue-300 flex items-center gap-2 transition-colors"
+          className="mb-6 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-2 transition-colors"
         >
           <span>←</span>
           <span>Back to Tournaments</span>
@@ -295,9 +295,9 @@ export default function TournamentDetailsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900">
-              <div className="relative h-64 bg-gradient-to-br from-blue-900/40 to-purple-900/40 flex items-center justify-center">
-                <div className="text-8xl text-white/20">🏆</div>
+            <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-white dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+              <div className="relative h-64 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/40 dark:to-purple-900/40 flex items-center justify-center">
+                <div className="text-8xl text-slate-300 dark:text-white/20">🏆</div>
                 <span className={`absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-semibold border ${getStatusColor(actualStatus)}`}>
                   {actualStatus}
                 </span>
@@ -305,30 +305,30 @@ export default function TournamentDetailsPage() {
 
               <div className="p-6 space-y-4">
                 <div>
-                  <h1 className="text-3xl font-bold text-white mb-2">{tournament.name}</h1>
-                  <p className="text-slate-400">{tournament.description}</p>
+                  <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">{tournament.name}</h1>
+                  <p className="text-slate-600 dark:text-slate-400">{tournament.description}</p>
                 </div>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <span className="text-blue-200 block">Start Date</span>
-                    <span className="text-white font-semibold">{tournament.startDate}</span>
+                    <span className="text-blue-700 dark:text-blue-200 block">Start Date</span>
+                    <span className="text-slate-900 dark:text-white font-semibold">{tournament.startDate}</span>
                   </div>
                   <div>
-                    <span className="text-blue-200 block">End Date</span>
-                    <span className="text-white font-semibold">{tournament.endDate}</span>
+                    <span className="text-blue-700 dark:text-blue-200 block">End Date</span>
+                    <span className="text-slate-900 dark:text-white font-semibold">{tournament.endDate}</span>
                   </div>
                   <div>
-                    <span className="text-blue-200 block">Participants</span>
-                    <span className="text-white font-semibold">
+                    <span className="text-blue-700 dark:text-blue-200 block">Participants</span>
+                    <span className="text-slate-900 dark:text-white font-semibold">
                       {tournament.participants}
                       {tournament.maxParticipants && ` / ${tournament.maxParticipants}`}
                     </span>
                   </div>
                   {tournament.prize && (
                     <div>
-                      <span className="text-blue-200 block">Prize</span>
-                      <span className="text-yellow-400 font-semibold">{tournament.prize}</span>
+                      <span className="text-blue-700 dark:text-blue-200 block">Prize</span>
+                      <span className="text-yellow-600 dark:text-yellow-400 font-semibold">{tournament.prize}</span>
                     </div>
                   )}
                 </div>
@@ -370,14 +370,14 @@ export default function TournamentDetailsPage() {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 sticky top-4">
-              <div className="bg-slate-950 px-6 py-4 border-b border-blue-900/40">
-                <h2 className="text-xl font-bold text-white">Leaderboard</h2>
+            <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-white dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 sticky top-4">
+              <div className="bg-slate-50 dark:bg-slate-950 px-6 py-4 border-b border-slate-200 dark:border-blue-900/40">
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Leaderboard</h2>
               </div>
               <div className="p-4">
                 {tournament.leaderboard.length === 0 ? (
                   <div className="text-center py-8">
-                    <p className="text-slate-400 text-sm">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm">
                       {tournament.status === 'Upcoming'
                         ? 'Leaderboard will be available when the tournament starts.'
                         : 'No scores yet. Be the first to play!'}
@@ -402,25 +402,25 @@ export default function TournamentDetailsPage() {
                           key={entry.rank}
                           className={`flex items-center gap-3 p-3 rounded-lg transition-colors ${
                             isCurrentUser
-                              ? 'bg-blue-900/30 border border-blue-600/40' 
-                              : 'bg-slate-900/50 hover:bg-slate-800/50'
+                              ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-600/40' 
+                              : 'bg-slate-50 dark:bg-slate-900/50 hover:bg-slate-100 dark:hover:bg-slate-800/50'
                           }`}
                         >
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${
-                            entry.rank === 1 ? 'bg-yellow-600/30 text-yellow-400' : ''
-                          } ${entry.rank === 2 ? 'bg-slate-500/30 text-slate-300' : ''} ${
-                            entry.rank === 3 ? 'bg-orange-600/30 text-orange-400' : ''
-                          } ${entry.rank > 3 ? 'bg-slate-700/30 text-slate-400' : ''}`}>
+                            entry.rank === 1 ? 'bg-yellow-100 dark:bg-yellow-600/30 text-yellow-600 dark:text-yellow-400' : ''
+                          } ${entry.rank === 2 ? 'bg-slate-200 dark:bg-slate-500/30 text-slate-600 dark:text-slate-300' : ''} ${
+                            entry.rank === 3 ? 'bg-orange-100 dark:bg-orange-600/30 text-orange-600 dark:text-orange-400' : ''
+                          } ${entry.rank > 3 ? 'bg-slate-100 dark:bg-slate-700/30 text-slate-500 dark:text-slate-400' : ''}`}>
                             {entry.rank}
                           </div>
 
                           <div className="flex-1 min-w-0">
                             <div className={`text-sm font-semibold truncate ${
-                              isCurrentUser ? 'text-blue-300' : 'text-white'
+                              isCurrentUser ? 'text-blue-700 dark:text-blue-300' : 'text-slate-900 dark:text-white'
                             }`}>
                               {entry.playerName}
                             </div>
-                            <div className="text-xs text-slate-400">
+                            <div className="text-xs text-slate-500 dark:text-slate-400">
                               {entry.score.toLocaleString()} pts
                             </div>
                           </div>

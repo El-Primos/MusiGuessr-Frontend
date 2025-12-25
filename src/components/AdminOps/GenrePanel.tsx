@@ -228,7 +228,7 @@ export default function GenrePanel({ apiBase }: Props) {
   }
 
   return (
-    <div className="w-full max-w-4xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-slate-900">
+    <div className="w-full max-w-4xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm text-slate-900 dark:text-white">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center">
           <h2 className="text-xl font-semibold">Genres</h2>
@@ -242,7 +242,7 @@ export default function GenrePanel({ apiBase }: Props) {
               setPage(1);
             }}
             placeholder="Search by id / name..."
-            className="w-full sm:w-72 rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-slate-400"
+            className="w-full sm:w-72 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
           />
 
           <select
@@ -251,7 +251,7 @@ export default function GenrePanel({ apiBase }: Props) {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-slate-400"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
           >
             {[5, 10, 20, 50].map((n) => (
               <option key={n} value={n}>
@@ -263,7 +263,7 @@ export default function GenrePanel({ apiBase }: Props) {
           <button
             type="button"
             onClick={fetchGenres}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className="rounded-xl bg-slate-900 dark:bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600"
           >
             Refresh
           </button>
@@ -271,20 +271,20 @@ export default function GenrePanel({ apiBase }: Props) {
       </div>
 
       {/* Add new */}
-      <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <div className="text-sm font-semibold text-slate-800">Add new genre</div>
+      <div className="mt-5 rounded-2xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 p-4">
+        <div className="text-sm font-semibold text-slate-800 dark:text-slate-200">Add new genre</div>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="e.g. Rock"
-            className="h-10 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+            className="h-10 w-full min-w-0 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
           />
           <button
             type="button"
             onClick={addGenre}
             disabled={!canAdd}
-            className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+            className="h-10 rounded-xl bg-slate-900 dark:bg-slate-700 px-4 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-60"
           >
             {adding ? "Adding..." : "Add"}
           </button>
@@ -292,25 +292,25 @@ export default function GenrePanel({ apiBase }: Props) {
       </div>
 
       {err && (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="mt-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
           {err}
         </div>
       )}
 
       {/* List */}
-      <div className="mt-5 rounded-2xl border border-slate-200 overflow-hidden">
-        <div className="grid grid-cols-12 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-600">
+      <div className="mt-5 rounded-2xl border border-slate-200 dark:border-slate-600 overflow-hidden">
+        <div className="grid grid-cols-12 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">
           <div className="col-span-2 sm:col-span-1">ID</div>
           <div className="col-span-7 sm:col-span-8">Name</div>
           <div className="col-span-3 sm:col-span-3 text-right">Actions</div>
         </div>
 
         {loading ? (
-          <div className="px-4 py-6 text-sm text-slate-600">Loading...</div>
+          <div className="px-4 py-6 text-sm text-slate-600 dark:text-slate-400">Loading...</div>
         ) : pageItems.length === 0 ? (
-          <div className="px-4 py-6 text-sm text-slate-600">No genres.</div>
+          <div className="px-4 py-6 text-sm text-slate-600 dark:text-slate-400">No genres.</div>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
             {pageItems.map((g) => {
               const isEditing = editingId === g.id;
               const isDeleting = deletingId === g.id;
@@ -318,7 +318,7 @@ export default function GenrePanel({ apiBase }: Props) {
 
               return (
                 <li key={g.id} className="grid grid-cols-12 items-start px-4 py-3 gap-y-2 min-w-0">
-                  <div className="col-span-2 sm:col-span-1 font-mono text-sm text-slate-700 pt-2">
+                  <div className="col-span-2 sm:col-span-1 font-mono text-sm text-slate-700 dark:text-slate-300 pt-2">
                     {g.id}
                   </div>
 
@@ -327,11 +327,11 @@ export default function GenrePanel({ apiBase }: Props) {
                       <input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="h-10 w-full min-w-0 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                        className="h-10 w-full min-w-0 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                         placeholder="Genre name"
                       />
                     ) : (
-                      <div className="pt-2 text-sm font-medium text-slate-900">{g.name}</div>
+                      <div className="pt-2 text-sm font-medium text-slate-900 dark:text-white">{g.name}</div>
                     )}
                   </div>
 
@@ -342,7 +342,7 @@ export default function GenrePanel({ apiBase }: Props) {
                           type="button"
                           onClick={() => saveEdit(g.id)}
                           disabled={isSaving || isDeleting}
-                          className="h-10 rounded-xl bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+                          className="h-10 rounded-xl bg-slate-900 dark:bg-slate-700 px-3 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-60"
                         >
                           {isSaving ? "Saving..." : "Save"}
                         </button>
@@ -350,7 +350,7 @@ export default function GenrePanel({ apiBase }: Props) {
                           type="button"
                           onClick={cancelEdit}
                           disabled={isSaving || isDeleting}
-                          className="h-10 rounded-xl border border-slate-200 px-3 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                          className="h-10 rounded-xl border border-slate-200 dark:border-slate-600 px-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60"
                         >
                           Cancel
                         </button>
@@ -360,7 +360,7 @@ export default function GenrePanel({ apiBase }: Props) {
                         <button
                           type="button"
                           onClick={() => startEdit(g)}
-                          className="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200 px-3 text-slate-700 hover:bg-slate-50"
+                          className="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200 dark:border-slate-600 px-3 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                           title="Edit"
                         >
                           <PencilIcon className="h-4 w-4" />
@@ -370,7 +370,7 @@ export default function GenrePanel({ apiBase }: Props) {
                           type="button"
                           onClick={() => deleteGenre(g.id)}
                           disabled={isDeleting}
-                          className="h-10 rounded-xl border border-red-200 bg-red-50 px-3 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-60"
+                          className="h-10 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-60"
                         >
                           {isDeleting ? "Deleting..." : "Delete"}
                         </button>
@@ -386,16 +386,16 @@ export default function GenrePanel({ apiBase }: Props) {
 
       {/* Pagination */}
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-slate-600">
+        <div className="text-sm text-slate-600 dark:text-slate-400">
           Showing{" "}
-          <span className="font-medium text-slate-900">
+          <span className="font-medium text-slate-900 dark:text-white">
             {filtered.length === 0 ? 0 : (page - 1) * pageSize + 1}
           </span>{" "}
           -{" "}
-          <span className="font-medium text-slate-900">
+          <span className="font-medium text-slate-900 dark:text-white">
             {Math.min(page * pageSize, filtered.length)}
           </span>{" "}
-          of <span className="font-medium text-slate-900">{filtered.length}</span>
+          of <span className="font-medium text-slate-900 dark:text-white">{filtered.length}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -403,7 +403,7 @@ export default function GenrePanel({ apiBase }: Props) {
             type="button"
             onClick={() => setPage(1)}
             disabled={page === 1}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
           >
             First
           </button>
@@ -411,12 +411,12 @@ export default function GenrePanel({ apiBase }: Props) {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
           >
             Prev
           </button>
 
-          <div className="text-sm text-slate-700">
+          <div className="text-sm text-slate-700 dark:text-slate-300">
             Page <span className="font-medium">{page}</span> /{" "}
             <span className="font-medium">{totalPages}</span>
           </div>
@@ -425,7 +425,7 @@ export default function GenrePanel({ apiBase }: Props) {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
           >
             Next
           </button>
@@ -433,7 +433,7 @@ export default function GenrePanel({ apiBase }: Props) {
             type="button"
             onClick={() => setPage(totalPages)}
             disabled={page === totalPages}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
           >
             Last
           </button>

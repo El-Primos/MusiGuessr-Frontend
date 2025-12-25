@@ -228,14 +228,14 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
       : null;
 
   return (
-    <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="w-full max-w-2xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-slate-900">Add Music</h2>
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-white">Add Music</h2>
 
       </div>
 
       {listError && (
-        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="mb-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
           {listError}
         </div>
       )}
@@ -243,16 +243,16 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Song name */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
             Song Name
           </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={file ? file.name.replace(/\.[^/.]+$/, "") : "e.g. Gül Döktüm Yollarına"}
-            className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 outline-none focus:border-slate-400"
+            className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-white outline-none focus:border-slate-400 dark:focus:border-slate-500"
           />
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
             If empty, autofill from file name
           </p>
         </div>
@@ -261,7 +261,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {/* Artist */}
           <div className="relative">
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Artist
             </label>
 
@@ -274,20 +274,20 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
               }}
               onFocus={() => setArtistOpen(true)}
               placeholder={loadingLists ? "Loading..." : "Type artist name (e.g. Tarkan)"}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 outline-none focus:border-slate-400"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-white outline-none focus:border-slate-400 dark:focus:border-slate-500"
             />
 
             {selectedArtist && (
-              <div className="mt-1 text-xs text-slate-600">
+              <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                 Selected: <span className="font-medium">{selectedArtist.name}</span> (id:{" "}
                 {selectedArtist.id})
               </div>
             )}
 
             {artistOpen && !loadingLists && (
-              <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+              <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg">
                 {filteredArtists.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-slate-500">No match</div>
+                  <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No match</div>
                 ) : (
                   <ul className="max-h-56 overflow-auto">
                     {filteredArtists.map((a) => (
@@ -299,7 +299,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
                             setArtistQuery(a.name);
                             setArtistOpen(false);
                           }}
-                          className="w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50"
+                          className="w-full px-3 py-2 text-left text-sm text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
                         >
                           {a.name}
                         </button>
@@ -314,14 +314,14 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
               className="pointer-events-none absolute inset-0"
               onClick={() => {}}
             />
-            <div className="mt-1 text-xs text-slate-500">
+            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Select from list
             </div>
           </div>
 
           {/* Genre */}
           <div className="relative">
-            <label className="mb-1 block text-sm font-medium text-slate-700">
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
               Genre
             </label>
 
@@ -334,20 +334,20 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
               }}
               onFocus={() => setGenreOpen(true)}
               placeholder={loadingLists ? "Loading..." : "Type genre name (e.g. Pop)"}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 outline-none focus:border-slate-400"
+              className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-slate-900 dark:text-white outline-none focus:border-slate-400 dark:focus:border-slate-500"
             />
 
             {selectedGenre && (
-              <div className="mt-1 text-xs text-slate-600">
+              <div className="mt-1 text-xs text-slate-600 dark:text-slate-400">
                 Selected: <span className="font-medium">{selectedGenre.name}</span> (id:{" "}
                 {selectedGenre.id})
               </div>
             )}
 
             {genreOpen && !loadingLists && (
-              <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+              <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg">
                 {filteredGenres.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-slate-500">No match</div>
+                  <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No match</div>
                 ) : (
                   <ul className="max-h-56 overflow-auto">
                     {filteredGenres.map((g) => (
@@ -359,7 +359,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
                             setGenreQuery(g.name);
                             setGenreOpen(false);
                           }}
-                          className="w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50"
+                          className="w-full px-3 py-2 text-left text-sm text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
                         >
                           {g.name}
                         </button>
@@ -370,7 +370,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
               </div>
             )}
 
-            <div className="mt-1 text-xs text-slate-500">
+            <div className="mt-1 text-xs text-slate-500 dark:text-slate-400">
               Select from list
             </div>
           </div>
@@ -378,7 +378,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
 
         {/* File */}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
             File
           </label>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -386,11 +386,11 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
               type="file"
               accept="audio/*"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-              className="block w-full text-sm text-slate-700 file:mr-3 file:rounded-xl file:border-0 file:bg-slate-900 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-slate-800"
+              className="block w-full text-sm text-slate-700 dark:text-slate-300 file:mr-3 file:rounded-xl file:border-0 file:bg-slate-900 dark:file:bg-slate-700 file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-slate-800 dark:hover:file:bg-slate-600"
             />
             {file && (
-              <div className="text-xs text-slate-500 sm:text-right">
-                <div className="font-medium text-slate-700">{file.name}</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 sm:text-right">
+                <div className="font-medium text-slate-700 dark:text-slate-300">{file.name}</div>
                 <div>
                   {formatBytes(file.size)} • {file.type || "unknown"}
                 </div>
@@ -400,13 +400,13 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
         </div>
 
         {(uploadError || confirmError) && (
-          <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+          <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
             {uploadError || confirmError}
           </div>
         )}
 
         {statusText && !(uploadError || confirmError) && (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+          <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-300">
             {statusText}
           </div>
         )}
@@ -415,7 +415,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center rounded-xl bg-slate-900 dark:bg-slate-700 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60 hover:bg-slate-800 dark:hover:bg-slate-600"
           >
             {uploading || confirming ? "Uploading..." : "Add"}
           </button>
@@ -423,9 +423,9 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
       </form>
 
       {result && (
-        <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-          <div className="text-sm font-semibold text-emerald-900">Created ✅</div>
-          <div className="mt-2 text-sm text-emerald-900/90">
+        <div className="mt-6 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 p-4">
+          <div className="text-sm font-semibold text-emerald-900 dark:text-emerald-400">Created ✅</div>
+          <div className="mt-2 text-sm text-emerald-900/90 dark:text-emerald-300">
             <div>
               <span className="font-medium">ID:</span> {result.id}
             </div>

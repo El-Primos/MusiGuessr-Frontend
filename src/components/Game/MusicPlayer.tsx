@@ -146,12 +146,14 @@ export const MusicPlayer = ({
               bg-transparent
               [&::-webkit-slider-runnable-track]:h-1
               [&::-webkit-slider-runnable-track]:rounded-full
-              [&::-webkit-slider-runnable-track]:bg-slate-700
+              [&::-webkit-slider-runnable-track]:bg-slate-300
+              dark:[&::-webkit-slider-runnable-track]:bg-slate-700
               [&::-webkit-slider-thumb]:appearance-none
               [&::-webkit-slider-thumb]:w-3
               [&::-webkit-slider-thumb]:h-3
               [&::-webkit-slider-thumb]:rounded-full
-              [&::-webkit-slider-thumb]:bg-blue-400
+              [&::-webkit-slider-thumb]:bg-blue-600
+              dark:[&::-webkit-slider-thumb]:bg-blue-400
               [&::-webkit-slider-thumb]:mt-[-4px]
               cursor-pointer
             "
@@ -161,7 +163,7 @@ export const MusicPlayer = ({
         
 
 
-        <div className="flex justify-between text-[11px] text-slate-400">
+        <div className="flex justify-between text-[11px] text-slate-500 dark:text-slate-400">
           <span>{formatTime(currentTime)}</span>
           <span>{formatTime(duration)}</span>
         </div>

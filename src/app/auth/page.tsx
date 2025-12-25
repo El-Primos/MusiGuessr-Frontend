@@ -1,185 +1,152 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Button from "@/components/Button";
 import { Header } from "@/components/Header";
+import Button from "@/components/Button";
+import { useApi } from "@/lib/useApi";
 import { AuthRes } from "@/dto/common.dto";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
-type Mode = "login" | "signup";
-
-const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
-
-export default function Auth() {
+function AuthContent() {
   const router = useRouter();
-  const sp = useSearchParams();
+  const searchParams = useSearchParams();
+  const { apiFetch } = useApi(API_BASE);
 
-  const initialMode = (sp.get("mode") as Mode) || "login";
-  const [mode, setMode] = useState<Mode>(initialMode);
-
-  useEffect(() => {
-    const m = (sp.get("mode") as Mode) || "login";
-    if (m === "login" || m === "signup") setMode(m);
-  }, [sp]);
-
-  // LOGIN fields
+  const [mode, setMode] = useState<"login" | "signup">("login");
   const [loginUserName, setLoginUserName] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
-
-  // SIGNUP fields
   const [name, setName] = useState("");
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const title = useMemo(() => (mode === "login" ? "Welcome back" : "Create your account"), [mode]);
-  const subtitle = useMemo(
-    () => (mode === "login" ? "Login to continue" : "Sign up to start playing"),
-    [mode]
-  );
-
-  function switchMode(m: Mode) {
-    if (loading) return;
-    setError(null);
-    router.replace(`/auth?mode=${m}`);
-  }
-
-  /**
-   * Kullanıcıyı kaydetmeden önce BANNED olup olmadığını kontrol eder.
-   */
-  function storeUserAndGoHome(res: AuthRes) {
-    // KRİTİK KONTROL: Eğer kullanıcı BANNED rolündeyse giriş yapmasına izin verme
-    if (res.role === "BANNED") {
-      setError("Hesabınız banlanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.");
-      setLoading(false); // Loading state'i kapat ki buton tekrar aktif olsun
-      return;
+  useEffect(() => {
+    const modeParam = searchParams?.get("mode");
+    if (modeParam === "login" || modeParam === "signup") {
+      setMode(modeParam);
     }
+  }, [searchParams]);
 
-    localStorage.setItem(
-      "user",
-      JSON.stringify({ 
-        id: res.id, 
-        username: res.username, 
-        email: res.email, 
-        role: res.role, 
-        accessToken: res.accessToken, 
-        refreshToken: res.refreshToken, 
-        tokenType: res.tokenType 
-      })
-    );
-    router.push("/");
-  }
-
-  function login() {
-    if (loading) return;
+  const switchMode = (newMode: "login" | "signup") => {
+    setMode(newMode);
     setError(null);
+    router.replace(`/auth?mode=${newMode}`);
+  };
 
-    if (!loginUserName.trim() || !loginPassword) {
-      setError("Please fill in username and password.");
-      return;
-    }
-
-    setLoading(true);
-
-    fetch(`${API_BASE}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        username: loginUserName.trim(),
-        password: loginPassword,
-      }),
-    })
-      .then(async (r) => {
-        if (!r.ok) {
-          const txt = await r.text().catch(() => "");
-          // Backend'den gelen spesifik ban mesajlarını veya hata mesajlarını yakala
-          throw new Error(txt || `Login failed (HTTP ${r.status})`);
-        }
-        return (await r.json()) as AuthRes;
-      })
-      .then((data) => {
-        storeUserAndGoHome(data);
-      })
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : "Login failed.");
-      })
-      .finally(() => {
-        // Eğer banlandıysa storeUserAndGoHome zaten loading'i false yapacak, 
-        // ama diğer genel hatalar için burada da false yapıyoruz.
-        setLoading(false);
-      });
-  }
-
-  function signup() {
-    if (loading) return;
-    setError(null);
-
-    const n = name.trim();
-    const u = userName.trim();
-    const em = email.trim();
-
-    if (!n || !u || !em || !signupPassword) {
+  const login = async () => {
+    if (!loginUserName.trim() || !loginPassword.trim()) {
       setError("Please fill in all fields.");
       return;
     }
-    if (!isEmail(em)) {
-      setError("Please enter a valid email.");
-      return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await apiFetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: loginUserName.trim(),
+          password: loginPassword.trim(),
+        }),
+      });
+
+      const text = await res.text();
+      if (!res.ok) {
+        let msg = `Login failed (${res.status})`;
+        try {
+          const errJson = JSON.parse(text);
+          msg = errJson.message || msg;
+        } catch {}
+        setError(msg);
+        return;
+      }
+
+      const data: AuthRes = JSON.parse(text);
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          role: data.role,
+        })
+      );
+
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message || "An error occurred during login.");
+    } finally {
+      setLoading(false);
     }
-    if (signupPassword.length < 6) {
-      setError("Password must be at least 6 characters.");
+  };
+
+  const signup = async () => {
+    if (!name.trim() || !userName.trim() || !email.trim() || !signupPassword.trim()) {
+      setError("Please fill in all fields.");
       return;
     }
 
     setLoading(true);
+    setError(null);
 
-    fetch(`${API_BASE}/api/auth/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: n,
-        username: u,
-        email: em,
-        password: signupPassword,
-      }),
-    })
-    .then(async (r) => {
-      if (!r.ok) {
-        let msg = `Sign up failed (HTTP ${r.status})`;
+    try {
+      const res = await apiFetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          username: userName.trim(),
+          email: email.trim(),
+          password: signupPassword.trim(),
+        }),
+      });
+
+      const text = await res.text();
+      if (!res.ok) {
+        let msg = `Signup failed (${res.status})`;
         try {
-          const errJson = await r.json();
-          msg = errJson.message || errJson.error || msg;
-        } catch {
-          const txt = await r.text();
-          if (txt) msg = txt;
-        }
-        throw new Error(msg);
+          const errJson = JSON.parse(text);
+          msg = errJson.message || msg;
+        } catch {}
+        setError(msg);
+        return;
       }
-      return (await r.json()) as AuthRes;
-    })
-    .then((data) => {
-      storeUserAndGoHome(data);
-    })
-    .catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : "Sign up failed.");
-    })
-    .finally(() => {
-      setLoading(false);
-    });
-  }
 
-  const primaryBtnClass = [
-    "w-full py-3 bg-blue-600 hover:bg-blue-700 transition-colors rounded-xl font-semibold",
-    loading ? "opacity-60 cursor-not-allowed pointer-events-none" : "",
-  ].join(" ");
+      const data: AuthRes = JSON.parse(text);
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          role: data.role,
+        })
+      );
+
+      router.push("/");
+    } catch (err: any) {
+      setError(err.message || "An error occurred during signup.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const title = mode === "login" ? "Welcome Back" : "Create Account";
+  const subtitle = mode === "login" ? "Enter your credentials to continue" : "Sign up to start guessing";
+  const primaryBtnClass = "w-full rounded-2xl bg-blue-600 py-4 text-lg font-bold text-white transition-all hover:bg-blue-500 hover:scale-[1.02] disabled:opacity-50 active:scale-95";
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-900 via-slate-950 to-black">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black">
       <Header
         logoSrc="/logo.png"
         exitVisible={false}
@@ -187,18 +154,18 @@ export default function Auth() {
         className="top-0 left-0"
       />
     
-      <div className="flex-1 flex items-center justify-center px-4 text-white">
-        <div className="w-full max-w-md m-4 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl">
+      <div className="flex-1 flex items-center justify-center px-4 text-slate-900 dark:text-white">
+        <div className="w-full max-w-md m-4 rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl p-8 shadow-2xl">
           <div className="mb-8">
             <div className="flex items-center justify-between">
-              <h1 className="text-3xl font-bold">{title}</h1>
-              <div className="flex gap-1 rounded-xl bg-white/5 p-1 border border-white/10">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{title}</h1>
+              <div className="flex gap-1 rounded-xl bg-slate-100 dark:bg-white/5 p-1 border border-slate-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
                   className={[
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                    mode === "login" ? "bg-blue-600 text-white shadow-lg" : "text-white/60 hover:text-white",
+                    mode === "login" ? "bg-blue-600 text-white shadow-lg" : "text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white",
                   ].join(" ")}
                 >
                   Login
@@ -208,18 +175,18 @@ export default function Auth() {
                   onClick={() => switchMode("signup")}
                   className={[
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                    mode === "signup" ? "bg-blue-600 text-white shadow-lg" : "text-white/60 hover:text-white",
+                    mode === "signup" ? "bg-blue-600 text-white shadow-lg" : "text-slate-600 dark:text-white/60 hover:text-slate-900 dark:hover:text-white",
                   ].join(" ")}
                 >
                   Sign Up
                 </button>
               </div>
             </div>
-            <p className="mt-2 text-slate-400">{subtitle}</p>
+            <p className="mt-2 text-slate-600 dark:text-slate-400">{subtitle}</p>
           </div>
 
           {error && (
-            <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-4 text-sm text-red-200 animate-in fade-in slide-in-from-top-2">
+            <div className="mb-6 rounded-2xl border border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 px-4 py-4 text-sm text-red-700 dark:text-red-200 animate-in fade-in slide-in-from-top-2">
               <div className="flex items-center gap-2">
                 <span className="text-lg">⚠️</span>
                 {error}
@@ -230,23 +197,23 @@ export default function Auth() {
           {mode === "login" ? (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Username</label>
                 <input
                   value={loginUserName}
                   onChange={(e) => setLoginUserName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900 dark:text-white"
                   placeholder="Enter your username"
                   autoComplete="username"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
                 <input
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   type="password"
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900 dark:text-white"
                   placeholder="••••••••"
                   autoComplete="current-password"
                 />
@@ -256,12 +223,12 @@ export default function Auth() {
                 {loading ? "Processing..." : "Login"}
               </Button>
 
-              <p className="text-center text-sm text-slate-400">
+              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
                 Don&apos;t have an account?{" "}
                 <button
                   type="button"
                   onClick={() => switchMode("signup")}
-                  className="text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-4"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline underline-offset-4"
                 >
                   Sign up
                 </button>
@@ -270,42 +237,43 @@ export default function Auth() {
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900 dark:text-white"
                   placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Username</label>
                 <input
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
-                  placeholder="johndoe123"
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900 dark:text-white"
+                  placeholder="johndoe"
+                  autoComplete="username"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900 dark:text-white"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Password</label>
                 <input
                   value={signupPassword}
                   onChange={(e) => setSignupPassword(e.target.value)}
                   type="password"
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600 text-slate-900 dark:text-white"
                   placeholder="Min. 6 characters"
                 />
               </div>
@@ -314,12 +282,12 @@ export default function Auth() {
                 {loading ? "Creating account..." : "Create Account"}
               </Button>
 
-              <p className="text-center text-sm text-slate-400">
+              <p className="text-center text-sm text-slate-600 dark:text-slate-400">
                 Already have an account?{" "}
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
-                  className="text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-4"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-semibold underline underline-offset-4"
                 >
                   Login
                 </button>
@@ -327,11 +295,11 @@ export default function Auth() {
             </div>
           )}
 
-          <div className="mt-8 pt-6 border-t border-white/5 flex justify-center">
+          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/5 flex justify-center">
             <button
               type="button"
               onClick={() => (loading ? null : router.push("/"))}
-              className="text-sm text-slate-500 hover:text-white transition-colors"
+              className="text-sm text-slate-500 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               ← Back to home
             </button>
@@ -339,5 +307,13 @@ export default function Auth() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Auth() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <AuthContent />
+    </Suspense>
   );
 }

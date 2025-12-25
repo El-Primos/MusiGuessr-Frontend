@@ -291,18 +291,18 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
   }, [apiFetch, selectedPlaylistId, name, description, startLocal, endLocal, onCreated]);
 
   return (
-    <div className="w-full max-w-6xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-slate-900">
+    <div className="w-full max-w-6xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm text-slate-900 dark:text-white">
       <div className="mb-5 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Create Tournament</h2>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Select one of your playlists, set start/end time, and create.
           </p>
         </div>
         <button
           type="button"
           onClick={fetchPlaylists}
-          className="h-10 rounded-xl border border-slate-200 px-4 text-sm hover:bg-slate-50"
+          className="h-10 rounded-xl border border-slate-200 dark:border-slate-600 px-4 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
         >
           Reload playlists
         </button>
@@ -310,10 +310,10 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* LEFT: Playlist picker */}
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-600 p-4">
           <div className="flex items-center justify-between gap-2">
             <div className="text-sm font-semibold">Pick a playlist</div>
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-slate-500 dark:text-slate-400">
               {filteredPlaylists.length} playlists
             </div>
           </div>
@@ -326,7 +326,7 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
                 setPlistPage(1);
               }}
               placeholder="Search playlists..."
-              className="h-10 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+              className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
             />
             <select
               value={plistPageSize}
@@ -334,7 +334,7 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
                 setPlistPageSize(Number(e.target.value));
                 setPlistPage(1);
               }}
-              className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none"
+              className="h-10 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm outline-none text-slate-900 dark:text-white"
             >
               {[5, 8, 12, 20].map((n) => (
                 <option key={n} value={n}>
@@ -345,16 +345,16 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
           </div>
 
           {plistErr && (
-            <div className="mt-3 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="mt-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
               {plistErr}
             </div>
           )}
 
           {plistLoading ? (
-            <div className="mt-3 text-sm text-slate-600">Loading playlists...</div>
+            <div className="mt-3 text-sm text-slate-600 dark:text-slate-400">Loading playlists...</div>
           ) : (
-            <div className="mt-3 overflow-hidden rounded-xl border border-slate-200">
-              <ul className="divide-y divide-slate-100">
+            <div className="mt-3 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600">
+              <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                 {plistPageItems.map((p) => {
                   const active = p.id === selectedPlaylistId;
                   return (
@@ -364,13 +364,13 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
                         onClick={() => setSelectedPlaylistId(p.id)}
                         className={[
                           "w-full px-3 py-2 text-left transition-colors",
-                          active ? "bg-slate-900 text-white" : "hover:bg-slate-50",
+                          active ? "bg-slate-900 dark:bg-slate-700 text-white" : "hover:bg-slate-50 dark:hover:bg-slate-700",
                         ].join(" ")}
                       >
                         <div className="flex items-center justify-between gap-2">
                           <div className="min-w-0">
                             <div className="text-sm font-medium truncate">{p.name}</div>
-                            <div className={active ? "text-xs text-white/70" : "text-xs text-slate-500"}>
+                            <div className={active ? "text-xs text-white/70" : "text-xs text-slate-500 dark:text-slate-400"}>
                               #{p.id}
                             </div>
                           </div>
@@ -385,7 +385,7 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
                   );
                 })}
                 {plistPageItems.length === 0 && (
-                  <li className="px-3 py-3 text-sm text-slate-600">No playlists found.</li>
+                  <li className="px-3 py-3 text-sm text-slate-600 dark:text-slate-400">No playlists found.</li>
                 )}
               </ul>
             </div>
@@ -396,18 +396,18 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
               type="button"
               onClick={() => setPlistPage((p) => Math.max(1, p - 1))}
               disabled={plistPage === 1}
-              className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+              className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
             >
               Prev
             </button>
-            <div className="text-sm text-slate-600">
+            <div className="text-sm text-slate-600 dark:text-slate-400">
               {plistPage} / {plistTotalPages}
             </div>
             <button
               type="button"
               onClick={() => setPlistPage((p) => Math.min(plistTotalPages, p + 1))}
               disabled={plistPage === plistTotalPages}
-              className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+              className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
             >
               Next
             </button>
@@ -415,63 +415,63 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
         </div>
 
         {/* RIGHT: Tournament form */}
-        <div className="rounded-2xl border border-slate-200 p-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-600 p-4">
           <div className="text-sm font-semibold">Tournament details</div>
 
           <div className="mt-3 space-y-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Name</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Name</label>
               <input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. 90s Turkish Pop Cup"
-                className="h-10 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Description</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Optional..."
                 rows={3}
-                className="w-full resize-none rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                className="w-full resize-none rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
               />
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">Start</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Start</label>
                 <input
                   type="datetime-local"
                   value={startLocal}
                   min={minStartLocal}
                   onChange={(e) => setStartLocal(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700">End</label>
+                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">End</label>
                 <input
                   type="datetime-local"
                   value={endLocal}
                   onChange={(e) => setEndLocal(e.target.value)}
-                  className="h-10 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                 />
               </div>
             </div>
 
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+            <div className="rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-3 py-2 text-sm text-slate-700 dark:text-slate-300">
               <div className="font-medium">Selected playlist</div>
-              <div className="mt-1 text-slate-600">
+              <div className="mt-1 text-slate-600 dark:text-slate-400">
                 {selectedPlaylistId
                   ? `#${selectedPlaylistId} • ${playlists.find((p) => p.id === selectedPlaylistId)?.name ?? "-"}`
                   : "None"}
               </div>
      
               {timeError && (
-                <div className="mt-1 text-xs text-red-600 font-medium">
+                <div className="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">
                   {timeError}
                 </div>
               )}
@@ -479,7 +479,7 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
             </div>
 
             {err && (
-              <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
                 {err}
               </div>
             )}
@@ -489,7 +489,7 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
                 type="button"
                 onClick={createTournament}
                 disabled={!canCreate}
-                className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+                className="h-10 rounded-xl bg-slate-900 dark:bg-slate-700 px-4 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-60"
               >
                 {creating ? "Creating..." : "Create Tournament"}
               </button>
@@ -499,9 +499,9 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
       </div>
 
       {created && (
-        <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-          <div className="text-sm font-semibold text-emerald-900">Tournament created</div>
-          <div className="mt-2 text-sm text-emerald-900/90 space-y-1">
+        <div className="mt-6 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 p-4">
+          <div className="text-sm font-semibold text-emerald-900 dark:text-emerald-400">Tournament created</div>
+          <div className="mt-2 text-sm text-emerald-900/90 dark:text-emerald-300 space-y-1">
             <div>
               <span className="font-medium">ID:</span> {created.id}
             </div>

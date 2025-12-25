@@ -11,7 +11,7 @@ export default function Button({
 }) {
   return (
     <div
-      className={`${className} rounded-md cursor-pointer border border-solid border-transparent transition-colors flex items-center justify-center text-background gap-2 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto `}
+      className={`${className} rounded-md cursor-pointer border border-solid border-transparent transition-colors flex items-center justify-center dark:text-background gap-2 font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto`}
       onClick={onClick}
     >
       {children}

@@ -294,7 +294,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
   }
 
   return (
-    <div className="w-full max-w-6xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-slate-900">
+    <div className="w-full max-w-6xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm text-slate-900 dark:text-white">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="">
           <h2 className="text-xl font-semibold">Musics</h2>
@@ -308,7 +308,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
               setPage(1);
             }}
             placeholder="Search by id / name / artist / genre..."
-            className="w-full sm:w-80 rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-slate-400"
+            className="w-full sm:w-80 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
           />
 
           <select
@@ -317,7 +317,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
               setPageSize(Number(e.target.value));
               setPage(1);
             }}
-            className="rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-slate-400"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
           >
             {[5, 10, 20, 50].map((n) => (
               <option key={n} value={n}>
@@ -329,7 +329,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
           <button
             type="button"
             onClick={fetchMusics}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+            className="rounded-xl bg-slate-900 dark:bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600"
           >
             Refresh
           </button>
@@ -337,19 +337,19 @@ export default function MusicListAdmin({ apiBase }: Props) {
       </div>
 
       {err && (
-        <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <div className="mt-4 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
           {err}
         </div>
       )}
 
       {loadingLists && (
-        <div className="mt-3 text-xs text-slate-500">
+        <div className="mt-3 text-xs text-slate-500 dark:text-slate-400">
           Loading artists/genres...
         </div>
       )}
 
-      <div className="mt-5 rounded-2xl border border-slate-200 overflow-hidden">
-        <div className="grid grid-cols-12 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-600">
+      <div className="mt-5 rounded-2xl border border-slate-200 dark:border-slate-600 overflow-hidden">
+        <div className="grid grid-cols-12 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-xs font-semibold text-slate-600 dark:text-slate-400">
           <div className="col-span-1">ID</div>
           <div className="col-span-4">Name</div>
           <div className="col-span-3">Artist</div>
@@ -358,18 +358,18 @@ export default function MusicListAdmin({ apiBase }: Props) {
         </div>
 
         {loading ? (
-          <div className="px-4 py-6 text-sm text-slate-600">Loading...</div>
+          <div className="px-4 py-6 text-sm text-slate-600 dark:text-slate-400">Loading...</div>
         ) : pageItems.length === 0 ? (
-          <div className="px-4 py-6 text-sm text-slate-600">No items.</div>
+          <div className="px-4 py-6 text-sm text-slate-600 dark:text-slate-400">No items.</div>
         ) : (
-          <ul className="divide-y divide-slate-100">
+          <ul className="divide-y divide-slate-100 dark:divide-slate-700">
             {pageItems.map((m) => {
               const isEditing = editingId === m.id;
               const isBusy = deletingId === m.id || savingId === m.id;
 
               return (
                 <li key={m.id} className="grid grid-cols-12 items-start px-4 py-3 gap-y-2">
-                  <div className="col-span-1 font-mono text-sm text-slate-700 pt-1">
+                  <div className="col-span-1 font-mono text-sm text-slate-700 dark:text-slate-300 pt-1">
                     {m.id}
                   </div>
 
@@ -379,17 +379,17 @@ export default function MusicListAdmin({ apiBase }: Props) {
                       <input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
-                        className="w-full rounded-xl border border-slate-200 px-3 py-1 text-sm outline-none focus:border-slate-400"
+                        className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-1 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                         placeholder="Music name"
                       />
                     ) : (
                       <>
-                        <div className="font-medium text-slate-900">{m.name}</div>
+                        <div className="font-medium text-slate-900 dark:text-white">{m.name}</div>
                         <a
                           href={m.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="mt-0.5 block truncate text-xs text-slate-500 underline"
+                          className="mt-0.5 block truncate text-xs text-slate-500 dark:text-slate-400 underline"
                           title={m.url}
                         >
                           {m.url}
@@ -410,13 +410,13 @@ export default function MusicListAdmin({ apiBase }: Props) {
                             setArtistOpen(true);
                           }}
                           onFocus={() => setArtistOpen(true)}
-                          className="w-full rounded-xl border border-slate-200 px-3 py-1 text-sm outline-none focus:border-slate-400"
+                          className="w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-1 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                           placeholder="Type artist name..."
                         />
                         {artistOpen && (
-                          <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                          <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg">
                             {filteredArtists.length === 0 ? (
-                              <div className="px-3 py-2 text-sm text-slate-500">No match</div>
+                              <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No match</div>
                             ) : (
                               <ul className="max-h-56 overflow-auto">
                                 {filteredArtists.map((a) => (
@@ -428,7 +428,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                                         setArtistQuery(a.name);
                                         setArtistOpen(false);
                                       }}
-                                      className="w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50"
+                                      className="w-full px-3 py-2 text-left text-sm text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
                                     >
                                       {a.name}
                                     </button>
@@ -438,7 +438,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                             )}
                           </div>
                         )}
-                        <div className="mt-1 text-[11px] text-slate-500">
+                        <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
                           Selected:{" "}
                           <span className="font-medium">
                             {selectedArtist?.name ?? "-"}
@@ -446,7 +446,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                         </div>
                       </>
                     ) : (
-                      <div className="pt-1 text-sm text-slate-700">{m.artist?.name ?? "-"}</div>
+                      <div className="pt-1 text-sm text-slate-700 dark:text-slate-300">{m.artist?.name ?? "-"}</div>
                     )}
                   </div>
 
@@ -462,13 +462,13 @@ export default function MusicListAdmin({ apiBase }: Props) {
                             setGenreOpen(true);
                           }}
                           onFocus={() => setGenreOpen(true)}
-                          className="w-full min-w-0 rounded-xl border border-slate-200 px-3 py-1 text-sm outline-none focus:border-slate-400"
+                          className="w-full min-w-0 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-1 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                           placeholder="Type genre name..."
                         />
                         {genreOpen && (
-                          <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
+                          <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg">
                             {filteredGenres.length === 0 ? (
-                              <div className="px-3 py-2 text-sm text-slate-500">No match</div>
+                              <div className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">No match</div>
                             ) : (
                               <ul className="max-h-56 overflow-auto">
                                 {filteredGenres.map((g) => (
@@ -480,7 +480,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                                         setGenreQuery(g.name);
                                         setGenreOpen(false);
                                       }}
-                                      className="w-full px-3 py-2 text-left text-sm text-slate-800 hover:bg-slate-50"
+                                      className="w-full px-3 py-2 text-left text-sm text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700"
                                     >
                                       {g.name}
                                     </button>
@@ -490,7 +490,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                             )}
                           </div>
                         )}
-                        <div className="mt-1 text-[11px] text-slate-500">
+                        <div className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
                           Selected:{" "}
                           <span className="font-medium">
                             {selectedGenre?.name ?? "-"}
@@ -498,7 +498,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                         </div>
                       </>
                     ) : (
-                      <div className="pt-1 text-sm text-slate-700">{m.genre?.name ?? "-"}</div>
+                      <div className="pt-1 text-sm text-slate-700 dark:text-slate-300">{m.genre?.name ?? "-"}</div>
                     )}
                   </div>
 
@@ -511,7 +511,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                           type="button"
                           onClick={() => saveEdit(m.id)}
                           disabled={isBusy}
-                          className="rounded-xl bg-slate-900 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+                          className="rounded-xl bg-slate-900 dark:bg-slate-700 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-60"
                         >
                           {savingId === m.id ? "Saving..." : "Save"}
                         </button>
@@ -519,7 +519,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                           type="button"
                           onClick={cancelEdit}
                           disabled={isBusy}
-                          className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                          className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60"
                         >
                           Cancel
                         </button>
@@ -529,7 +529,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                         <button
                           type="button"
                           onClick={() => startEdit(m)}
-                          className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-2.5 py-1.5 text-slate-700 hover:bg-slate-50"
+                          className="inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-slate-600 px-2.5 py-1.5 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                           title="Edit"
                         >
                           <PencilIcon className="h-4 w-4" />
@@ -539,7 +539,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
                           type="button"
                           onClick={() => deleteMusic(m.id)}
                           disabled={deletingId === m.id}
-                          className="rounded-xl border border-red-200 bg-red-50 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-60"
+                          className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-1.5 text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-60"
                         >
                           {deletingId === m.id ? "Deleting..." : "Delete"}
                         </button>
@@ -555,16 +555,16 @@ export default function MusicListAdmin({ apiBase }: Props) {
 
       {/* Pagination */}
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-slate-600">
+        <div className="text-sm text-slate-600 dark:text-slate-400">
           Showing{" "}
-          <span className="font-medium text-slate-900">
+          <span className="font-medium text-slate-900 dark:text-white">
             {filtered.length === 0 ? 0 : (page - 1) * pageSize + 1}
           </span>{" "}
           -{" "}
-          <span className="font-medium text-slate-900">
+          <span className="font-medium text-slate-900 dark:text-white">
             {Math.min(page * pageSize, filtered.length)}
           </span>{" "}
-          of <span className="font-medium text-slate-900">{filtered.length}</span>
+          of <span className="font-medium text-slate-900 dark:text-white">{filtered.length}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -572,7 +572,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
             type="button"
             onClick={() => setPage(1)}
             disabled={page === 1}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
           >
             First
           </button>
@@ -580,12 +580,12 @@ export default function MusicListAdmin({ apiBase }: Props) {
             type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
           >
             Prev
           </button>
 
-          <div className="text-sm text-slate-700">
+          <div className="text-sm text-slate-700 dark:text-slate-300">
             Page <span className="font-medium">{page}</span> /{" "}
             <span className="font-medium">{totalPages}</span>
           </div>
@@ -594,7 +594,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
           >
             Next
           </button>
@@ -602,7 +602,7 @@ export default function MusicListAdmin({ apiBase }: Props) {
             type="button"
             onClick={() => setPage(totalPages)}
             disabled={page === totalPages}
-            className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+            className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
           >
             Last
           </button>

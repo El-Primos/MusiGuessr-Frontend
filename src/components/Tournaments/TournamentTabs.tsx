@@ -22,7 +22,7 @@ export const TournamentTabs = ({ activeTab, onTabChange }: TournamentTabsProps) 
           className={`px-4 py-2 rounded-lg font-semibold transition-all ${
             activeTab === tab.key
               ? 'bg-blue-600 text-white'
-              : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
+              : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
           }`}
         >
           {tab.label}

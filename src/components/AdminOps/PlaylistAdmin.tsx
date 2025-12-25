@@ -581,13 +581,13 @@ export default function PlaylistAdmin({ apiBase }: Props) {
   }
 
   return (
-    <div className="w-full max-w-6xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-slate-900">
+    <div className="w-full max-w-6xl rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 shadow-sm text-slate-900 dark:text-white">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Playlists</h2>
         <button
           type="button"
           onClick={fetchPlaylists}
-          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
+          className="rounded-xl bg-slate-900 dark:bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600"
         >
           Refresh
         </button>
@@ -597,22 +597,22 @@ export default function PlaylistAdmin({ apiBase }: Props) {
       {(listErr || songsErr || addErr || reorderErr) && (
         <div className="mt-4 space-y-2">
           {listErr && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
               {listErr}
             </div>
           )}
           {songsErr && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
               {songsErr}
             </div>
           )}
           {addErr && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
               {addErr}
             </div>
           )}
           {reorderErr && (
-            <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
               {reorderErr}
             </div>
           )}
@@ -622,8 +622,8 @@ export default function PlaylistAdmin({ apiBase }: Props) {
       <div className="mt-5 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* LEFT: playlist list */}
         <div className="lg:col-span-1">
-          <div className="rounded-2xl border border-slate-200 overflow-hidden">
-            <div className="bg-slate-50 px-4 py-3">
+          <div className="rounded-2xl border border-slate-200 dark:border-slate-600 overflow-hidden">
+            <div className="bg-slate-50 dark:bg-slate-700 px-4 py-3">
               <div className="flex gap-2">
                 <input
                   value={plistQuery}
@@ -632,7 +632,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                     setPlistPage(1);
                   }}
                   placeholder="Search playlists..."
-                  className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-slate-400"
+                  className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                 />
                 <select
                   value={plistPageSize}
@@ -640,7 +640,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                     setPlistPageSize(Number(e.target.value));
                     setPlistPage(1);
                   }}
-                  className="h-10 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none"
+                  className="h-10 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm outline-none text-slate-900 dark:text-white"
                 >
                   {[5, 10, 20].map((n) => (
                     <option key={n} value={n}>
@@ -655,38 +655,38 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                     setCreateName("");
                     setCreateOpen(true);
                   }}
-                  className="h-10 whitespace-nowrap rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+                  className="h-10 whitespace-nowrap rounded-xl bg-slate-900 dark:bg-slate-700 px-4 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600"
                 >
                   +
                 </button>
               </div>
               {createErr && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/30 px-3 py-2 text-sm text-red-700 dark:text-red-400">
                   {createErr}
                 </div>
               )}
             </div>
 
             {listLoading ? (
-              <div className="px-4 py-4 text-sm text-slate-600">Loading playlists...</div>
+              <div className="px-4 py-4 text-sm text-slate-600 dark:text-slate-400">Loading playlists...</div>
             ) : plistPageItems.length === 0 ? (
-              <div className="px-4 py-4 text-sm text-slate-600">No playlists.</div>
+              <div className="px-4 py-4 text-sm text-slate-600 dark:text-slate-400">No playlists.</div>
             ) : (
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                 {plistPageItems.map((p) => (
                   <li key={p.id}>
                     <button
                       type="button"
                       onClick={() => setSelectedId(p.id)}
                       className={[
-                        "w-full text-left px-4 py-3 hover:bg-slate-50",
-                        selectedId === p.id ? "bg-slate-100" : "bg-white",
+                        "w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700",
+                        selectedId === p.id ? "bg-slate-100 dark:bg-slate-700" : "bg-white dark:bg-slate-800",
                       ].join(" ")}
                     >
                       <div className="flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <div className="text-sm font-semibold text-slate-900 truncate">{p.name}</div>
-                          <div className="text-xs text-slate-500">ID: {p.id}</div>
+                          <div className="text-sm font-semibold truncate">{p.name}</div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">ID: {p.id}</div>
                         </div>
                         <span className="text-xs text-slate-400">{">"}</span>
                       </div>
@@ -696,23 +696,23 @@ export default function PlaylistAdmin({ apiBase }: Props) {
               </ul>
             )}
 
-            <div className="flex items-center justify-between px-4 py-3 bg-white border-t border-slate-100">
+            <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
               <button
                 type="button"
                 onClick={() => setPlistPage((x) => Math.max(1, x - 1))}
                 disabled={plistPage === 1}
-                className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+                className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
               >
                 Prev
               </button>
-              <div className="text-sm text-slate-700">
+              <div className="text-sm text-slate-700 dark:text-slate-300">
                 {plistPage} / {plistTotalPages}
               </div>
               <button
                 type="button"
                 onClick={() => setPlistPage((x) => Math.min(plistTotalPages, x + 1))}
                 disabled={plistPage === plistTotalPages}
-                className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+                className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
               >
                 Next
               </button>
@@ -723,16 +723,16 @@ export default function PlaylistAdmin({ apiBase }: Props) {
         {/* RIGHT: selected playlist detail */}
         <div className="lg:col-span-2">
           {!selectedPlaylist ? (
-            <div className="rounded-2xl border border-slate-200 p-6 text-sm text-slate-600">
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-600 p-6 text-sm text-slate-600 dark:text-slate-400">
               Select a playlist.
             </div>
           ) : (
             <div className="space-y-4">
               {/* header / name edit / delete */}
-              <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-600 p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <div className="text-xs text-slate-500">Playlist ID: {selectedPlaylist.id}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400">Playlist ID: {selectedPlaylist.id}</div>
 
                     {!nameEditing ? (
                       <div className="mt-1 flex items-center gap-2">
@@ -740,7 +740,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                         <button
                           type="button"
                           onClick={() => setNameEditing(true)}
-                          className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-50"
+                          className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                         >
                           Edit name
                         </button>
@@ -750,14 +750,14 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                         <input
                           value={nameDraft}
                           onChange={(e) => setNameDraft(e.target.value)}
-                          className="h-10 w-full min-w-0 rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                          className="h-10 w-full min-w-0 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                         />
                         <div className="flex gap-2">
                           <button
                             type="button"
                             onClick={handleSaveName}
                             disabled={nameSaving}
-                            className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+                            className="h-10 rounded-xl bg-slate-900 dark:bg-slate-700 px-4 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-60"
                           >
                             {nameSaving ? "Saving..." : "Save"}
                           </button>
@@ -768,7 +768,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                               setNameDraft(selectedPlaylist.name);
                             }}
                             disabled={nameSaving}
-                            className="h-10 rounded-xl border border-slate-200 px-4 text-sm hover:bg-slate-50 disabled:opacity-60"
+                            className="h-10 rounded-xl border border-slate-200 dark:border-slate-600 px-4 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60"
                           >
                             Cancel
                           </button>
@@ -781,7 +781,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                     type="button"
                     onClick={handleDeletePlaylist}
                     disabled={deletingPlaylistId === selectedPlaylist.id}
-                    className="h-10 rounded-xl border border-red-200 bg-red-50 px-4 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-60"
+                    className="h-10 rounded-xl border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/30 px-4 text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 disabled:opacity-60"
                   >
                     {deletingPlaylistId === selectedPlaylist.id ? "Deleting..." : "Delete playlist"}
                   </button>
@@ -789,11 +789,11 @@ export default function PlaylistAdmin({ apiBase }: Props) {
               </div>
 
               {/* Add songs */}
-              <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-600 p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div>
                     <div className="text-sm font-semibold">Add songs</div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                       Select musics and add sequentially (no 500).
                     </div>
                   </div>
@@ -801,7 +801,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                     type="button"
                     onClick={handleAddSelectedSongs}
                     disabled={addingSongs || selectedToAddIds.length === 0}
-                    className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+                    className="h-10 rounded-xl bg-slate-900 dark:bg-slate-700 px-4 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-60"
                   >
                     {addingSongs ? "Adding..." : `Add (${selectedToAddIds.length})`}
                   </button>
@@ -812,7 +812,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                     value={musicSearch}
                     onChange={(e) => setMusicSearch(e.target.value)}
                     placeholder="Search (name / artist / genre / id)"
-                    className="h-10 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
                   />
 
                   <select
@@ -820,7 +820,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                     onChange={(e) =>
                       setFilterArtistId(e.target.value === "all" ? "all" : Number(e.target.value))
                     }
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm outline-none text-slate-900 dark:text-white"
                   >
                     <option value="all">All artists</option>
                     {artistOptions.map((a) => (
@@ -835,7 +835,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                     onChange={(e) =>
                       setFilterGenreId(e.target.value === "all" ? "all" : Number(e.target.value))
                     }
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none"
+                    className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 text-sm outline-none text-slate-900 dark:text-white"
                   >
                     <option value="all">All genres</option>
                     {genreOptions.map((g) => (
@@ -854,7 +854,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                       setFilterArtistId("all");
                       setFilterGenreId("all");
                     }}
-                    className="h-9 rounded-xl border border-slate-200 px-3 text-sm hover:bg-slate-50"
+                    className="h-9 rounded-xl border border-slate-200 dark:border-slate-600 px-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                   >
                     Clear filters
                   </button>
@@ -862,7 +862,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                   <button
                     type="button"
                     onClick={fetchAllMusics}
-                    className="h-9 rounded-xl border border-slate-200 px-3 text-sm hover:bg-slate-50"
+                    className="h-9 rounded-xl border border-slate-200 dark:border-slate-600 px-3 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                   >
                     Reload
                   </button>
@@ -870,10 +870,10 @@ export default function PlaylistAdmin({ apiBase }: Props) {
 
 
                 {musicsLoading ? (
-                  <div className="mt-3 text-sm text-slate-600">Loading musics...</div>
+                  <div className="mt-3 text-sm text-slate-600 dark:text-slate-400">Loading musics...</div>
                 ) : (
-                  <div className="mt-3 max-h-72 overflow-auto rounded-xl border border-slate-200">
-                    <ul className="divide-y divide-slate-100">
+                  <div className="mt-3 max-h-72 overflow-auto rounded-xl border border-slate-200 dark:border-slate-600">
+                    <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                       {pagedMusicsToAdd.map((m) => {
 
                         const disabled = existingSongIds.has(m.id);
@@ -896,7 +896,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                                     <span className="ml-2 text-xs text-slate-400">(already in playlist)</span>
                                   )}
                                 </div>
-                                <div className="text-xs text-slate-500 truncate">
+                                <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                                   #{m.id} • {m.artist?.name ?? "-"} • {m.genre?.name ?? "-"}
                                 </div>
                               </div>
@@ -912,19 +912,19 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                 <button
                   onClick={() => setMusicPage(p => Math.max(1, p - 1))}
                   disabled={musicPage === 1}
-                  className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+                  className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
                 >
                   Prev
                 </button>
 
-                <div className="text-sm text-slate-600">
+                <div className="text-sm text-slate-600 dark:text-slate-400">
                   {musicPage} / {musicTotalPages}
                 </div>
 
                 <button
                   onClick={() => setMusicPage(p => Math.min(musicTotalPages, p + 1))}
                   disabled={musicPage === musicTotalPages}
-                  className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
+                  className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 disabled:opacity-50"
                 >
                   Next
                 </button>
@@ -932,29 +932,29 @@ export default function PlaylistAdmin({ apiBase }: Props) {
 
 
               {/* Songs list + reorder + remove */}
-              <div className="rounded-2xl border border-slate-200 overflow-hidden">
-                <div className="flex items-center justify-between bg-slate-50 px-4 py-3">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-600 overflow-hidden">
+                <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-700 px-4 py-3">
                   <div>
                     <div className="text-sm font-semibold">Playlist songs</div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                       Reorder with ↑/↓ (calls /reorder). {reordering ? "Reordering..." : null}
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => fetchPlaylistSongs(selectedPlaylist.id)}
-                    className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm hover:bg-slate-50"
+                    className="rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
                   >
                     Refresh songs
                   </button>
                 </div>
 
                 {songsLoading ? (
-                  <div className="px-4 py-4 text-sm text-slate-600">Loading songs...</div>
+                  <div className="px-4 py-4 text-sm text-slate-600 dark:text-slate-400">Loading songs...</div>
                 ) : songs.length === 0 ? (
-                  <div className="px-4 py-4 text-sm text-slate-600">No songs in this playlist.</div>
+                  <div className="px-4 py-4 text-sm text-slate-600 dark:text-slate-400">No songs in this playlist.</div>
                 ) : (
-                  <ul className="divide-y divide-slate-100">
+                  <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                     {songs.map((s, idx) => (
                       <li key={s.id} className="px-4 py-3">
                         <div className="flex items-start justify-between gap-3">
@@ -962,7 +962,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                             <div className="text-sm font-semibold truncate">
                               {idx + 1}. {s.name}
                             </div>
-                            <div className="text-xs text-slate-500 truncate">
+                            <div className="text-xs text-slate-500 dark:text-slate-400 truncate">
                               #{s.id} • {s.artist?.name ?? "-"} • {s.genre?.name ?? "-"}
                             </div>
                           </div>
@@ -972,7 +972,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                               type="button"
                               onClick={() => moveSong(idx, -1)}
                               disabled={idx === 0 || reordering}
-                              className="h-9 w-9 rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-50"
+                              className="h-9 w-9 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
                               title="Move up"
                             >
                               ↑
@@ -981,7 +981,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                               type="button"
                               onClick={() => moveSong(idx, 1)}
                               disabled={idx === songs.length - 1 || reordering}
-                              className="h-9 w-9 rounded-xl border border-slate-200 hover:bg-slate-50 disabled:opacity-50"
+                              className="h-9 w-9 rounded-xl border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50"
                               title="Move down"
                             >
                               ↓
@@ -989,7 +989,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                             <button
                               type="button"
                               onClick={() => handleRemoveSong(s.id)}
-                              className="h-9 rounded-xl border border-red-200 bg-red-50 px-3 text-sm font-medium text-red-700 hover:bg-red-100"
+                              className="h-9 rounded-xl border border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/30 px-3 text-sm font-medium text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50"
                               title="Remove"
                             >
                               Remove
@@ -1007,25 +1007,25 @@ export default function PlaylistAdmin({ apiBase }: Props) {
       </div>
       {createOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-lg">
+          <div className="w-full max-w-md rounded-2xl bg-white dark:bg-slate-800 p-5 shadow-lg">
             <div className="flex items-center justify-between">
-              <div className="text-lg font-semibold text-slate-900">Create playlist</div>
+              <div className="text-lg font-semibold text-slate-900 dark:text-white">Create playlist</div>
               <button
                 type="button"
                 onClick={() => setCreateOpen(false)}
-                className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm hover:bg-slate-50"
+                className="rounded-xl border border-slate-200 dark:border-slate-600 px-3 py-1.5 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
               >
                 Close
               </button>
             </div>
 
             <div className="mt-4 space-y-2">
-              <label className="text-sm font-medium text-slate-700">Name</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Name</label>
               <input
                 value={createName}
                 onChange={(e) => setCreateName(e.target.value)}
                 placeholder="e.g. 90s Turkish Pop"
-                className="h-10 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-slate-400"
+                className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900 px-3 py-2 text-sm outline-none focus:border-slate-400 dark:focus:border-slate-500 text-slate-900 dark:text-white"
               />
             </div>
 
@@ -1034,7 +1034,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                 type="button"
                 onClick={() => setCreateOpen(false)}
                 disabled={creating}
-                className="h-10 rounded-xl border border-slate-200 px-4 text-sm hover:bg-slate-50 disabled:opacity-60"
+                className="h-10 rounded-xl border border-slate-200 dark:border-slate-600 px-4 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -1042,7 +1042,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
                 type="button"
                 onClick={handleCreatePlaylist}
                 disabled={creating || !createName.trim()}
-                className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
+                className="h-10 rounded-xl bg-slate-900 dark:bg-slate-700 px-4 text-sm font-medium text-white hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-60"
               >
                 {creating ? "Creating..." : "Create"}
               </button>

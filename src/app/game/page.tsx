@@ -158,7 +158,7 @@ export default function Game() {
   }, [apiFetch, gameId]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
@@ -174,7 +174,7 @@ export default function Game() {
                 duration={gameplayDuration}
                 onComplete={handleSkip}
               />
-              <span className="text-blue-400 font-bold tracking-widest uppercase text-xs">
+              <span className="text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase text-xs">
                 Raund {currentRound} / {totalRounds}
               </span>
             </div>
@@ -193,7 +193,7 @@ export default function Game() {
               />
             </div>
 
-            <div className="mt-4 px-6 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-xl shadow-lg shadow-emerald-500/10">
+            <div className="mt-4 px-6 py-2 rounded-full border border-emerald-500/30 bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-xl shadow-lg shadow-emerald-500/10">
               SKOR: {totalScore}
             </div>
           </section>
@@ -215,16 +215,16 @@ export default function Game() {
 }
 
 const StartModal = ({ onStart, loading }: { onStart: () => void; loading: boolean }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm px-4">
-    <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-800 p-8 text-center shadow-2xl">
-      <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/10 text-blue-400">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 dark:bg-black/90 backdrop-blur-sm px-4">
+    <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
+      <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
         </svg>
       </div>
-      <h2 className="text-3xl font-bold text-white mb-2">MusiGuessr</h2>
-      <p className="text-slate-400 text-sm mb-8">
+      <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">MusiGuessr</h2>
+      <p className="text-slate-600 dark:text-slate-400 text-sm mb-8">
         Şarkıları dinle, sanatçıyı bul, en yüksek skoru sen yap!
       </p>
       <button
@@ -239,13 +239,13 @@ const StartModal = ({ onStart, loading }: { onStart: () => void; loading: boolea
 );
 
 const ResultModal = ({ score, onContinue }: { score: number; onContinue: () => void }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md px-4">
-    <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-800 p-8 text-center shadow-2xl">
-      <p className="text-blue-400 font-bold uppercase tracking-widest text-xs mb-2">Oyun Tamamlandı</p>
-      <h2 className="text-2xl font-bold text-white mb-6">Final Skorun</h2>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-md px-4">
+    <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
+      <p className="text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs mb-2">Oyun Tamamlandı</p>
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Final Skorun</h2>
       
       <div className="mb-8 relative">
-        <div className="text-6xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+        <div className="text-6xl font-black text-emerald-600 dark:text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
           {score}
         </div>
       </div>

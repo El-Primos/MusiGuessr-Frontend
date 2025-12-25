@@ -86,7 +86,7 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
           placeholder={isLoading ? "Yükleniyor..." : "Şarkı ara..."}
           disabled={isLoading}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full px-4 py-3 rounded-xl bg-slate-900 border border-blue-900 outline-none focus:ring-2 ring-blue-500 disabled:opacity-50"
+          className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-blue-900 outline-none focus:ring-2 ring-blue-500 disabled:opacity-50 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
         />
         {isLoading && (
           <div className="absolute right-3 top-3 animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
@@ -94,7 +94,7 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
       </div>
 
       {query && !isLoading && (
-        <div className="absolute top-full left-0 w-full mt-2 bg-slate-900 border border-slate-800 rounded-xl overflow-hidden z-50 max-h-60 overflow-y-auto shadow-2xl">
+        <div className="absolute top-full left-0 w-full mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden z-50 max-h-60 overflow-y-auto shadow-2xl">
           {filteredResults.map((track) => (
             <div
               key={track.id}
@@ -102,14 +102,14 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
                 onSelect?.(track);
                 setQuery(""); // Seçtikten sonra temizle
               }}
-              className="px-4 py-3 hover:bg-blue-600/20 cursor-pointer border-b border-slate-800 last:border-none"
+              className="px-4 py-3 hover:bg-blue-100 dark:hover:bg-blue-600/20 cursor-pointer border-b border-slate-200 dark:border-slate-800 last:border-none"
             >
-              <div className="font-bold text-blue-100">{track.title}</div>
-              <div className="text-sm text-slate-400">{track.artist}</div>
+              <div className="font-bold text-slate-900 dark:text-blue-100">{track.title}</div>
+              <div className="text-sm text-slate-500 dark:text-slate-400">{track.artist}</div>
             </div>
           ))}
           {filteredResults.length === 0 && (
-            <div className="p-4 text-slate-500 text-sm">Sonuç bulunamadı.</div>
+            <div className="p-4 text-slate-500 dark:text-slate-500 text-sm">Sonuç bulunamadı.</div>
           )}
         </div>
       )}
