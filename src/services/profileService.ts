@@ -32,6 +32,15 @@ export interface UpdateProfileData {
   password?: string;
 }
 
+export interface UserResponseDTO {
+  id: number;
+  username: string;
+  name: string;
+  email: string;
+  role: string;
+  profilePictureUrl?: string;
+}
+
 export interface ProfileStats {
   averageScore: number;
   totalGames: number;
@@ -118,16 +127,18 @@ export async function fetchUserProfile(
  * NOTE: This endpoint is not implemented in the backend yet
  * Expected endpoint: PUT /api/users/me/profile
  */
+/**
+ * Update user profile (name)
+ * @param data - Profile data to update (name)
+ * @param apiFetch - API fetch function from useApi hook
+ * @returns Updated user data
+ */
 export async function updateProfile(
-  data: UpdateProfileData, // eslint-disable-line @typescript-eslint/no-unused-vars
-  apiFetch: (path: string, init?: RequestInit) => Promise<Response> // eslint-disable-line @typescript-eslint/no-unused-vars
-): Promise<{ success: boolean; message?: string }> {
-  // TODO: Implement when backend endpoint is ready
-  throw new Error('Profile update endpoint not implemented in backend yet');
-  
-  /* Implementation template for when backend is ready:
-  const response = await apiFetch('/api/users/me/profile', {
-    method: 'PUT',
+  data: UpdateProfileData,
+  apiFetch: (path: string, init?: RequestInit) => Promise<Response>
+): Promise<UserResponseDTO> {
+  const response = await apiFetch('/api/users/me', {
+    method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -135,12 +146,11 @@ export async function updateProfile(
   });
   
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: response.statusText }));
-    throw new Error(errorData.message || 'Failed to update profile');
+    const errorText = await response.text().catch(() => response.statusText);
+    throw new Error(`Failed to update profile: ${errorText}`);
   }
   
   return response.json();
-  */
 }
 
 /**
