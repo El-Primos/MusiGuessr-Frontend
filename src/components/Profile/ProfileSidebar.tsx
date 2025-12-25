@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Button from '@/components/Button';
 import { EditProfileModal } from './EditProfileModal';
+import Image from 'next/image';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
 
