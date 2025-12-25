@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+/* Smooth page transitions */
+body {
+  transition: opacity 300ms ease-in-out;
+}
+
+/* Smooth transitions for components */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity 200ms ease-in-out;
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
