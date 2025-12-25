@@ -42,13 +42,20 @@ export default function AdminDashboard() {
           apiFetch('/api/tournaments').then((r) => r.json()),
         ]);
 
+      const resolvedTournamentsCount = (() => {
+        if (Array.isArray(tournaments)) return tournaments.length;
+        if (tournaments && typeof tournaments.totalElements === 'number') return tournaments.totalElements;
+        if (tournaments && Array.isArray(tournaments.content)) return tournaments.content.length;
+        return 0;
+      })();
+
       setStats({
         totalUsers: Array.isArray(users) ? users.length : 0,
         totalArtists: Array.isArray(artists) ? artists.length : 0,
         totalGenres: Array.isArray(genres) ? genres.length : 0,
         totalMusic: Array.isArray(music) ? music.length : 0,
         totalPlaylists: Array.isArray(playlists) ? playlists.length : 0,
-        totalTournaments: Array.isArray(tournaments) ? tournaments.length : 0,
+        totalTournaments: resolvedTournamentsCount,
       });
     } catch (err: unknown) {
       console.error('Failed to fetch stats:', err);
