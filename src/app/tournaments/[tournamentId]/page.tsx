@@ -62,11 +62,11 @@ export default function TournamentDetailsPage() {
   }, []);
 
   useEffect(() => {
-    if (token && tournamentId) {
+    if (token && tournamentId && userId) {
       fetchTournamentData();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, tournamentId]);
+  }, [token, tournamentId, userId]);
 
   async function fetchTournamentData() {
     setIsLoading(true);
@@ -101,15 +101,36 @@ export default function TournamentDetailsPage() {
         }));
       }
 
+      console.log('DEBUG: Starting registration check. userId:', userId, 'tournamentId:', tournamentId);
+      
       let isRegistered = false;
       if (userId) {
+        console.log('DEBUG: userId exists, attempting to fetch tournament history');
         try {
-          const participantsResponse = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
-          if (participantsResponse.ok) {
-            const userTournaments = await participantsResponse.json();
-            isRegistered = userTournaments.some((t: { tournamentId: number }) => t.tournamentId === parseInt(tournamentId));
+          // Use the same approach as the working tournaments list page
+          const historyResponse = await apiFetch(`/api/users/me/history/tournaments?userId=${userId}`);
+          console.log('History API response status:', historyResponse.status);
+          
+          if (historyResponse.ok) {
+            const userTournaments = await historyResponse.json();
+            const tournamentIdNum = parseInt(tournamentId);
+            
+            console.log('Checking registration:', {
+              currentTournamentId: tournamentIdNum,
+              tournamentIdType: typeof tournamentIdNum,
+              userTournaments: userTournaments,
+              userTournamentIds: userTournaments.map((t: { tournamentId: number }) => t.tournamentId),
+            });
+            
+            isRegistered = userTournaments.some((t: { tournamentId: number }) => {
+              const matches = t.tournamentId === tournamentIdNum;
+              console.log(`Comparing: ${t.tournamentId} === ${tournamentIdNum} = ${matches}`);
+              return matches;
+            });
+            
+            console.log('Final isRegistered value:', isRegistered);
           } else {
-            console.warn('Could not fetch tournament history, status:', participantsResponse.status);
+            console.warn('Could not fetch tournament history, status:', historyResponse.status);
             // Fallback: check localStorage for recently joined tournaments
             try {
               const recentJoins = localStorage.getItem('recentTournamentJoins');
@@ -124,6 +145,8 @@ export default function TournamentDetailsPage() {
         } catch (error) {
           console.warn('Error fetching tournament history:', error);
         }
+      } else {
+        console.warn('DEBUG: No userId found, skipping registration check');
       }
 
       setTournament({
@@ -241,6 +264,16 @@ export default function TournamentDetailsPage() {
   const canJoin = !tournament.isRegistered && !hasEnded;
   const isFull = tournament.maxParticipants && tournament.participants >= tournament.maxParticipants;
   const canPlay = tournament.isRegistered && hasStarted && !hasEnded;
+
+  // Debug log to check button states
+  console.log('Tournament button states:', {
+    isRegistered: tournament.isRegistered,
+    hasStarted,
+    hasEnded,
+    canJoin,
+    canPlay,
+    shouldShowAlreadyJoined: tournament.isRegistered && !canPlay && !hasEnded
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white animate-in fade-in duration-300">
