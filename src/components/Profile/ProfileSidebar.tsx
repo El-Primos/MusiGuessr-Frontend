@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useEffect } from 'react';
 import Button from '@/components/Button';
 import { EditProfileModal } from './EditProfileModal';
 import { useToast } from '@/hooks/useToast';
@@ -41,7 +40,20 @@ export const ProfileSidebar = ({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(profileData.name);
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const { toast, showToast, hideToast } = useToast();
+
+  // Update editedName when profileData.name changes
+  useEffect(() => {
+    if (!isEditingName) {
+      setEditedName(profileData.name);
+    }
+  }, [profileData.name, isEditingName]);
+
+  // Debug: Log avatar changes
+  useEffect(() => {
+    console.log('ProfileSidebar - profileData.avatar changed:', profileData.avatar);
+  }, [profileData.avatar]);
 
   const handleShareProfile = () => {
     const profileUrl = `${window.location.origin}/profile/${profileData.userId}`;
@@ -49,35 +61,97 @@ export const ProfileSidebar = ({
     showToast('Profile link copied!', 'success');
   };
 
-  const handlePictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const imagePreview = reader.result as string;
-        if (onProfileUpdate) {
-          onProfileUpdate({
-            name: profileData.name,
-            avatar: imagePreview,
-          });
-        }
-        showToast('Picture updated!', 'success');
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select an image file', 'error');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (file.size > maxSize) {
+      showToast('Image size must be less than 5MB', 'error');
+      return;
+    }
+
+    if (!apiFetch) {
+      showToast('API not available', 'error');
+      return;
+    }
+
+    setIsUploadingPicture(true);
+    try {
+      showToast('Uploading profile picture...', 'info');
+      
+      const { uploadProfileImage } = await import('@/services/profileService');
+      const updatedUser = await uploadProfileImage(file, apiFetch);
+
+      console.log('Updated user from backend:', updatedUser);
+      console.log('Profile picture URL:', updatedUser.profilePictureUrl);
+
+      // Update local state with the new profile picture URL
+      if (onProfileUpdate) {
+        onProfileUpdate({
+          name: profileData.name,
+          avatar: updatedUser.profilePictureUrl || profileData.avatar,
+        });
+      }
+
+      showToast('Profile picture updated successfully!', 'success');
+    } catch (err) {
+      console.error('Failed to upload profile picture:', err);
+      showToast(
+        err instanceof Error ? err.message : 'Failed to upload profile picture',
+        'error'
+      );
+    } finally {
+      setIsUploadingPicture(false);
+      // Reset file input
+      e.target.value = '';
     }
   };
 
-  const handleNameSave = () => {
-    if (editedName.trim() && editedName !== profileData.name) {
+  const handleNameSave = async () => {
+    if (!editedName.trim() || editedName.trim() === profileData.name) {
+      setIsEditingName(false);
+      return;
+    }
+
+    if (!apiFetch) {
+      showToast('API not available', 'error');
+      return;
+    }
+
+    try {
+      const { updateProfile } = await import('@/services/profileService');
+      const updatedUser = await updateProfile(
+        { name: editedName.trim() },
+        apiFetch
+      );
+
+      // Update local state
       if (onProfileUpdate) {
         onProfileUpdate({
-          name: editedName.trim(),
-          avatar: profileData.avatar,
+          name: updatedUser.name,
+          avatar: updatedUser.profilePictureUrl || profileData.avatar,
         });
       }
-      showToast('Name updated!', 'success');
+
+      showToast('Name updated successfully!', 'success');
+      setIsEditingName(false);
+    } catch (err) {
+      console.error('Failed to update name:', err);
+      showToast(
+        err instanceof Error ? err.message : 'Failed to update name',
+        'error'
+      );
+      // Revert to original name on error
+      setEditedName(profileData.name);
     }
-    setIsEditingName(false);
   };
 
   const handleNameCancel = () => {
@@ -92,12 +166,27 @@ export const ProfileSidebar = ({
         <div className="flex justify-center mb-4 relative">
           <div className="w-32 h-32 rounded-full bg-slate-800 border-2 border-blue-900/40 flex items-center justify-center overflow-hidden relative">
             {profileData.avatar ? (
-              <Image
-                src={profileData.avatar}
+              <img
+                key={profileData.avatar} // Force re-render when avatar URL changes
+                src={`${profileData.avatar}?t=${Date.now()}`} // Add timestamp to bypass cache
                 alt={profileData.name}
-                fill
-                className="object-cover rounded-full"
-                unoptimized
+                className="absolute inset-0 w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  console.error('Failed to load image:', profileData.avatar);
+                  console.error('Error event:', e);
+                  // Try loading without timestamp
+                  const img = e.currentTarget;
+                  if (!img.src.includes('?t=')) {
+                    // Already tried without timestamp, show error state
+                    img.style.opacity = '0.5';
+                  } else {
+                    // Try without timestamp
+                    img.src = profileData.avatar;
+                  }
+                }}
+                onLoad={() => {
+                  console.log('Image loaded successfully:', profileData.avatar);
+                }}
               />
             ) : (
               <div className="text-4xl text-slate-400">
@@ -106,32 +195,62 @@ export const ProfileSidebar = ({
             )}
           </div>
           {isOwnProfile && (
-            <label className="absolute bottom-0 right-0 w-8 h-8 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center border-2 border-slate-950 transition-colors cursor-pointer" title="Change picture">
+            <label 
+              className={`absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center border-2 border-slate-950 transition-colors ${
+                isUploadingPicture 
+                  ? 'bg-slate-600 cursor-not-allowed opacity-50' 
+                  : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+              }`} 
+              title={isUploadingPicture ? 'Uploading...' : 'Change picture'}
+            >
               <input
                 type="file"
                 accept="image/*"
                 onChange={handlePictureChange}
+                disabled={isUploadingPicture}
                 className="hidden"
               />
-              <svg
-                className="w-4 h-4 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
+              {isUploadingPicture ? (
+                <svg
+                  className="w-4 h-4 text-white animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-4 h-4 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              )}
             </label>
           )}
         </div>
