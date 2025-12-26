@@ -14,7 +14,6 @@ type Props = {
    * - update: PATCH /api/tournaments/{id}  (body: { startDate, endDate })
    * - del: DELETE /api/tournaments/{id}
    * - participants: GET /api/tournaments/{id}/participants
-   * - participantRemove: DELETE /api/tournaments/{id}/participants/{userId}
    */
   endpoints?: Partial<{
     list: string; // default "/api/tournaments"
@@ -22,7 +21,6 @@ type Props = {
     update: (id: number) => string; // default (id)=>`/api/tournaments/${id}`
     del: (id: number) => string; // default (id)=>`/api/tournaments/${id}`
     participants: (id: number) => string; // default (id)=>`/api/tournaments/${id}/participants`
-    participantRemove: (tournamentId: number, userId: number) => string; // default
   }>;
 
   /**
@@ -118,8 +116,6 @@ export default function TournamentManage({
       update: endpoints?.update ?? ((id: number) => `/api/tournaments/${id}`),
       del: endpoints?.del ?? ((id: number) => `/api/tournaments/${id}`),
       participants: endpoints?.participants ?? ((id: number) => `/api/tournaments/${id}/participants`),
-      participantRemove:
-        endpoints?.participantRemove ?? ((tid: number, uid: number) => `/api/tournaments/${tid}/participants/${uid}`),
     };
   }, [endpoints]);
 
@@ -420,28 +416,6 @@ export default function TournamentManage({
     }
   }, [apiFetch, detail?.id, startLocal, endLocal, ep, fetchTournamentDetail, fetchTournaments]);
 
-  const removeParticipant = useCallback(
-    async (tournamentId: number, userId: number) => {
-      setPartErr(null);
-      try {
-        const res = await apiFetch(ep.participantRemove(tournamentId, userId), { method: "DELETE" });
-        const text = await res.text();
-        if (!res.ok) {
-          const parsed = safeJsonParse(text);
-          throw new Error(
-            parsed?.message ||
-              `DELETE participant failed (${res.status}). If endpoint differs, override endpoints.participantRemove.`
-          );
-        }
-        // refresh
-        fetchParticipants(tournamentId);
-      } catch (e) {
-        setPartErr(isError(e) ? e.message : "Failed to remove participant");
-      }
-    },
-    [apiFetch, ep, fetchParticipants]
-  );
-
   const deleteTournament = useCallback(async () => {
     if (!detail?.id) return;
 
@@ -705,14 +679,6 @@ export default function TournamentManage({
                             <div className="text-sm font-medium truncate">{p.username}</div>
                             <div className="text-xs text-slate-500">userId: {p.userId}</div>
                           </div>
-
-                          <button
-                            type="button"
-                            onClick={() => removeParticipant(detail.id, p.userId)}
-                            className="h-9 rounded-xl border border-red-200 px-3 text-sm text-red-700 hover:bg-red-50"
-                          >
-                            Remove
-                          </button>
                         </li>
                       ))}
                       {participants.length === 0 && (
@@ -721,10 +687,6 @@ export default function TournamentManage({
                     </ul>
                   </div>
                 )}
-
-                <div className="mt-2 text-xs text-slate-500">
-                  Not: Participant remove endpoint farklıysa `endpoints.participantRemove` override et.
-                </div>
               </div>
 
               {/* playlist read-only */}
