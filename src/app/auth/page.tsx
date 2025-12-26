@@ -92,7 +92,6 @@ export default function Auth() {
       .then(async (r) => {
         if (!r.ok) {
           const txt = await r.text().catch(() => "");
-          // Backend'den gelen spesifik ban mesajlarını veya hata mesajlarını yakala
           throw new Error(txt || `Login failed (HTTP ${r.status})`);
         }
         return (await r.json()) as AuthRes;
@@ -102,14 +101,12 @@ export default function Auth() {
       })
       .catch((err: unknown) => {
         if (err instanceof Error && err.message.includes("disabled")) {
-          setError(t('auth.accountBanned'));
+          setError("Hesabınız banlanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.");
         } else {
-          setError(err instanceof Error ? err.message : t('auth.loginFailed'));
+          setError(err instanceof Error ? err.message : "Login failed.");
         }
       })
       .finally(() => {
-        // Eğer banlandıysa storeUserAndGoHome zaten loading'i false yapacak, 
-        // ama diğer genel hatalar için burada da false yapıyoruz.
         setLoading(false);
       });
   }
@@ -165,7 +162,7 @@ export default function Auth() {
       storeUserAndGoHome(data);
     })
     .catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : t('auth.signupFailed'));
+      setError(err instanceof Error ? err.message : "Sign up failed.");
     })
     .finally(() => {
       setLoading(false);
