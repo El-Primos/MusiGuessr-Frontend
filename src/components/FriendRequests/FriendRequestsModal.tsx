@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Toast } from '@/components/Toast';
-import { getIncomingRequests, getFriends, acceptRequest, discardRequest, markInboxSeen, removeFriend, type FriendRequest as BackendFriendRequest, type Friend as BackendFriend } from '@/services/friendsService';
+import { getIncomingRequests, getFriends, acceptRequest, discardRequest, markInboxSeen, removeFriend } from '@/services/friendsService';
 
 interface FriendRequest {
   requesterId: number;
@@ -28,7 +27,7 @@ interface FriendRequestsModalProps {
 
 type TabType = 'requests' | 'friends';
 
-export const FriendRequestsModal = ({ isOpen, onClose, requestCount = 0, friendCount = 0, apiFetch }: FriendRequestsModalProps) => {
+export const FriendRequestsModal = ({ isOpen, onClose, apiFetch }: FriendRequestsModalProps) => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabType>('requests');
   const [requests, setRequests] = useState<FriendRequest[]>([]);
@@ -40,16 +39,7 @@ export const FriendRequestsModal = ({ isOpen, onClose, requestCount = 0, friendC
     isVisible: false,
   });
 
-  // Load data when modal opens
-  useEffect(() => {
-    if (isOpen && apiFetch) {
-      loadData();
-      // Mark inbox as seen when opening
-      markInboxSeen(apiFetch).catch(err => console.error('Failed to mark inbox as seen:', err));
-    }
-  }, [isOpen, apiFetch]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!apiFetch) return;
 
     setIsLoading(true);
@@ -67,7 +57,16 @@ export const FriendRequestsModal = ({ isOpen, onClose, requestCount = 0, friendC
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [apiFetch]);
+
+  // Load data when modal opens
+  useEffect(() => {
+    if (isOpen && apiFetch) {
+      loadData();
+      // Mark inbox as seen when opening
+      markInboxSeen(apiFetch).catch(err => console.error('Failed to mark inbox as seen:', err));
+    }
+  }, [isOpen, apiFetch, loadData]);
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setToast({ message, type, isVisible: true });

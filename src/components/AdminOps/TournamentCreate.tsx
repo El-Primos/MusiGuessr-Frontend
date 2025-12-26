@@ -73,7 +73,7 @@ function getUserIdFromStorage(): number | null {
 
 export default function TournamentCreate({ apiBase, onCreated }: Props) {
   const { token, apiFetch } = useApi(apiBase);
-  const { t } = useLanguage();
+  useLanguage();
 
   // playlists
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -133,11 +133,6 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
     return String(n).padStart(2, "0");
   }
 
-  function toDatetimeLocalValue(d: Date) {
-    // datetime-local: "YYYY-MM-DDTHH:mm"
-    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
-  }
-
   function nowPlusMinutes(min: number) {
     const d = new Date();
     d.setMinutes(d.getMinutes() + min);
@@ -150,7 +145,12 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
     return d.getTime();
   }, []);
 
-  const minStartLocal = useMemo(() => toDatetimeLocalValue(nowPlusMinutes(2)), [toDatetimeLocalValue]);
+  const minStartLocal = useMemo(() => {
+    const toLocalValue = (d: Date) => {
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+    };
+    return toLocalValue(nowPlusMinutes(2));
+  }, []);
 
 
   const fetchPlaylists = useCallback(async () => {

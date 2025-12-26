@@ -39,7 +39,7 @@ export default function TournamentsPage() {
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'active' | 'completed'>('all');
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [registeredTournamentIds, setRegisteredTournamentIds] = useState<Set<number>>(new Set());
+  const [, setRegisteredTournamentIds] = useState<Set<number>>(new Set());
   const { toast, showToast, hideToast } = useToast();
   const { apiFetch, token } = useApi('http://localhost:8080');
   const [userId, setUserId] = useState<number | null>(null);

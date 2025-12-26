@@ -33,7 +33,7 @@ function isError(e: unknown): e is Error {
 
 export default function PlaylistAdmin({ apiBase }: Props) {
   const { token, apiFetch } = useApi(apiBase);
-  const { t } = useLanguage();
+  useLanguage();
 
   // playlists list
   const [playlists, setPlaylists] = useState<Playlist[]>([]);

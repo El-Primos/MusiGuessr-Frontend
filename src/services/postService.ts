@@ -14,7 +14,7 @@ export interface PostShareResponse {
   gameScore: number;
   playedAt: string;
   predictions: boolean[];
-  gameHistory: Record<string, any>;
+  gameHistory: Record<string, unknown>;
 }
 
 /**

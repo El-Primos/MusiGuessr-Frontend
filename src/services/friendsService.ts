@@ -224,8 +224,9 @@ export async function checkFriendshipStatus(
 
     // Check incoming requests - if the other user sent us a request,
     // it means we might have a pending request to them
-    const incomingRequests = await getIncomingRequests(apiFetch);
-    const hasIncomingRequest = incomingRequests.some(req => req.requesterId === userId);
+    // We check incoming requests to potentially determine relationship status
+    // but currently rely on localStorage for outgoing requests tracking
+    await getIncomingRequests(apiFetch);
     
     // If we have an incoming request from them, it's likely we sent one too
     // But we can't be 100% sure without backend endpoint for outgoing requests

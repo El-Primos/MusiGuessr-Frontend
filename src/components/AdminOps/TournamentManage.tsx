@@ -109,7 +109,7 @@ export default function TournamentManage({
 }: Props) {
   const router = useRouter();
   const { token, apiFetch } = useApi(apiBase);
-  const { t } = useLanguage();
+  useLanguage();
 
   const ep = useMemo(() => {
     return {
