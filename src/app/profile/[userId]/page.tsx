@@ -213,7 +213,7 @@ export default function OtherUserProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -247,7 +247,7 @@ export default function OtherUserProfilePage() {
           }
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-400">Loading...</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">Loading...</div>
         </main>
       </div>
     );
@@ -255,7 +255,7 @@ export default function OtherUserProfilePage() {
 
   if (!profileData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -289,14 +289,14 @@ export default function OtherUserProfilePage() {
           }
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-400">Profile not found</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">Profile not found</div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}

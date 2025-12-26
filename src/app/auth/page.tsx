@@ -176,7 +176,7 @@ export default function Auth() {
   ].join(" ");
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-900 via-slate-950 to-black">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black">
       <Header
         logoSrc="/logo.png"
         exitVisible={false}
@@ -184,18 +184,18 @@ export default function Auth() {
         className="top-0 left-0"
       />
     
-      <div className="flex-1 flex items-center justify-center px-4 text-white">
-        <div className="w-full max-w-md m-4 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl">
+      <div className="flex-1 flex items-center justify-center px-4 text-slate-900 dark:text-white">
+        <div className="w-full max-w-md m-4 rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur-xl p-8 shadow-2xl">
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <h1 className="text-3xl font-bold">{title}</h1>
-              <div className="flex gap-1 rounded-xl bg-white/5 p-1 border border-white/10">
+              <div className="flex gap-1 rounded-xl bg-slate-100 dark:bg-white/5 p-1 border border-slate-200 dark:border-white/10">
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
                   className={[
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                    mode === "login" ? "bg-blue-600 text-white shadow-lg" : "text-white/60 hover:text-white",
+                    mode === "login" ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white",
                   ].join(" ")}
                 >
                   Login
@@ -205,14 +205,14 @@ export default function Auth() {
                   onClick={() => switchMode("signup")}
                   className={[
                     "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-                    mode === "signup" ? "bg-blue-600 text-white shadow-lg" : "text-white/60 hover:text-white",
+                    mode === "signup" ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white",
                   ].join(" ")}
                 >
                   Sign Up
                 </button>
               </div>
             </div>
-            <p className="mt-2 text-slate-400">{subtitle}</p>
+            <p className="mt-2 text-slate-500 dark:text-slate-400">{subtitle}</p>
           </div>
 
           {error && (
@@ -227,23 +227,23 @@ export default function Auth() {
           {mode === "login" ? (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Username</label>
                 <input
                   value={loginUserName}
                   onChange={(e) => setLoginUserName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   placeholder="Enter your username"
                   autoComplete="username"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Password</label>
                 <input
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   type="password"
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   placeholder="••••••••"
                   autoComplete="current-password"
                 />
@@ -253,12 +253,12 @@ export default function Auth() {
                 {loading ? "Processing..." : "Login"}
               </Button>
 
-              <p className="text-center text-sm text-slate-400">
+              <p className="text-center text-sm text-slate-500 dark:text-slate-400">
                 Don&apos;t have an account?{" "}
                 <button
                   type="button"
                   onClick={() => switchMode("signup")}
-                  className="text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-4"
+                  className="text-blue-500 dark:text-blue-400 hover:text-blue-400 dark:hover:text-blue-300 font-semibold underline underline-offset-4"
                 >
                   Sign up
                 </button>
@@ -267,42 +267,42 @@ export default function Auth() {
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Full Name</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   placeholder="John Doe"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Username</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Username</label>
                 <input
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   placeholder="johndoe123"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Email</label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   placeholder="john@example.com"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Password</label>
                 <input
                   value={signupPassword}
                   onChange={(e) => setSignupPassword(e.target.value)}
                   type="password"
-                  className="w-full rounded-xl bg-slate-900/50 border border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-600"
+                  className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
                   placeholder="Min. 6 characters"
                 />
               </div>
@@ -311,12 +311,12 @@ export default function Auth() {
                 {loading ? "Creating account..." : "Create Account"}
               </Button>
 
-              <p className="text-center text-sm text-slate-400">
+              <p className="text-center text-sm text-slate-500 dark:text-slate-400">
                 Already have an account?{" "}
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
-                  className="text-blue-400 hover:text-blue-300 font-semibold underline underline-offset-4"
+                  className="text-blue-500 dark:text-blue-400 hover:text-blue-400 dark:hover:text-blue-300 font-semibold underline underline-offset-4"
                 >
                   Login
                 </button>
@@ -324,11 +324,11 @@ export default function Auth() {
             </div>
           )}
 
-          <div className="mt-8 pt-6 border-t border-white/5 flex justify-center">
+          <div className="mt-8 pt-6 border-t border-slate-200 dark:border-white/5 flex justify-center">
             <button
               type="button"
               onClick={() => (loading ? null : router.push("/"))}
-              className="text-sm text-slate-500 hover:text-white transition-colors"
+              className="text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               ← Back to home
             </button>

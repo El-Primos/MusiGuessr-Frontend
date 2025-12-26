@@ -111,22 +111,22 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
 
   if (gameHistory.length === 0) {
     return (
-      <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900">
-        <div className="bg-slate-950 px-4 py-3 border-b border-blue-900/40">
-          <h3 className="text-xl font-bold text-white">Game History</h3>
+      <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
+        <div className="bg-slate-100 dark:bg-slate-950 px-4 py-3 border-b border-slate-200 dark:border-blue-900/40">
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">Game History</h3>
         </div>
         <div className="p-8 text-center">
-          <p className="text-slate-400 text-sm">No games played yet.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">No games played yet.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900">
+    <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
       {/* Header */}
-      <div className="bg-slate-950 px-4 py-3 border-b border-blue-900/40">
-        <h3 className="text-xl font-bold text-white">Game History</h3>
+      <div className="bg-slate-100 dark:bg-slate-950 px-4 py-3 border-b border-slate-200 dark:border-blue-900/40">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Game History</h3>
       </div>
 
       {/* Table */}
@@ -134,16 +134,16 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
         <table className="w-full">
           {/* Table Header */}
           <thead>
-            <tr className="bg-slate-900/50 border-b border-blue-900/40">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-200">Date</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-200">Mode</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-200">Score</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-blue-200">Actions</th>
+            <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-blue-900/40">
+              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">Date</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">Mode</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">Score</th>
+              <th className="px-4 py-3 text-right text-sm font-semibold text-blue-600 dark:text-blue-200">Actions</th>
             </tr>
           </thead>
 
           {/* Table Body */}
-          <tbody className="divide-y divide-blue-900/40">
+          <tbody className="divide-y divide-slate-200 dark:divide-blue-900/40">
             {gameHistory.map((game) => {
               const posted = isPosted(game.gameHistoryId);
               const isLoading = loadingPosts[game.gameHistoryId] || false;
@@ -151,11 +151,11 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
               return (
                 <tr
                   key={game.gameHistoryId}
-                  className="hover:bg-blue-900/20 transition-colors"
+                  className="hover:bg-slate-100 dark:hover:bg-blue-900/20 transition-colors"
                 >
-                  <td className="px-4 py-3 text-sm text-white">{game.date}</td>
-                  <td className="px-4 py-3 text-sm text-blue-200">{game.mode}</td>
-                  <td className="px-4 py-3 text-sm text-white font-semibold">
+                  <td className="px-4 py-3 text-sm text-slate-900 dark:text-white">{game.date}</td>
+                  <td className="px-4 py-3 text-sm text-blue-600 dark:text-blue-200">{game.mode}</td>
+                  <td className="px-4 py-3 text-sm text-slate-900 dark:text-white font-semibold">
                     {game.score.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 text-right">

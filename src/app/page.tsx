@@ -37,7 +37,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white flex flex-col">
       <Header
         logoSrc="/logo.png"
         exitVisible={false}
@@ -120,29 +120,29 @@ export default function Home() {
       />
 
       <div className="flex flex-col items-center justify-center flex-1 px-4 gap-4">
-        <div className="w-full max-w-xl rounded-2xl border border-white/10 bg-white/5 backdrop-blur px-6 py-10 shadow-lg">
+        <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur px-6 py-10 shadow-lg">
           <h1 className="text-4xl font-bold mb-3 text-center">Welcome to MusiGuessr!</h1>
-          <p className="text-lg mb-8 text-center text-white/80">
+          <p className="text-lg mb-8 text-center text-slate-600 dark:text-white/80">
             Test your knowledge of music tracks and artists. Can you guess them all?
           </p>
 
           <div className="flex flex-col gap-3 items-center justify-center">
             <Button
-              className="px-4 py-2 text-base bg-blue-600 hover:bg-blue-700"
+              className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
               onClick={() => go("/game")}
             >
               Play
             </Button>
 
             <Button
-              className="px-4 py-2 text-base bg-blue-600 hover:bg-blue-700"
+              className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
               onClick={() => go("/tournaments")}
             >
               Tournaments
             </Button>
 
             <Button
-              className="px-4 py-2 text-base bg-blue-600 hover:bg-blue-700"
+              className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
               onClick={() => go("/leaderboard")}
             >
               Leaderboard
@@ -152,14 +152,14 @@ export default function Home() {
             {!hasUser && (
               <div className="mt-3 flex items-center justify-center gap-3">
                 <Button
-                  className="px-4 py-2 text-sm bg-white/10 hover:bg-white/15 border border-white/10 min-w-[90px]"
+                  className="px-4 py-2 text-sm bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 border border-slate-300 dark:border-white/10 min-w-[90px]"
                   onClick={() => go("/auth?mode=login")}
                 >
                   Login
                 </Button>
-                <span className="text-white/40">|</span>
+                <span className="text-slate-400 dark:text-white/40">|</span>
                 <Button
-                  className="px-4 py-2 text-sm bg-white/10 hover:bg-white/15 border border-white/10 min-w-[90px]"
+                  className="px-4 py-2 text-sm bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 border border-slate-300 dark:border-white/10 min-w-[90px]"
                   onClick={() => go("/auth?mode=signup")}
                 >
                   Sign Up
@@ -172,7 +172,7 @@ export default function Home() {
 
       <SettingsButton />
 
-      <div className="mt-auto p-4 text-center text-sm text-gray-400">
+      <div className="mt-auto p-4 text-center text-sm text-slate-500 dark:text-gray-400">
         &copy; 2025 MusiGuessr. All rights reserved.
       </div>
     </div>

@@ -161,10 +161,10 @@ export const ProfileSidebar = ({
 
   return (
     <>
-      <div className="rounded-lg overflow-hidden border border-blue-900/60 bg-gradient-to-br from-slate-950 via-slate-950 to-slate-900 p-6">
+      <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 p-6">
         {/* Profile Picture */}
         <div className="flex justify-center mb-4 relative">
-          <div className="w-32 h-32 rounded-full bg-slate-800 border-2 border-blue-900/40 flex items-center justify-center overflow-hidden relative">
+          <div className="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-slate-300 dark:border-blue-900/40 flex items-center justify-center overflow-hidden relative">
             {profileData.avatar ? (
               <img
                 key={profileData.avatar} // Force re-render when avatar URL changes
@@ -189,14 +189,14 @@ export const ProfileSidebar = ({
                 }}
               />
             ) : (
-              <div className="text-4xl text-slate-400">
+              <div className="text-4xl text-slate-500 dark:text-slate-400">
                 {profileData.name.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
           {isOwnProfile && (
             <label 
-              className={`absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center border-2 border-slate-950 transition-colors ${
+              className={`absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-950 transition-colors ${
                 isUploadingPicture 
                   ? 'bg-slate-600 cursor-not-allowed opacity-50' 
                   : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
@@ -271,17 +271,17 @@ export const ProfileSidebar = ({
                     handleNameCancel();
                   }
                 }}
-                className="text-2xl font-bold text-white bg-slate-800 border border-blue-900/40 rounded px-2 py-1 focus:outline-none focus:border-blue-500 text-center"
+                className="text-2xl font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-blue-900/40 rounded px-2 py-1 focus:outline-none focus:border-blue-500 text-center"
                 autoFocus
               />
             </div>
           ) : (
             <>
-              <h2 className="text-2xl font-bold text-white">{profileData.name}</h2>
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{profileData.name}</h2>
               {isOwnProfile && (
                 <button
                   onClick={() => setIsEditingName(true)}
-                  className="p-1 text-blue-400 hover:text-blue-300 transition-colors"
+                  className="p-1 text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
                   title="Edit name"
                 >
                   <svg
@@ -305,7 +305,7 @@ export const ProfileSidebar = ({
 
         {/* Username */}
         <div className="text-center mb-6">
-          <p className="text-slate-400">@{profileData.userName}</p>
+          <p className="text-slate-500 dark:text-slate-400">@{profileData.userName}</p>
         </div>
 
         {/* Buttons */}

@@ -117,7 +117,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-        <p className="text-slate-400">
+        <p className="text-slate-500 dark:text-slate-400">
           Welcome to the MusiGuessr admin control panel
         </p>
       </div>
@@ -127,14 +127,14 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-slate-400">Loading statistics...</p>
+            <p className="text-slate-500 dark:text-slate-400">Loading statistics...</p>
           </div>
         </div>
       )}
 
       {/* Error State */}
       {error && (
-        <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg mb-6">
+        <div className="bg-red-500/10 border border-red-500 text-red-500 dark:text-red-400 px-4 py-3 rounded-lg mb-6">
           {error}
         </div>
       )}
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
             <div
               key={card.title}
               onClick={() => router.push(card.link)}
-              className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl p-6 hover:border-slate-600 transition-all cursor-pointer group"
+              className="bg-white dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-xl p-6 hover:border-slate-300 dark:hover:border-slate-600 transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between mb-4">
                 <div
@@ -155,13 +155,13 @@ export default function AdminDashboard() {
                   {card.icon}
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-slate-400 mb-1">{card.title}</p>
-                  <p className="text-3xl font-bold group-hover:text-blue-400 transition-colors">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">{card.title}</p>
+                  <p className="text-3xl font-bold group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {card.value}
                   </p>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-sm text-slate-400">
+              <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
                 <span>View details</span>
                 <span className="group-hover:translate-x-1 transition-transform">
                   →

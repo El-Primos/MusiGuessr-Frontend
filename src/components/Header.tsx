@@ -19,7 +19,7 @@ export const Header = ({ logoSrc, exitVisible = false, onExit, className = "", e
       className={`
         w-full h-20 md:h-32 
         flex items-center justify-between
-        bg-slate-950/80 border-b border-blue-900/40
+        bg-white/80 dark:bg-slate-950/80 border-b border-slate-200 dark:border-blue-900/40
         ${className}
       `}
     >

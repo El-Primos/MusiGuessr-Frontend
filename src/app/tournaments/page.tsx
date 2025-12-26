@@ -311,7 +311,7 @@ export default function TournamentsPage() {
   // Check if user is not authenticated
   if (!token || !userId) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -322,7 +322,7 @@ export default function TournamentsPage() {
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div className="mb-8">
               <svg
-                className="w-24 h-24 mx-auto text-slate-600 mb-4"
+                className="w-24 h-24 mx-auto text-slate-400 dark:text-slate-600 mb-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -334,8 +334,8 @@ export default function TournamentsPage() {
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                 />
               </svg>
-              <h2 className="text-2xl font-bold text-white mb-2">Authentication Required</h2>
-              <p className="text-slate-400 mb-6">
+              <h2 className="text-2xl font-bold mb-2">Authentication Required</h2>
+              <p className="text-slate-500 dark:text-slate-400 mb-6">
                 You need to sign in or register to view and participate in tournaments
               </p>
             </div>
@@ -353,7 +353,7 @@ export default function TournamentsPage() {
 
   if (!tournamentData) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+      <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
@@ -361,14 +361,14 @@ export default function TournamentsPage() {
           className="top-0 left-0"
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-400">No tournament data available</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">No tournament data available</div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white animate-in fade-in duration-300">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white animate-in fade-in duration-300">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
@@ -379,8 +379,8 @@ export default function TournamentsPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-white mb-2">Tournaments</h1>
-          <p className="text-slate-400">Join tournaments and compete for prizes!</p>
+          <h1 className="text-3xl font-bold mb-2">Tournaments</h1>
+          <p className="text-slate-500 dark:text-slate-400">Join tournaments and compete for prizes!</p>
         </div>
 
         {/* Tournament Statistics - Compact at top */}
@@ -409,7 +409,7 @@ export default function TournamentsPage() {
             >
               Previous
             </button>
-            <span className="text-slate-300">
+            <span className="text-slate-600 dark:text-slate-300">
               Page {currentPage + 1} of {totalPages}
             </span>
             <button

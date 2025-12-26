@@ -276,7 +276,7 @@ export default function Game() {
   }, [apiFetch, gameId]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-950 to-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white">
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
@@ -302,7 +302,7 @@ export default function Game() {
                 duration={gameplayDuration}
                 onComplete={handleSkip}
               />
-              <span className="text-blue-400 font-bold tracking-widest uppercase text-xs">
+              <span className="text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase text-xs">
                 Raund {currentRound} / {totalRounds}
               </span>
             </div>
@@ -323,12 +323,12 @@ export default function Game() {
 
             <button
               onClick={handleSkip}
-              className="px-8 py-3 rounded-xl bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white font-semibold transition-all border border-slate-600/50 hover:border-slate-500"
+              className="px-8 py-3 rounded-xl bg-slate-200 dark:bg-slate-700/50 hover:bg-slate-300 dark:hover:bg-slate-600/50 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition-all border border-slate-300 dark:border-slate-600/50 hover:border-slate-400 dark:hover:border-slate-500"
             >
               Skip
             </button>
 
-            <div className="mt-4 px-6 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-xl shadow-lg shadow-emerald-500/10">
+            <div className="mt-4 px-6 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-xl shadow-lg shadow-emerald-500/10">
               SCORE: {totalScore}
             </div>
           </section>
@@ -350,16 +350,16 @@ export default function Game() {
 }
 
 const StartModal = ({ onStart, loading }: { onStart: () => void; loading: boolean }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm px-4">
-    <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-800 p-8 text-center shadow-2xl">
-      <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/10 text-blue-400">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 dark:bg-black/90 backdrop-blur-sm px-4">
+    <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
+      <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/10 text-blue-500 dark:text-blue-400">
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
           <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 0 1 0 .656l-5.603 3.113a.375.375 0 0 1-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112Z" />
         </svg>
       </div>
-      <h2 className="text-3xl font-bold text-white mb-2">MusiGuessr</h2>
-      <p className="text-slate-400 text-sm mb-8">
+      <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">MusiGuessr</h2>
+      <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">
         Şarkıları dinle, sanatçıyı bul, en yüksek skoru sen yap!
       </p>
       <button
@@ -374,13 +374,13 @@ const StartModal = ({ onStart, loading }: { onStart: () => void; loading: boolea
 );
 
 const ResultModal = ({ score, onContinue }: { score: number; onContinue: () => void }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md px-4">
-    <div className="w-full max-w-sm rounded-3xl bg-slate-900 border border-slate-800 p-8 text-center shadow-2xl">
-      <p className="text-blue-400 font-bold uppercase tracking-widest text-xs mb-2">Oyun Tamamlandı</p>
-      <h2 className="text-2xl font-bold text-white mb-6">Final Skorun</h2>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-md px-4">
+    <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
+      <p className="text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs mb-2">Oyun Tamamlandı</p>
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Final Skorun</h2>
       
       <div className="mb-8 relative">
-        <div className="text-6xl font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+        <div className="text-6xl font-black text-emerald-500 dark:text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
           {score}
         </div>
       </div>
@@ -410,11 +410,11 @@ const AnswerModal = ({
   correctMusic: { id: number; name: string; artist: string; genre: string } | null;
   onContinue: () => void;
 }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md px-4">
-    <div className="w-full max-w-md rounded-3xl bg-slate-900 border border-slate-800 p-8 text-center shadow-2xl">
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-md px-4">
+    <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
       {/* Correct/Wrong/Skipped Icon */}
       <div className={`mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full ${
-        correct ? 'bg-green-500/20 text-green-400' : skipped ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
+        correct ? 'bg-green-500/20 text-green-500 dark:text-green-400' : skipped ? 'bg-yellow-500/20 text-yellow-500 dark:text-yellow-400' : 'bg-red-500/20 text-red-500 dark:text-red-400'
       }`}>
         {correct ? (
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-12 h-12">
@@ -433,40 +433,40 @@ const AnswerModal = ({
 
       {/* Result Text */}
       <h2 className={`text-3xl font-bold mb-2 ${
-        correct ? 'text-green-400' : skipped ? 'text-yellow-400' : 'text-red-400'
+        correct ? 'text-green-500 dark:text-green-400' : skipped ? 'text-yellow-500 dark:text-yellow-400' : 'text-red-500 dark:text-red-400'
       }`}>
         {correct ? 'Doğru!' : skipped ? 'Pas Geçildi!' : 'Yanlış!'}
       </h2>
 
       {/* Score */}
       {correct && (
-        <p className="text-yellow-400 font-bold text-xl mb-4">
+        <p className="text-yellow-500 dark:text-yellow-400 font-bold text-xl mb-4">
           +{earnedScore} puan
         </p>
       )}
 
       {/* Correct Song Details */}
       {correctMusic ? (
-        <div className="bg-slate-800/50 rounded-2xl p-6 mb-6 border border-slate-700">
-          <p className="text-slate-400 text-sm mb-3">Doğru Şarkı:</p>
+        <div className="bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-6 mb-6 border border-slate-200 dark:border-slate-700">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">Doğru Şarkı:</p>
           <div className="space-y-2 text-left">
             <div>
-              <span className="text-blue-400 text-sm">Şarkı: </span>
-              <span className="text-white font-semibold">{correctMusic.name}</span>
+              <span className="text-blue-600 dark:text-blue-400 text-sm">Şarkı: </span>
+              <span className="text-slate-900 dark:text-white font-semibold">{correctMusic.name}</span>
             </div>
             <div>
-              <span className="text-blue-400 text-sm">Sanatçı: </span>
-              <span className="text-white font-semibold">{correctMusic.artist}</span>
+              <span className="text-blue-600 dark:text-blue-400 text-sm">Sanatçı: </span>
+              <span className="text-slate-900 dark:text-white font-semibold">{correctMusic.artist}</span>
             </div>
             <div>
-              <span className="text-blue-400 text-sm">Tür: </span>
-              <span className="text-white font-semibold">{correctMusic.genre}</span>
+              <span className="text-blue-600 dark:text-blue-400 text-sm">Tür: </span>
+              <span className="text-slate-900 dark:text-white font-semibold">{correctMusic.genre}</span>
             </div>
           </div>
         </div>
       ) : (
-        <div className="bg-slate-800/50 rounded-2xl p-6 mb-6 border border-slate-700">
-          <p className="text-slate-400 text-sm">Şarkı bilgisi yükleniyor...</p>
+        <div className="bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-6 mb-6 border border-slate-200 dark:border-slate-700">
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Şarkı bilgisi yükleniyor...</p>
         </div>
       )}
 

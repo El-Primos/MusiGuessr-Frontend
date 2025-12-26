@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Tailwind v4 dark mode - class-based */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Smooth page transitions */
 body {
   transition: opacity 300ms ease-in-out;
