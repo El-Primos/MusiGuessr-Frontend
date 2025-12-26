@@ -104,6 +104,33 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
     }
   };
 
+  /**
+   * Change user role
+   * PATCH /api/users/{id}/role
+   */
+  const handleRoleChange = async (user: User, newRole: 'USER' | 'ADMIN' | 'BANNED') => {
+    if (user.role === newRole) return;
+    
+    if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
+
+    const prevUsers = [...users];
+    // UI'da anında güncelle (Optimistic Update)
+    setUsers(prevUsers.map(u => u.id === user.id ? { ...u, role: newRole } : u));
+
+    try {
+      const res = await apiFetch(`/api/users/${user.id}/role`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole }),
+      });
+
+      if (!res.ok) throw new Error(`Role change failed.`);
+    } catch (err: any) {
+      setError(err.message);
+      setUsers(prevUsers); // Hata varsa eski listeye geri dön
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -148,7 +175,7 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Role</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Score</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -169,19 +196,39 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
                     </td>
                     <td className="px-6 py-4 text-sm text-slate-300">{user.totalScore}</td>
                     <td className="px-6 py-4 text-sm">
-                      {/* Kendini, sistem kullanıcısını ve ADMIN'leri değiştiremezsin */}
-                      {user.id !== 0 && user.id !== myId && user.role !== "ADMIN" && (
-                        <button
-                          onClick={() => handleToggleBan(user)}
-                          className={`px-3 py-1 rounded font-bold transition-all text-white ${
-                            user.role === 'BANNED' 
-                              ? 'bg-emerald-600 hover:bg-emerald-700' 
-                              : 'bg-amber-600 hover:bg-amber-700'
-                          }`}
-                        >
-                          {user.role === 'BANNED' ? 'Unban' : 'Ban'}
-                        </button>
-                      )}
+                      <div className="flex items-center justify-center gap-2">
+                        {/* Kendini, sistem kullanıcısını değiştiremezsin */}
+                        {user.id !== 0 && user.id !== myId && (
+                          <>
+                            {/* Role Change Dropdown - hidden for banned users */}
+                            {user.role !== 'BANNED' && (
+                              <select
+                                value={user.role}
+                                onChange={(e) => handleRoleChange(user, e.target.value as 'USER' | 'ADMIN' )}
+                                className="px-3 py-1 rounded bg-slate-700 border border-slate-600 text-white font-semibold transition-all hover:bg-slate-600 focus:outline-none focus:border-blue-500"
+                              >
+                                <option value="USER">USER</option>
+                                <option value="ADMIN">ADMIN</option>
+                                
+                              </select>
+                            )}
+
+                            {/* Ban/Unban Button (kept for quick access) */}
+                            {user.role !== "ADMIN" && (
+                              <button
+                                onClick={() => handleToggleBan(user)}
+                                className={`px-3 py-1 rounded font-bold transition-all text-white ${
+                                  user.role === 'BANNED' 
+                                    ? 'bg-emerald-600 hover:bg-emerald-700' 
+                                    : 'bg-amber-600 hover:bg-amber-700'
+                                }`}
+                              >
+                                {user.role === 'BANNED' ? 'Unban' : 'Ban'}
+                              </button>
+                            )}
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
