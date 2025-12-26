@@ -64,7 +64,6 @@ export default function OtherUserProfilePage() {
     const loadUserProfile = async () => {
       try {
         setIsLoading(true);
-        setError(null);
         
         // Fetch user profile
         const data = await fetchUserProfile(userId, apiFetch);
@@ -120,7 +119,6 @@ export default function OtherUserProfilePage() {
         }
       } catch (err) {
         console.error('Failed to load user profile:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load profile');
         showToast('Failed to load profile. Please try again.', 'error');
       } finally {
         setIsLoading(false);

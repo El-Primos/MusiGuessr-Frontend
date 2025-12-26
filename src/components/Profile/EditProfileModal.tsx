@@ -299,7 +299,6 @@ export const EditProfileModal = ({ isOpen, onClose, profileData, apiFetch, onSav
               <Button
                 className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleSave}
-                disabled={isLoading}
               >
                 {isLoading ? 'Saving...' : 'Save'}
               </Button>

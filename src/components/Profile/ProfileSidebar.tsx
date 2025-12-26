@@ -185,7 +185,7 @@ export const ProfileSidebar = ({
                     img.style.opacity = '0.5';
                   } else {
                     // Try without timestamp
-                    img.src = profileData.avatar;
+                    img.src = profileData.avatar||"";
                   }
                 }}
                 onLoad={() => {
