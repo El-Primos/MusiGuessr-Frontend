@@ -243,8 +243,8 @@ export default function MusicListAdmin({ apiBase }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editName.trim(),
-          artist_id: selectedArtist.id,
-          genre_id: selectedGenre.id,
+          artistId: selectedArtist.id,
+          genreId: selectedGenre.id,
         }),
       });
 
