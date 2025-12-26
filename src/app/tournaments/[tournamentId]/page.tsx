@@ -417,7 +417,7 @@ export default function TournamentDetailsPage() {
                   {canPlay && (
                     <Button
                       className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-semibold"
-                      onClick={() => router.push(`/game/tournament=${tournament.tournamentId}&playlist=${tournament.playlistId}`)}
+                      onClick={handlePlayTournament}
                     >
                       Play Now
                     </Button>
