@@ -91,8 +91,14 @@ export default function Auth() {
     })
       .then(async (r) => {
         if (!r.ok) {
-          const txt = await r.text().catch(() => "");
-          throw new Error(txt || `Login failed (HTTP ${r.status})`);
+          let errorMessage = "";
+          try {
+            const errorData = await r.json();
+            errorMessage = errorData.message || errorData.error || "";
+          } catch {
+            errorMessage = await r.text().catch(() => "");
+          }
+          throw new Error(errorMessage || `HTTP ${r.status}`);
         }
         return (await r.json()) as AuthRes;
       })
@@ -100,10 +106,14 @@ export default function Auth() {
         storeUserAndGoHome(data);
       })
       .catch((err: unknown) => {
-        if (err instanceof Error && err.message.includes("disabled")) {
-          setError("Hesabınız banlanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.");
+        const message = err instanceof Error ? err.message : "";
+        
+        if (message.includes("disabled")) {
+          setError(t('auth.accountDisabled'));
+        } else if (message.includes("Invalid credentials") || message.includes("401")) {
+          setError(t('auth.invalidCredentials'));
         } else {
-          setError(err instanceof Error ? err.message : "Login failed.");
+          setError(t('auth.loginFailed'));
         }
       })
       .finally(() => {
@@ -146,15 +156,14 @@ export default function Auth() {
     })
     .then(async (r) => {
       if (!r.ok) {
-        let msg = `Sign up failed (HTTP ${r.status})`;
+        let errorMessage = "";
         try {
-          const errJson = await r.json();
-          msg = errJson.message || errJson.error || msg;
+          const errorData = await r.json();
+          errorMessage = errorData.message || errorData.error || "";
         } catch {
-          const txt = await r.text();
-          if (txt) msg = txt;
+          errorMessage = await r.text().catch(() => "");
         }
-        throw new Error(msg);
+        throw new Error(errorMessage || `HTTP ${r.status}`);
       }
       return (await r.json()) as AuthRes;
     })
@@ -162,7 +171,17 @@ export default function Auth() {
       storeUserAndGoHome(data);
     })
     .catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : "Sign up failed.");
+      const message = err instanceof Error ? err.message : "";
+      
+      if (message.toLowerCase().includes("username") && (message.includes("exists") || message.includes("already"))) {
+        setError(t('auth.usernameTaken'));
+      } else if (message.toLowerCase().includes("email") && (message.includes("exists") || message.includes("already"))) {
+        setError(t('auth.emailExists'));
+      } else if (message.includes("400")) {
+        setError(t('auth.checkInformation'));
+      } else {
+        setError(t('auth.signupFailed'));
+      }
     })
     .finally(() => {
       setLoading(false);

@@ -82,9 +82,14 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.fillAllFields': 'Please fill in all fields.',
     'auth.validEmail': 'Please enter a valid email.',
     'auth.passwordLength': 'Password must be at least 6 characters.',
-    'auth.loginFailed': 'Login failed.',
-    'auth.signupFailed': 'Sign up failed.',
+    'auth.loginFailed': 'Unable to login. Please check your connection and try again.',
+    'auth.signupFailed': 'Unable to create account. Please try again later.',
     'auth.accountBanned': 'Your account has been banned. Please contact admin@musiguessr.com.',
+    'auth.accountDisabled': 'Your account has been disabled. Please contact support at admin@musiguessr.com.',
+    'auth.invalidCredentials': 'Invalid username or password. Please try again.',
+    'auth.usernameTaken': 'This username is already taken. Please choose another one.',
+    'auth.emailExists': 'This email is already registered. Please use another email or try logging in.',
+    'auth.checkInformation': 'Please check your information and try again.',
 
     // Profile Page
     'profile.title': 'Profile',
@@ -386,9 +391,14 @@ const translations: Record<Language, Record<string, string>> = {
     'auth.fillAllFields': 'Lütfen tüm alanları doldurun.',
     'auth.validEmail': 'Lütfen geçerli bir e-posta adresi girin.',
     'auth.passwordLength': 'Şifre en az 6 karakter olmalıdır.',
-    'auth.loginFailed': 'Giriş başarısız.',
-    'auth.signupFailed': 'Kayıt başarısız.',
+    'auth.loginFailed': 'Giriş yapılamadı. Lütfen bağlantınızı kontrol edip tekrar deneyin.',
+    'auth.signupFailed': 'Hesap oluşturulamadı. Lütfen daha sonra tekrar deneyin.',
     'auth.accountBanned': 'Hesabınız yasaklanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.',
+    'auth.accountDisabled': 'Hesabınız devre dışı bırakılmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.',
+    'auth.invalidCredentials': 'Geçersiz kullanıcı adı veya şifre. Lütfen tekrar deneyin.',
+    'auth.usernameTaken': 'Bu kullanıcı adı zaten kullanılıyor. Lütfen başka bir tane seçin.',
+    'auth.emailExists': 'Bu e-posta zaten kayıtlı. Lütfen başka bir e-posta kullanın veya giriş yapmayı deneyin.',
+    'auth.checkInformation': 'Lütfen bilgilerinizi kontrol edip tekrar deneyin.',
 
     // Profile Page
     'profile.title': 'Profil',
