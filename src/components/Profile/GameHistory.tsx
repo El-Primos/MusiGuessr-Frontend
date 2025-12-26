@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import Button from '@/components/Button';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
@@ -15,12 +14,10 @@ interface GameHistoryProps {
 }
 
 export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
-  const router = useRouter();
   const { toast, showToast, hideToast } = useToast();
   const { t } = useLanguage();
   const [posts, setPosts] = useState<PostShareResponse[]>([]);
   const [loadingPosts, setLoadingPosts] = useState<Record<number, boolean>>({});
-  const [isLoading, setIsLoading] = useState(true);
 
   // Map gameHistoryId to postId
   const getPostIdForGameHistory = (gameHistoryId: number): number | null => {
@@ -36,7 +33,6 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
   // Load user's posts on mount
   useEffect(() => {
     if (!apiFetch) {
-      setIsLoading(false);
       return;
     }
 
@@ -47,8 +43,6 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
       } catch (err) {
         console.error('Failed to load posts:', err);
         // Non-critical, continue without posts
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -166,7 +160,6 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
                         <Button
                           className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg font-semibold disabled:opacity-50"
                           onClick={() => handlePost(game.gameHistoryId)}
-                          disabled={isLoading || !apiFetch}
                         >
                           {isLoading ? t('profile.posting') : t('profile.post')}
                         </Button>
@@ -181,7 +174,6 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
                           <Button
                             className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg font-semibold disabled:opacity-50"
                             onClick={() => handleUnpost(game.gameHistoryId)}
-                            disabled={isLoading || !apiFetch}
                           >
                             {isLoading ? t('profile.removing') : t('profile.unpost')}
                           </Button>

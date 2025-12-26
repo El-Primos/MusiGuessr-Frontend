@@ -2,13 +2,14 @@
 
 import MusicUpdate from '@/components/AdminOps/MusicUpdate';
 import MusicUpload from '@/components/AdminOps/MusicUpload';
-import TournamentManage from '@/components/AdminOps/TournamentManage';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function MusicUploadPage() {
   const [activeTab, setActiveTab] = useState<'add' | 'update'>('add');
+  const { t } = useLanguage();
   
   return (
     <div className="p-8">
@@ -23,7 +24,7 @@ export default function MusicUploadPage() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Add Music
+            {t('admin.addMusic')}
           </button>
           <button
             onClick={() => setActiveTab('update')}
@@ -33,7 +34,7 @@ export default function MusicUploadPage() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Update Music
+            {t('admin.updateMusic')}
           </button>
         </div>
       </div>

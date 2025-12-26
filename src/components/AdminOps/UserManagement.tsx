@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useApi } from '@/lib/useApi';
 import { getUserId } from '@/lib/auth';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface User {
   id: number;
@@ -20,22 +21,25 @@ interface UserManagementProps {
 
 export default function UserManagement({ apiBase }: UserManagementProps) {
   const { apiFetch } = useApi(apiBase);
+  const { t } = useLanguage();
   const [users, setUsers] = useState<User[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<'ALL' | 'USER' | 'ADMIN' | 'BANNED'>('ALL');
+  const [roleFilter] = useState<'ALL' | 'USER' | 'ADMIN' | 'BANNED'>('ALL');
   const [myId, setMyId] = useState<number | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
 
   useEffect(() => {
     fetchUsers();
     setMyId(getUserId());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [users, searchTerm, roleFilter]);
 
   const fetchUsers = async () => {
@@ -47,8 +51,8 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
       if (!res.ok) throw new Error(`Error ${res.status}`);
       const data = JSON.parse(text);
       setUsers(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load users');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load users');
     } finally {
       setLoading(false);
     }
@@ -98,8 +102,8 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
       });
 
       if (!res.ok) throw new Error(`${actionText} işlemi başarısız oldu.`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setUsers(prevUsers); // Hata varsa eski listeye geri dön
     }
   };
@@ -125,8 +129,8 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
       });
 
       if (!res.ok) throw new Error(`Role change failed.`);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
       setUsers(prevUsers); // Hata varsa eski listeye geri dön
     }
   };
@@ -134,12 +138,12 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">User Management</h2>
+        <h2 className="text-2xl font-bold">{t('admin.manageUsers')}</h2>
         <button 
           onClick={fetchUsers} 
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-semibold"
         >
-          🔄 Refresh
+          🔄 {t('admin.refresh')}
         </button>
       </div>
 
@@ -152,7 +156,7 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
       <div className="bg-slate-800/50 p-4 rounded-xl border border-slate-700">
         <input 
           type="text" 
-          placeholder="Search users..." 
+          placeholder={t('admin.searchUsers')} 
           className="bg-slate-900 border border-slate-600 p-2 rounded-lg w-full outline-none focus:border-blue-500 transition-colors"
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -170,12 +174,12 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
                   >
                     ID {sortOrder === 'asc' ? '🔼' : '🔽'}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Username</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">Score</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">{t('admin.name')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">{t('admin.username')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">{t('admin.email')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">{t('admin.role')}</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider">{t('admin.score')}</th>
+                  <th className="px-6 py-3 text-center text-xs font-medium text-slate-300 uppercase tracking-wider">{t('admin.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700">
@@ -223,7 +227,7 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
                                     : 'bg-amber-600 hover:bg-amber-700'
                                 }`}
                               >
-                                {user.role === 'BANNED' ? 'Unban' : 'Ban'}
+                                {user.role === 'BANNED' ? t('admin.unban') : t('admin.ban')}
                               </button>
                             )}
                           </>
@@ -236,7 +240,7 @@ export default function UserManagement({ apiBase }: UserManagementProps) {
             </table>
           </div>
         )}
-        {loading && <div className="p-20 text-center text-slate-400">Loading users...</div>}
+        {loading && <div className="p-20 text-center text-slate-400">{t('admin.loadingUsers')}</div>}
       </div>
     </div>
   );

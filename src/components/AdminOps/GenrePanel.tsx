@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import { Genre } from "@/dto/common.dto"
 
@@ -41,6 +42,7 @@ function PencilIcon(props: React.SVGProps<SVGSVGElement>) {
 
 export default function GenrePanel({ apiBase }: Props) {
   const { token, apiFetch } = useApi(apiBase);
+  const { t } = useLanguage();
 
   const [items, setItems] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(false);
@@ -231,7 +233,7 @@ export default function GenrePanel({ apiBase }: Props) {
     <div className="w-full max-w-4xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-slate-900">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="flex items-center">
-          <h2 className="text-xl font-semibold">Genres</h2>
+          <h2 className="text-xl font-semibold">{t('admin.genres')}</h2>
         </div>
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -241,7 +243,7 @@ export default function GenrePanel({ apiBase }: Props) {
               setQ(e.target.value);
               setPage(1);
             }}
-            placeholder="Search by id / name..."
+            placeholder={t('admin.searchByIdName')}
             className="w-full sm:w-72 rounded-xl border border-slate-200 px-3 py-2 outline-none focus:border-slate-400"
           />
 
@@ -255,7 +257,7 @@ export default function GenrePanel({ apiBase }: Props) {
           >
             {[5, 10, 20, 50].map((n) => (
               <option key={n} value={n}>
-                {n} / page
+                {n} {t('admin.perPage')}
               </option>
             ))}
           </select>
@@ -265,14 +267,14 @@ export default function GenrePanel({ apiBase }: Props) {
             onClick={fetchGenres}
             className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800"
           >
-            Refresh
+            {t('admin.refresh')}
           </button>
         </div>
       </div>
 
       {/* Add new */}
       <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-        <div className="text-sm font-semibold text-slate-800">Add new genre</div>
+        <div className="text-sm font-semibold text-slate-800">{t('admin.addNewGenre')}</div>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
             value={newName}
@@ -286,7 +288,7 @@ export default function GenrePanel({ apiBase }: Props) {
             disabled={!canAdd}
             className="h-10 rounded-xl bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
           >
-            {adding ? "Adding..." : "Add"}
+            {adding ? t('admin.adding') : t('admin.add')}
           </button>
         </div>
       </div>
@@ -301,14 +303,14 @@ export default function GenrePanel({ apiBase }: Props) {
       <div className="mt-5 rounded-2xl border border-slate-200 overflow-hidden">
         <div className="grid grid-cols-12 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-600">
           <div className="col-span-2 sm:col-span-1">ID</div>
-          <div className="col-span-7 sm:col-span-8">Name</div>
-          <div className="col-span-3 sm:col-span-3 text-right">Actions</div>
+          <div className="col-span-7 sm:col-span-8">{t('admin.name')}</div>
+          <div className="col-span-3 sm:col-span-3 text-right">{t('admin.actions')}</div>
         </div>
 
         {loading ? (
-          <div className="px-4 py-6 text-sm text-slate-600">Loading...</div>
+          <div className="px-4 py-6 text-sm text-slate-600">{t('admin.loading')}</div>
         ) : pageItems.length === 0 ? (
-          <div className="px-4 py-6 text-sm text-slate-600">No genres.</div>
+          <div className="px-4 py-6 text-sm text-slate-600">{t('admin.noGenres')}</div>
         ) : (
           <ul className="divide-y divide-slate-100">
             {pageItems.map((g) => {
@@ -344,7 +346,7 @@ export default function GenrePanel({ apiBase }: Props) {
                           disabled={isSaving || isDeleting}
                           className="h-10 rounded-xl bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-60"
                         >
-                          {isSaving ? "Saving..." : "Save"}
+                          {isSaving ? t('admin.saving') : t('admin.save')}
                         </button>
                         <button
                           type="button"
@@ -352,7 +354,7 @@ export default function GenrePanel({ apiBase }: Props) {
                           disabled={isSaving || isDeleting}
                           className="h-10 rounded-xl border border-slate-200 px-3 text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-60"
                         >
-                          Cancel
+                          {t('admin.cancel')}
                         </button>
                       </>
                     ) : (
@@ -361,7 +363,7 @@ export default function GenrePanel({ apiBase }: Props) {
                           type="button"
                           onClick={() => startEdit(g)}
                           className="inline-flex h-10 items-center justify-center rounded-xl border border-slate-200 px-3 text-slate-700 hover:bg-slate-50"
-                          title="Edit"
+                          title={t('admin.edit')}
                         >
                           <PencilIcon className="h-4 w-4" />
                         </button>
@@ -372,7 +374,7 @@ export default function GenrePanel({ apiBase }: Props) {
                           disabled={isDeleting}
                           className="h-10 rounded-xl border border-red-200 bg-red-50 px-3 text-sm font-medium text-red-700 hover:bg-red-100 disabled:opacity-60"
                         >
-                          {isDeleting ? "Deleting..." : "Delete"}
+                          {isDeleting ? t('admin.deleting') : t('admin.delete')}
                         </button>
                       </>
                     )}
@@ -387,7 +389,7 @@ export default function GenrePanel({ apiBase }: Props) {
       {/* Pagination */}
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm text-slate-600">
-          Showing{" "}
+          {t('admin.showing')}{" "}
           <span className="font-medium text-slate-900">
             {filtered.length === 0 ? 0 : (page - 1) * pageSize + 1}
           </span>{" "}
@@ -395,7 +397,7 @@ export default function GenrePanel({ apiBase }: Props) {
           <span className="font-medium text-slate-900">
             {Math.min(page * pageSize, filtered.length)}
           </span>{" "}
-          of <span className="font-medium text-slate-900">{filtered.length}</span>
+          {t('admin.of')} <span className="font-medium text-slate-900">{filtered.length}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -405,7 +407,7 @@ export default function GenrePanel({ apiBase }: Props) {
             disabled={page === 1}
             className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
           >
-            First
+            {t('admin.first')}
           </button>
           <button
             type="button"
@@ -413,11 +415,11 @@ export default function GenrePanel({ apiBase }: Props) {
             disabled={page === 1}
             className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
           >
-            Prev
+            {t('admin.prev')}
           </button>
 
           <div className="text-sm text-slate-700">
-            Page <span className="font-medium">{page}</span> /{" "}
+            {t('admin.page')} <span className="font-medium">{page}</span> /{" "}
             <span className="font-medium">{totalPages}</span>
           </div>
 
@@ -427,7 +429,7 @@ export default function GenrePanel({ apiBase }: Props) {
             disabled={page === totalPages}
             className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
           >
-            Next
+            {t('admin.next')}
           </button>
           <button
             type="button"
@@ -435,7 +437,7 @@ export default function GenrePanel({ apiBase }: Props) {
             disabled={page === totalPages}
             className="rounded-xl border border-slate-200 px-3 py-1.5 text-sm disabled:opacity-50"
           >
-            Last
+            {t('admin.last')}
           </button>
         </div>
       </div>

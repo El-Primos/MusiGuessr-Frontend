@@ -144,12 +144,12 @@ export default function TournamentDetailsPage() {
                 const joins: number[] = JSON.parse(recentJoins);
                 isRegistered = joins.includes(parseInt(tournamentId));
               }
-            } catch (e) {
+            } catch {
               console.warn('Could not check localStorage for recent joins');
             }
           }
-        } catch (error) {
-          console.warn('Error fetching tournament history:', error);
+        } catch (err) {
+          console.warn('Error fetching tournament history:', err);
         }
       } else {
         console.warn('DEBUG: No userId found, skipping registration check');
@@ -170,6 +170,7 @@ export default function TournamentDetailsPage() {
         leaderboard,
       });
     } catch (error) {
+      console.error('Error fetching tournament data:', error);
       showToast('Failed to load tournament', 'error');
       setTournament(null);
     } finally {
@@ -224,11 +225,11 @@ export default function TournamentDetailsPage() {
             joins.push(tournamentIdNum);
             localStorage.setItem('recentTournamentJoins', JSON.stringify(joins));
           }
-        } catch (e) {
+        } catch {
           console.warn('Could not save to localStorage');
         }
       }
-    } catch (error) {
+    } catch {
       showToast('Failed to join tournament', 'error');
     }
   };
@@ -260,11 +261,11 @@ export default function TournamentDetailsPage() {
             const updatedJoins = joins.filter(id => id !== tournamentIdNum);
             localStorage.setItem('recentTournamentJoins', JSON.stringify(updatedJoins));
           }
-        } catch (e) {
+        } catch {
           console.warn('Could not update localStorage');
         }
       }
-    } catch (error) {
+    } catch {
       showToast('Failed to leave tournament', 'error');
     }
   };
@@ -466,7 +467,7 @@ export default function TournamentDetailsPage() {
                           const user = JSON.parse(userStr);
                           isCurrentUser = user?.username === entry.playerName;
                         }
-                      } catch (e) {
+                      } catch {
                         // Ignore parse errors
                       }
                       

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
 import { MusicItem } from "@/dto/common.dto";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Props = { apiBase: string };
 
@@ -32,6 +33,7 @@ function isError(e: unknown): e is Error {
 
 export default function PlaylistAdmin({ apiBase }: Props) {
   const { token, apiFetch } = useApi(apiBase);
+  const { t } = useLanguage();
 
   // playlists list
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -74,7 +76,7 @@ export default function PlaylistAdmin({ apiBase }: Props) {
   const [addErr, setAddErr] = useState<string | null>(null);
 
   const [musicPage, setMusicPage] = useState(1);
-  const [musicPageSize, setMusicPageSize] = useState(10);
+  const [musicPageSize] = useState(10);
 
 
   // reorder

@@ -43,10 +43,12 @@ export default function TournamentManagement({
 
   useEffect(() => {
     fetchTournaments();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     applyFilters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tournaments, searchTerm, statusFilter]);
 
   const fetchTournaments = async () => {

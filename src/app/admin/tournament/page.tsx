@@ -3,11 +3,13 @@
 import TournamentCreate from '@/components/AdminOps/TournamentCreate';
 import TournamentManage from '@/components/AdminOps/TournamentManage';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function TournamentPage() {
   const [activeTab, setActiveTab] = useState<'manage' | 'create'>('manage');
+  const { t } = useLanguage();
 
   return (
     <div className="p-8">
@@ -22,7 +24,7 @@ export default function TournamentPage() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Manage Tournaments
+            {t('admin.manageTournaments')}
           </button>
           <button
             onClick={() => setActiveTab('create')}
@@ -32,7 +34,7 @@ export default function TournamentPage() {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Create Tournament
+            {t('admin.createTournament')}
           </button>
         </div>
       </div>

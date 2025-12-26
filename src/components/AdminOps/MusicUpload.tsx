@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
 import { useS3Upload } from "../../hooks/useS3Upload";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import { UploadConfirmReq, UploadConfirmRes, Artist, Genre } from "@/dto/common.dto"
 
@@ -40,7 +41,8 @@ function isError(e: unknown): e is Error {
 }
 
 export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
-  const { token, apiFetch, authHeaders } = useApi(apiBase);
+  const { token, apiFetch } = useApi(apiBase);
+  const { t } = useLanguage();
 
   // Song & file
   const [name, setName] = useState("");
@@ -182,15 +184,15 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
     setResult(null);
 
     if (!file) {
-      setConfirmError("Lütfen bir dosya seç.");
+      setConfirmError(t('admin.selectFile'));
       return;
     }
     if (!selectedArtist) {
-      setConfirmError("Lütfen bir artist seç.");
+      setConfirmError(t('admin.selectArtist'));
       return;
     }
     if (!selectedGenre) {
-      setConfirmError("Lütfen bir genre seç.");
+      setConfirmError(t('admin.selectGenre'));
       return;
     }
 
@@ -220,17 +222,17 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
 
   const statusText =
     stage === "requesting_url"
-      ? "Upload URL alınıyor..."
+      ? t('admin.uploadingUrl')
       : stage === "uploading"
-      ? "Dosya yükleniyor..."
+      ? t('admin.uploadingFile')
       : confirming
-      ? "Backend'e kaydediliyor..."
+      ? t('admin.savingToBackend')
       : null;
 
   return (
     <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold text-slate-900">Add Music</h2>
+        <h2 className="text-xl font-semibold text-slate-900">{t('admin.addMusic')}</h2>
 
       </div>
 
@@ -244,7 +246,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
         {/* Song name */}
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">
-            Song Name
+            {t('admin.songName')}
           </label>
           <input
             value={name}
@@ -253,7 +255,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
             className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 outline-none focus:border-slate-400"
           />
           <p className="mt-1 text-xs text-slate-500">
-            If empty, autofill from file name
+            {t('admin.autoFillFromFileName')}
           </p>
         </div>
 
@@ -262,7 +264,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
           {/* Artist */}
           <div className="relative">
             <label className="mb-1 block text-sm font-medium text-slate-700">
-              Artist
+              {t('admin.artist')}
             </label>
 
             <input
@@ -273,13 +275,13 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
                 setSelectedArtist(null);
               }}
               onFocus={() => setArtistOpen(true)}
-              placeholder={loadingLists ? "Loading..." : "Type artist name (e.g. Tarkan)"}
+              placeholder={loadingLists ? t('admin.loading') : "e.g. Tarkan"}
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 outline-none focus:border-slate-400"
             />
 
             {selectedArtist && (
               <div className="mt-1 text-xs text-slate-600">
-                Selected: <span className="font-medium">{selectedArtist.name}</span> (id:{" "}
+                {t('admin.selected')}: <span className="font-medium">{selectedArtist.name}</span> (id:{" "}
                 {selectedArtist.id})
               </div>
             )}
@@ -287,7 +289,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
             {artistOpen && !loadingLists && (
               <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
                 {filteredArtists.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-slate-500">No match</div>
+                  <div className="px-3 py-2 text-sm text-slate-500">{t('admin.noMatch')}</div>
                 ) : (
                   <ul className="max-h-56 overflow-auto">
                     {filteredArtists.map((a) => (
@@ -315,14 +317,14 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
               onClick={() => {}}
             />
             <div className="mt-1 text-xs text-slate-500">
-              Select from list
+              {t('admin.selectFromList')}
             </div>
           </div>
 
           {/* Genre */}
           <div className="relative">
             <label className="mb-1 block text-sm font-medium text-slate-700">
-              Genre
+              {t('admin.genre')}
             </label>
 
             <input
@@ -333,13 +335,13 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
                 setSelectedGenre(null);
               }}
               onFocus={() => setGenreOpen(true)}
-              placeholder={loadingLists ? "Loading..." : "Type genre name (e.g. Pop)"}
+              placeholder={loadingLists ? t('admin.loading') : "e.g. Pop"}
               className="w-full rounded-xl border border-slate-200 px-3 py-2 text-slate-900 outline-none focus:border-slate-400"
             />
 
             {selectedGenre && (
               <div className="mt-1 text-xs text-slate-600">
-                Selected: <span className="font-medium">{selectedGenre.name}</span> (id:{" "}
+                {t('admin.selected')}: <span className="font-medium">{selectedGenre.name}</span> (id:{" "}
                 {selectedGenre.id})
               </div>
             )}
@@ -347,7 +349,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
             {genreOpen && !loadingLists && (
               <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg">
                 {filteredGenres.length === 0 ? (
-                  <div className="px-3 py-2 text-sm text-slate-500">No match</div>
+                  <div className="px-3 py-2 text-sm text-slate-500">{t('admin.noMatch')}</div>
                 ) : (
                   <ul className="max-h-56 overflow-auto">
                     {filteredGenres.map((g) => (
@@ -371,7 +373,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
             )}
 
             <div className="mt-1 text-xs text-slate-500">
-              Select from list
+              {t('admin.selectFromList')}
             </div>
           </div>
         </div>
@@ -379,7 +381,7 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
         {/* File */}
         <div>
           <label className="mb-1 block text-sm font-medium text-slate-700">
-            File
+            {t('admin.file')}
           </label>
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <input
@@ -417,23 +419,23 @@ export default function MusicUpload({ apiBase = "", onSuccess }: Props) {
             disabled={!canSubmit}
             className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {uploading || confirming ? "Uploading..." : "Add"}
+            {uploading || confirming ? t('admin.uploading') : t('admin.add')}
           </button>
         </div>
       </form>
 
       {result && (
         <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-          <div className="text-sm font-semibold text-emerald-900">Created ✅</div>
+          <div className="text-sm font-semibold text-emerald-900">{t('admin.created')} ✅</div>
           <div className="mt-2 text-sm text-emerald-900/90">
             <div>
               <span className="font-medium">ID:</span> {result.id}
             </div>
             <div>
-              <span className="font-medium">Name:</span> {result.name}
+              <span className="font-medium">{t('admin.name')}:</span> {result.name}
             </div>
             <div className="break-all">
-              <span className="font-medium">URL:</span>{" "}
+              <span className="font-medium">{t('admin.url')}:</span>{" "}
               <a href={result.url} target="_blank" rel="noreferrer" className="underline">
                 {result.url}
               </a>

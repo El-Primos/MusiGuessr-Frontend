@@ -17,7 +17,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import {
   TournamentPageResponse,
   mapTournamentStatus,
-  mapToBackendStatus,
   formatTournamentDate,
 } from '@/dto/tournament.dto';
 
@@ -127,7 +126,7 @@ export default function TournamentsPage() {
                   }
                 }
               }
-            } catch (err) {
+            } catch {
               console.warn('Could not fetch leaderboard for tournament', tournament.tournamentId);
             }
           }

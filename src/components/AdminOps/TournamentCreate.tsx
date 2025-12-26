@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useApi } from "@/lib/useApi";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Props = { apiBase: string; onCreated?: (t: Tournament) => void };
 
@@ -72,6 +73,7 @@ function getUserIdFromStorage(): number | null {
 
 export default function TournamentCreate({ apiBase, onCreated }: Props) {
   const { token, apiFetch } = useApi(apiBase);
+  const { t } = useLanguage();
 
   // playlists
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -124,7 +126,7 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
     }
 
     setTimeError(null);
-  }, [startLocal, endLocal]);
+  }, [startLocal, endLocal, MIN_START_MS]);
 
 
   function pad2(n: number) {
@@ -148,7 +150,7 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
     return d.getTime();
   }, []);
 
-  const minStartLocal = useMemo(() => toDatetimeLocalValue(nowPlusMinutes(2)), []);
+  const minStartLocal = useMemo(() => toDatetimeLocalValue(nowPlusMinutes(2)), [toDatetimeLocalValue]);
 
 
   const fetchPlaylists = useCallback(async () => {
@@ -288,7 +290,7 @@ export default function TournamentCreate({ apiBase, onCreated }: Props) {
     } finally {
       setCreating(false);
     }
-  }, [apiFetch, selectedPlaylistId, name, description, startLocal, endLocal, onCreated]);
+  }, [apiFetch, selectedPlaylistId, name, description, startLocal, endLocal, onCreated, minStartMs]);
 
   return (
     <div className="w-full max-w-6xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm text-slate-900">

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useApi } from "@/lib/useApi";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Props = {
   apiBase: string;
@@ -108,6 +109,7 @@ export default function TournamentManage({
 }: Props) {
   const router = useRouter();
   const { token, apiFetch } = useApi(apiBase);
+  const { t } = useLanguage();
 
   const ep = useMemo(() => {
     return {

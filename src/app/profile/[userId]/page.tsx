@@ -11,7 +11,7 @@ import { GameHistory } from '@/components/Profile/GameHistory';
 import { Toast } from '@/components/Toast';
 import { useApi } from '@/lib/useApi';
 import { fetchUserProfile, ProfileData } from '@/services/profileService';
-import { addFriend, removeFriend, checkFriendship, getIncomingRequests, sendFollowRequest } from '@/services/friendsService';
+import { addFriend, removeFriend, checkFriendship, sendFollowRequest } from '@/services/friendsService';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
@@ -28,7 +28,6 @@ export default function OtherUserProfilePage() {
   const [friendshipStatus, setFriendshipStatus] = useState<'none' | 'pending' | 'friend'>('none');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   // Check authentication
   useEffect(() => {

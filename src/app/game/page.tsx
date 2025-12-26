@@ -170,7 +170,7 @@ export default function Game() {
         setShowAnswerModal(true);
         
         // Store data for later transition
-        (window as any).__pendingRoundData = data;
+        (window as unknown as { __pendingRoundData: unknown }).__pendingRoundData = data;
       } catch (err) {
         console.error("Tahmin hatası:", err);
       }
@@ -227,16 +227,23 @@ export default function Game() {
       setShowAnswerModal(true);
       
       // Store data for later transition
-      (window as any).__pendingRoundData = data;
+      (window as unknown as { __pendingRoundData: unknown }).__pendingRoundData = data;
     } catch (err) {
       console.error("Pas geçme hatası:", err);
     }
   }, [apiFetch, gameId, gameOver]);
 
+  interface RoundData {
+    totalScore: number;
+    gameFinished: boolean;
+    nextPreviewUrl: string;
+    nextRound: number;
+  }
+
   /**
    * Raund geçişlerini yöneten yardımcı fonksiyon
    */
-  const handleRoundTransition = (data: any) => {
+  const handleRoundTransition = (data: RoundData) => {
     setTotalScore(data.totalScore);
     
     if (data.gameFinished) {
@@ -255,10 +262,10 @@ export default function Game() {
    */
   const handleContinue = () => {
     setShowAnswerModal(false);
-    const data = (window as any).__pendingRoundData;
+    const data = (window as unknown as { __pendingRoundData: RoundData | null }).__pendingRoundData;
     if (data) {
       handleRoundTransition(data);
-      (window as any).__pendingRoundData = null;
+      (window as unknown as { __pendingRoundData: RoundData | null }).__pendingRoundData = null;
     }
   };
 

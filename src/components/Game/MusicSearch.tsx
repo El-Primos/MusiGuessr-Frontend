@@ -40,7 +40,12 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
         
         console.log("Ham liste uzunluğu:", rawList.length);
 
-        const formatted: Track[] = rawList.map((m: any) => ({
+        interface MusicItem {
+          id: number;
+          name: string;
+          artist?: { name?: string };
+        }
+        const formatted: Track[] = rawList.map((m: MusicItem) => ({
           id: m.id,
           title: m.name,
           artist: m.artist?.name || t('admin.unknownArtist')
@@ -56,7 +61,7 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
     };
 
     fetchAllMusics();
-  }, [apiFetch]);
+  }, [apiFetch, t]);
 
   // 2. ADIM: Raund değiştiğinde kutuyu temizle
   useEffect(() => {

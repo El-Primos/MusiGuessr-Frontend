@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import ShareGamePost from "@/components/Game/ShareGamePost";
+import ShareGamePost, { ShareGamePostData } from "@/components/Game/ShareGamePost";
 import { useApi } from "@/lib/useApi";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080";
@@ -15,7 +15,7 @@ export default function SharePostPage() {
   // useApi'den token'ı da çekiyoruz
   const { apiFetch, token } = useApi(API_BASE);
   
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<ShareGamePostData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,8 +42,12 @@ export default function SharePostPage() {
         
         const json = await res.json();
         setData(json);
-      } catch (e: any) {
-        setError(e.message);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError("Bilinmeyen bir hata oluştu.");
+        }
       } finally {
         setLoading(false);
       }
