@@ -289,7 +289,7 @@ export default function TournamentDetailsPage() {
       // Navigate to game page with the game ID
       router.push(`/game?gameId=${gameData.id}&tournament=${tournamentId}&playlist=${gameData.playlistId}`);
     } catch (error) {
-      showToast('Failed to start tournament game', 'error');
+      showToast('You have already played this tournament game', 'error');
       console.error('Error creating tournament game:', error);
     }
   };
@@ -304,7 +304,7 @@ export default function TournamentDetailsPage() {
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
-          onExit={() => router.push('/tournaments')}
+          onExit={() => router.push('/')}
           className="top-0 left-0"
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
@@ -348,7 +348,7 @@ export default function TournamentDetailsPage() {
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
-        onExit={() => router.push('/tournaments')}
+        onExit={() => router.push('/')}
         className="top-0 left-0"
       />
 

@@ -217,8 +217,15 @@ export default function Game() {
               />
             </div>
 
+            <button
+              onClick={handleSkip}
+              className="px-8 py-3 rounded-xl bg-slate-700/50 hover:bg-slate-600/50 text-slate-300 hover:text-white font-semibold transition-all border border-slate-600/50 hover:border-slate-500"
+            >
+              Skip
+            </button>
+
             <div className="mt-4 px-6 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-mono text-xl shadow-lg shadow-emerald-500/10">
-              SKOR: {totalScore}
+              SCORE: {totalScore}
             </div>
           </section>
         )}
