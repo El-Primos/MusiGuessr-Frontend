@@ -5,6 +5,7 @@
 FROM node:20 AS build
 WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
+ENV NEXT_PUBLIC_API_BASE="https://backend:8080"
 RUN npm install -g pnpm
 RUN pnpm install
 COPY . .
