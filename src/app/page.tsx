@@ -1,109 +1,182 @@
 'use client';
 
 import Button from "@/components/Button";
-import Image from "next/image";
-import { redirect } from "next/navigation";
+import { Header } from "@/components/Header";
+import { SettingsButton } from "@/components/SettingsButton";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
+
+import { StoredUser } from "@/dto/common.dto"
 
 export default function Home() {
+  const router = useRouter();
+  const { t } = useLanguage();
+  const [hasUser, setHasUser] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("user");
+      if (!raw) return setHasUser(false);
+      const parsed = JSON.parse(raw) as Partial<StoredUser & { role?: string }>;
+      setHasUser(Boolean(parsed && parsed.id && parsed.username));
+      setIsAdmin(parsed?.role === 'ADMIN');
+    } catch {
+      setHasUser(false);
+      setIsAdmin(false);
+    }
+  }, []);
+
+  const go = (path: string) => router.push(path);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('friends');
+    setHasUser(false);
+    setIsAdmin(false);
+    router.push('/');
+  };
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-gradient-to-b from-slate-100 via-slate-50 to-white dark:from-slate-900 dark:via-slate-950 dark:to-black text-slate-900 dark:text-white flex flex-col">
+      <Header
+        logoSrc="/logo.png"
+        exitVisible={false}
+        onExit={() => console.log("EXIT")}
+        className="top-0 left-0"
+        rightContent={
+          hasUser ? (
+            <div className="flex items-center gap-2 mr-2 md:mr-4">
+              {isAdmin && (
+                <button
+                  onClick={() => router.push("/admin")}
+                  className="px-2 md:px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
+                  title="Admin Panel"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">{t('nav.admin')}</span>
+                </button>
+              )}
+              <button
+                onClick={() => router.push("/profile")}
+                className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
+                title={t('nav.profile')}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">{t('nav.profile')}</span>
+              </button>
+              <button
+                onClick={handleLogout}
+                className="px-2 md:px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-1 transition-colors"
+                title={t('nav.logout')}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                  />
+                </svg>
+                <span className="hidden md:inline">{t('nav.logout')}</span>
+              </button>
+            </div>
+          ) : null
+        }
+      />
 
-        <Button onClick={()=>redirect("/login")}>Custom Button</Button>
+      <div className="flex flex-col items-center justify-center flex-1 px-4 gap-4">
+        <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur px-6 py-10 shadow-lg">
+          <h1 className="text-4xl font-bold mb-3 text-center">{t('home.welcome')}</h1>
+          <p className="text-lg mb-8 text-center text-slate-600 dark:text-white/80">
+            {t('home.subtitle')}
+          </p>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          <div className="flex flex-col gap-3 items-center justify-center">
+            <Button
+              className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
+              onClick={() => go("/game")}
+            >
+              {t('home.play')}
+            </Button>
+
+            <Button
+              className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
+              onClick={() => go("/tournaments")}
+            >
+              {t('home.tournaments')}
+            </Button>
+
+            <Button
+              className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
+              onClick={() => go("/leaderboard")}
+            >
+              {t('home.leaderboard')}
+            </Button>
+
+            {/* login-signup - if there is no user in localStorage */}
+            {!hasUser && (
+              <div className="mt-3 flex items-center justify-center gap-3">
+                <Button
+                  className="px-4 py-2 text-sm bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 border border-slate-300 dark:border-white/10 min-w-[90px]"
+                  onClick={() => go("/auth?mode=login")}
+                >
+                  {t('nav.login')}
+                </Button>
+                <span className="text-slate-400 dark:text-white/40">|</span>
+                <Button
+                  className="px-4 py-2 text-sm bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 border border-slate-300 dark:border-white/10 min-w-[90px]"
+                  onClick={() => go("/auth?mode=signup")}
+                >
+                  {t('nav.signup')}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      <SettingsButton />
+
+      <div className="mt-auto p-4 text-center text-sm text-slate-500 dark:text-gray-400">
+        {t('common.copyright')}
+      </div>
     </div>
   );
 }
