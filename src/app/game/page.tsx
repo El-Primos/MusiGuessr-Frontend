@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { MusicPlayer } from "@/components/Game/MusicPlayer";
 import { MusicSearch, type Track } from "@/components/Game/MusicSearch";
 import { useApi } from "@/lib/useApi";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
@@ -17,6 +18,7 @@ export default function Game() {
   const tournamentId = searchParams?.get('tournament');
   const existingGameId = searchParams?.get('gameId');
   const { apiFetch } = useApi(API_BASE);
+  const { t } = useLanguage();
 
   // API State
   const [gameId, setGameId] = useState<number | null>(null);
@@ -290,6 +292,7 @@ export default function Game() {
           earnedScore={answerData.earnedScore}
           correctMusic={answerData.correctMusic}
           onContinue={handleContinue}
+          t={t}
         />
       )}
 
@@ -303,7 +306,7 @@ export default function Game() {
                 onComplete={handleSkip}
               />
               <span className="text-blue-600 dark:text-blue-400 font-bold tracking-widest uppercase text-xs">
-                Raund {currentRound} / {totalRounds}
+                {t('game.round')} {currentRound} / {totalRounds}
               </span>
             </div>
 
@@ -325,31 +328,32 @@ export default function Game() {
               onClick={handleSkip}
               className="px-8 py-3 rounded-xl bg-slate-200 dark:bg-slate-700/50 hover:bg-slate-300 dark:hover:bg-slate-600/50 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white font-semibold transition-all border border-slate-300 dark:border-slate-600/50 hover:border-slate-400 dark:hover:border-slate-500"
             >
-              Skip
+              {t('game.skip')}
             </button>
 
             <div className="mt-4 px-6 py-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-xl shadow-lg shadow-emerald-500/10">
-              SCORE: {totalScore}
+              {t('game.score').toUpperCase()}: {totalScore}
             </div>
           </section>
         )}
       </main>
 
       {!gameStarted && (
-        <StartModal onStart={handleStartGame} loading={loading} />
+        <StartModal onStart={handleStartGame} loading={loading} t={t} />
       )}
 
       {gameOver && (
         <ResultModal
           score={totalScore}
           onContinue={() => router.push(tournamentId ? `/tournaments/${tournamentId}` : "/")}
+          t={t}
         />
       )}
     </div>
   );
 }
 
-const StartModal = ({ onStart, loading }: { onStart: () => void; loading: boolean }) => (
+const StartModal = ({ onStart, loading, t }: { onStart: () => void; loading: boolean; t: (key: string) => string }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/90 dark:bg-black/90 backdrop-blur-sm px-4">
     <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
       <div className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/10 text-blue-500 dark:text-blue-400">
@@ -360,24 +364,24 @@ const StartModal = ({ onStart, loading }: { onStart: () => void; loading: boolea
       </div>
       <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">MusiGuessr</h2>
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">
-        Şarkıları dinle, sanatçıyı bul, en yüksek skoru sen yap!
+        {t('game.subtitle')}
       </p>
       <button
         onClick={onStart}
         disabled={loading}
         className="w-full rounded-2xl bg-blue-600 py-4 text-lg font-bold text-white transition-all hover:bg-blue-500 hover:scale-[1.02] disabled:opacity-50 active:scale-95"
       >
-        {loading ? "Hazırlanıyor..." : "Oyunu Başlat"}
+        {loading ? t('game.preparing') : t('game.startGame')}
       </button>
     </div>
   </div>
 );
 
-const ResultModal = ({ score, onContinue }: { score: number; onContinue: () => void }) => (
+const ResultModal = ({ score, onContinue, t }: { score: number; onContinue: () => void; t: (key: string) => string }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-md px-4">
     <div className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
-      <p className="text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs mb-2">Oyun Tamamlandı</p>
-      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Final Skorun</h2>
+      <p className="text-blue-600 dark:text-blue-400 font-bold uppercase tracking-widest text-xs mb-2">{t('game.gameOver')}</p>
+      <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">{t('game.finalScore')}</h2>
       
       <div className="mb-8 relative">
         <div className="text-6xl font-black text-emerald-500 dark:text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
@@ -390,7 +394,7 @@ const ResultModal = ({ score, onContinue }: { score: number; onContinue: () => v
           onClick={onContinue}
           className="w-full rounded-2xl bg-blue-600 py-4 text-lg font-bold text-white transition-all hover:bg-blue-500 active:scale-95"
         >
-          Ana Sayfaya Dön
+          {t('nav.backToHome')}
         </button>
       </div>
     </div>
@@ -403,12 +407,14 @@ const AnswerModal = ({
   earnedScore,
   correctMusic,
   onContinue,
+  t,
 }: {
   correct: boolean;
   skipped: boolean;
   earnedScore: number;
   correctMusic: { id: number; name: string; artist: string; genre: string } | null;
   onContinue: () => void;
+  t: (key: string) => string;
 }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/95 dark:bg-black/95 backdrop-blur-md px-4">
     <div className="w-full max-w-md rounded-3xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-8 text-center shadow-2xl">
@@ -435,38 +441,38 @@ const AnswerModal = ({
       <h2 className={`text-3xl font-bold mb-2 ${
         correct ? 'text-green-500 dark:text-green-400' : skipped ? 'text-yellow-500 dark:text-yellow-400' : 'text-red-500 dark:text-red-400'
       }`}>
-        {correct ? 'Doğru!' : skipped ? 'Pas Geçildi!' : 'Yanlış!'}
+        {correct ? t('game.correct') : skipped ? t('game.skipped') : t('game.wrong')}
       </h2>
 
       {/* Score */}
       {correct && (
         <p className="text-yellow-500 dark:text-yellow-400 font-bold text-xl mb-4">
-          +{earnedScore} puan
+          +{earnedScore} {t('game.points')}
         </p>
       )}
 
       {/* Correct Song Details */}
       {correctMusic ? (
         <div className="bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-6 mb-6 border border-slate-200 dark:border-slate-700">
-          <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">Doğru Şarkı:</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-3">{t('game.correctSong')}:</p>
           <div className="space-y-2 text-left">
             <div>
-              <span className="text-blue-600 dark:text-blue-400 text-sm">Şarkı: </span>
+              <span className="text-blue-600 dark:text-blue-400 text-sm">{t('game.song')}: </span>
               <span className="text-slate-900 dark:text-white font-semibold">{correctMusic.name}</span>
             </div>
             <div>
-              <span className="text-blue-600 dark:text-blue-400 text-sm">Sanatçı: </span>
+              <span className="text-blue-600 dark:text-blue-400 text-sm">{t('game.artist')}: </span>
               <span className="text-slate-900 dark:text-white font-semibold">{correctMusic.artist}</span>
             </div>
             <div>
-              <span className="text-blue-600 dark:text-blue-400 text-sm">Tür: </span>
+              <span className="text-blue-600 dark:text-blue-400 text-sm">{t('game.genre')}: </span>
               <span className="text-slate-900 dark:text-white font-semibold">{correctMusic.genre}</span>
             </div>
           </div>
         </div>
       ) : (
         <div className="bg-slate-100 dark:bg-slate-800/50 rounded-2xl p-6 mb-6 border border-slate-200 dark:border-slate-700">
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Şarkı bilgisi yükleniyor...</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('game.loadingSongInfo')}</p>
         </div>
       )}
 
@@ -475,7 +481,7 @@ const AnswerModal = ({
         onClick={onContinue}
         className="w-full rounded-2xl bg-blue-600 py-4 text-lg font-bold text-white transition-all hover:bg-blue-500 active:scale-95"
       >
-        Devam Et
+        {t('game.continue')}
       </button>
     </div>
   </div>

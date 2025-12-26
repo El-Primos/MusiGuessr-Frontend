@@ -13,6 +13,7 @@ import { Toast } from '@/components/Toast';
 import { Loading } from '@/components/Loading';
 import { useApi } from '@/lib/useApi';
 import { calculateTournamentStatus } from '@/lib/tournamentUtils';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   TournamentPageResponse,
   mapTournamentStatus,
@@ -33,6 +34,7 @@ interface TournamentData {
 
 export default function TournamentsPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [tournamentData, setTournamentData] = useState<TournamentData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'all' | 'upcoming' | 'active' | 'completed'>('all');
@@ -305,7 +307,7 @@ export default function TournamentsPage() {
   };
 
   if (isLoading) {
-    return <Loading fullScreen message="Loading tournaments..." />;
+    return <Loading fullScreen message={t('common.loading')} />;
   }
 
   // Check if user is not authenticated
@@ -379,8 +381,8 @@ export default function TournamentsPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Tournaments</h1>
-          <p className="text-slate-500 dark:text-slate-400">Join tournaments and compete for prizes!</p>
+          <h1 className="text-3xl font-bold mb-2">{t('tournaments.title')}</h1>
+          <p className="text-slate-500 dark:text-slate-400">{t('home.subtitle')}</p>
         </div>
 
         {/* Tournament Statistics - Compact at top */}

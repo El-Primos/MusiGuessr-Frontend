@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useApi } from '@/lib/useApi';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
@@ -18,6 +19,7 @@ interface Stats {
 export default function AdminDashboard() {
   const router = useRouter();
   const { apiFetch } = useApi(API_BASE);
+  const { t } = useLanguage();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -68,42 +70,42 @@ export default function AdminDashboard() {
   const statCards = stats
     ? [
         {
-          title: 'Total Users',
+          title: t('admin.totalUsers'),
           value: stats.totalUsers,
           icon: '👥',
           color: 'from-blue-500 to-blue-600',
           link: '/admin/users',
         },
         {
-          title: 'Total Artists',
+          title: t('admin.totalArtists'),
           value: stats.totalArtists,
           icon: '🎤',
           color: 'from-purple-500 to-purple-600',
           link: '/admin/artist',
         },
         {
-          title: 'Total Genres',
+          title: t('admin.totalGenres'),
           value: stats.totalGenres,
           icon: '🎵',
           color: 'from-pink-500 to-pink-600',
           link: '/admin/genre',
         },
         {
-          title: 'Total Songs',
+          title: t('admin.totalSongs'),
           value: stats.totalMusic,
           icon: '🎶',
           color: 'from-green-500 to-green-600',
           link: '/admin/musicUpload',
         },
         {
-          title: 'Total Playlists',
+          title: t('admin.totalPlaylists'),
           value: stats.totalPlaylists,
           icon: '📝',
           color: 'from-yellow-500 to-yellow-600',
           link: '/admin/playlist',
         },
         {
-          title: 'Total Tournaments',
+          title: t('admin.totalTournaments'),
           value: stats.totalTournaments,
           icon: '🏆',
           color: 'from-red-500 to-red-600',
@@ -116,9 +118,9 @@ export default function AdminDashboard() {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+        <h1 className="text-4xl font-bold mb-2">{t('admin.dashboard')}</h1>
         <p className="text-slate-500 dark:text-slate-400">
-          Welcome to the MusiGuessr admin control panel
+          {t('admin.welcomeMessage')}
         </p>
       </div>
 
@@ -127,7 +129,7 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-center py-20">
           <div className="text-center">
             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-slate-500 dark:text-slate-400">Loading statistics...</p>
+            <p className="text-slate-500 dark:text-slate-400">{t('admin.loadingStats')}</p>
           </div>
         </div>
       )}
@@ -162,7 +164,7 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-400">
-                <span>View details</span>
+                <span>{t('admin.viewDetails')}</span>
                 <span className="group-hover:translate-x-1 transition-transform">
                   →
                 </span>
@@ -175,35 +177,35 @@ export default function AdminDashboard() {
       {/* Quick Actions */}
       {!loading && !error && (
         <div className="mt-12">
-          <h2 className="text-2xl font-bold mb-6">Quick Actions</h2>
+          <h2 className="text-2xl font-bold mb-6">{t('admin.quickActions')}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={() => router.push('/admin/musicUpload')}
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <span>⬆️</span>
-              Upload Music
+              {t('admin.uploadMusic')}
             </button>
             <button
               onClick={() => router.push('/admin/tournament')}
               className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <span>🏆</span>
-              Create Tournament
+              {t('admin.createTournament')}
             </button>
             <button
               onClick={() => router.push('/admin/playlist')}
               className="bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <span>📝</span>
-              Manage Playlists
+              {t('admin.managePlaylists')}
             </button>
             <button
               onClick={() => router.push('/admin/users')}
               className="bg-red-600 hover:bg-red-700 text-white px-6 py-4 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
             >
               <span>👥</span>
-              Manage Users
+              {t('admin.manageUsers')}
             </button>
           </div>
         </div>

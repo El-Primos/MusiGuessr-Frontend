@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
 import { Loading } from '@/components/Loading';
 import { calculateTournamentStatus, hasTournamentStarted, hasTournamentEnded } from '@/lib/tournamentUtils';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   TournamentResponseDTO,
   TournamentLeaderboardEntryDTO,
@@ -40,6 +41,7 @@ export default function TournamentDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const tournamentId = params?.tournamentId as string;
+  const { t } = useLanguage();
   
   const [tournament, setTournament] = useState<TournamentDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -295,7 +297,7 @@ export default function TournamentDetailsPage() {
   };
 
   if (isLoading) {
-    return <Loading fullScreen message="Loading tournament details..." />;
+    return <Loading fullScreen message={t('loading.tournament')} />;
   }
 
   if (!tournament) {
@@ -309,13 +311,13 @@ export default function TournamentDetailsPage() {
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
           <div className="text-center">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">Tournament Not Found</h2>
-            <p className="text-slate-500 dark:text-slate-400 mb-6">The tournament you are looking for does not exist.</p>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">{t('tournaments.notFound')}</h2>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">{t('tournaments.notFoundDescription')}</p>
             <Button
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
               onClick={() => router.push('/tournaments')}
             >
-              Back to Tournaments
+              {t('nav.backToTournaments')}
             </Button>
           </div>
         </main>
@@ -358,7 +360,7 @@ export default function TournamentDetailsPage() {
           className="mb-6 text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 flex items-center gap-2 transition-colors"
         >
           <span>←</span>
-          <span>Back to Tournaments</span>
+          <span>{t('nav.backToTournaments')}</span>
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -379,15 +381,15 @@ export default function TournamentDetailsPage() {
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div>
-                    <span className="text-blue-600 dark:text-blue-200 block">Start Date</span>
+                    <span className="text-blue-600 dark:text-blue-200 block">{t('tournaments.startDate')}</span>
                     <span className="text-slate-900 dark:text-white font-semibold">{tournament.startDate}</span>
                   </div>
                   <div>
-                    <span className="text-blue-600 dark:text-blue-200 block">End Date</span>
+                    <span className="text-blue-600 dark:text-blue-200 block">{t('tournaments.endDate')}</span>
                     <span className="text-slate-900 dark:text-white font-semibold">{tournament.endDate}</span>
                   </div>
                   <div>
-                    <span className="text-blue-600 dark:text-blue-200 block">Participants</span>
+                    <span className="text-blue-600 dark:text-blue-200 block">{t('tournaments.participants')}</span>
                     <span className="text-slate-900 dark:text-white font-semibold">
                       {tournament.participants}
                       {tournament.maxParticipants && ` / ${tournament.maxParticipants}`}
@@ -395,7 +397,7 @@ export default function TournamentDetailsPage() {
                   </div>
                   {tournament.prize && (
                     <div>
-                      <span className="text-blue-600 dark:text-blue-200 block">Prize</span>
+                      <span className="text-blue-600 dark:text-blue-200 block">{t('tournaments.prize')}</span>
                       <span className="text-yellow-500 dark:text-yellow-400 font-semibold">{tournament.prize}</span>
                     </div>
                   )}
@@ -411,7 +413,7 @@ export default function TournamentDetailsPage() {
                       }`}
                       onClick={!isFull ? handleJoinTournament : undefined}
                     >
-                      {isFull ? 'Tournament Full' : 'Join Tournament'}
+                      {isFull ? t('tournaments.tournamentFull') : t('tournaments.joinTournament')}
                     </Button>
                   )}
                   {canPlay && (
@@ -419,7 +421,7 @@ export default function TournamentDetailsPage() {
                       className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-semibold"
                       onClick={handlePlayTournament}
                     >
-                      Play Now
+                      {t('tournaments.playNow')}
                     </Button>
                   )}
                   {canLeave && (
@@ -427,12 +429,12 @@ export default function TournamentDetailsPage() {
                       className="flex-1 py-3 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg font-semibold"
                       onClick={handleLeaveTournament}
                     >
-                      Leave Tournament
+                      {t('tournaments.leaveTournament')}
                     </Button>
                   )}
                   {tournament.isRegistered && hasEnded && (
                     <div className="flex-1 py-3 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
-                      Registered
+                      {t('tournaments.registered')}
                     </div>
                   )}
                 </div>
@@ -443,15 +445,15 @@ export default function TournamentDetailsPage() {
           <div className="lg:col-span-1">
             <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 sticky top-4">
               <div className="bg-slate-100 dark:bg-slate-950 px-6 py-4 border-b border-slate-200 dark:border-blue-900/40">
-                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Leaderboard</h2>
+                <h2 className="text-xl font-bold text-slate-900 dark:text-white">{t('tournaments.leaderboard')}</h2>
               </div>
               <div className="p-4">
                 {tournament.leaderboard.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-slate-500 dark:text-slate-400 text-sm">
                       {tournament.status === 'Upcoming'
-                        ? 'Leaderboard will be available when the tournament starts.'
-                        : 'No scores yet. Be the first to play!'}
+                        ? t('tournaments.leaderboardUpcoming')
+                        : t('tournaments.leaderboardEmpty')}
                     </p>
                   </div>
                 ) : (

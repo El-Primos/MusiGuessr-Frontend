@@ -5,6 +5,7 @@ import { useAdminGuard } from '@/hooks/useAdminGuard';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function AdminLayout({
   children,
@@ -14,17 +15,18 @@ export default function AdminLayout({
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { t } = useLanguage();
 
   useAdminGuard(router);
 
   const navItems = [
-    { name: 'Dashboard', href: '/admin', icon: '📊' },
-    { name: 'Artists', href: '/admin/artist', icon: '🎤' },
-    { name: 'Genres', href: '/admin/genre', icon: '🎵' },
-    { name: 'Music', href: '/admin/musicUpload', icon: '⬆️' },
-    { name: 'Playlists', href: '/admin/playlist', icon: '📝' },
-    { name: 'Tournaments', href: '/admin/tournament', icon: '🏆' },
-    { name: 'Users', href: '/admin/users', icon: '👥' },
+    { name: t('admin.dashboard'), href: '/admin', icon: '📊' },
+    { name: t('admin.artists'), href: '/admin/artist', icon: '🎤' },
+    { name: t('admin.genres'), href: '/admin/genre', icon: '🎵' },
+    { name: t('admin.musicUpload'), href: '/admin/musicUpload', icon: '⬆️' },
+    { name: t('admin.playlists'), href: '/admin/playlist', icon: '📝' },
+    { name: t('admin.tournament'), href: '/admin/tournament', icon: '🏆' },
+    { name: t('admin.users'), href: '/admin/users', icon: '👥' },
   ];
 
   return (
@@ -39,7 +41,7 @@ export default function AdminLayout({
         <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
           {isSidebarOpen && (
             <div>
-              <h2 className="text-xl font-bold text-blue-600 dark:text-blue-400">Admin Panel</h2>
+              <h2 className="text-xl font-bold text-blue-600 dark:text-blue-400">{t('admin.dashboard')}</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">MusiGuessr</p>
             </div>
           )}
@@ -81,10 +83,10 @@ export default function AdminLayout({
           <button
             onClick={() => router.push('/')}
             className={`flex items-center gap-3 px-3 py-2 w-full rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300`}
-            title={!isSidebarOpen ? 'Exit Admin' : undefined}
+            title={!isSidebarOpen ? t('game.exit') : undefined}
           >
             <span className="text-xl">🚪</span>
-            {isSidebarOpen && <span className="font-medium">Exit Admin</span>}
+            {isSidebarOpen && <span className="font-medium">{t('game.exit')}</span>}
           </button>
         </div>
       </aside>

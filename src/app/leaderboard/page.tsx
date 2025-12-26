@@ -8,12 +8,14 @@ import { LeaderboardTabs } from '@/components/Leaderboard/LeaderboardTabs';
 import { LeaderboardTable } from '@/components/Leaderboard/LeaderboardTable';
 import { useApi } from '@/lib/useApi';
 import { fetchGlobalLeaderboard, fetchFriendsLeaderboard, type LeaderboardEntry } from '@/services/leaderboardService';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function LeaderboardPage() {
   const router = useRouter();
   const { apiFetch } = useApi(API_BASE);
+  const { t } = useLanguage();
   
   const [activeTab, setActiveTab] = useState<'global' | 'friends'>('global');
   const [data, setData] = useState<LeaderboardEntry[]>([]);
@@ -101,7 +103,7 @@ export default function LeaderboardPage() {
               <button
                 onClick={() => router.push("/profile")}
                 className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
-                title="View Profile"
+                title={t('nav.profile')}
               >
                 <svg
                   className="w-5 h-5"
@@ -116,12 +118,12 @@ export default function LeaderboardPage() {
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-                <span className="hidden sm:inline">Profile</span>
+                <span className="hidden sm:inline">{t('nav.profile')}</span>
               </button>
               <button
                 onClick={handleLogout}
                 className="px-2 md:px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-1 transition-colors"
-                title="Logout"
+                title={t('nav.logout')}
               >
                 <svg
                   className="w-5 h-5"
@@ -136,7 +138,7 @@ export default function LeaderboardPage() {
                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
-                <span className="hidden md:inline">Logout</span>
+                <span className="hidden md:inline">{t('nav.logout')}</span>
               </button>
             </div>
           ) : null
@@ -144,7 +146,7 @@ export default function LeaderboardPage() {
       />
 
       <main className="max-w-5xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-4">Leaderboard</h1>
+        <h1 className="text-2xl font-bold mb-4">{t('leaderboard.title')}</h1>
         
         {/* Tab buttons */}
         <LeaderboardTabs
@@ -163,7 +165,7 @@ export default function LeaderboardPage() {
         {loading ? (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-blue-400 mb-4"></div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Loading leaderboard...</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">{t('leaderboard.loading')}</p>
           </div>
         ) : (
           /* Leaderboard Table */

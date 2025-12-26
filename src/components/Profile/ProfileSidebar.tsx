@@ -5,6 +5,7 @@ import Button from '@/components/Button';
 import { EditProfileModal } from './EditProfileModal';
 import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ProfileData {
   userId: number;
@@ -42,6 +43,7 @@ export const ProfileSidebar = ({
   const [editedName, setEditedName] = useState(profileData.name);
   const [isUploadingPicture, setIsUploadingPicture] = useState(false);
   const { toast, showToast, hideToast } = useToast();
+  const { t } = useLanguage();
 
   // Update editedName when profileData.name changes
   useEffect(() => {
@@ -58,7 +60,7 @@ export const ProfileSidebar = ({
   const handleShareProfile = () => {
     const profileUrl = `${window.location.origin}/profile/${profileData.userId}`;
     navigator.clipboard.writeText(profileUrl);
-    showToast('Profile link copied!', 'success');
+    showToast(t('profile.profileLinkCopied'), 'success');
   };
 
   const handlePictureChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,14 +69,14 @@ export const ProfileSidebar = ({
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      showToast('Please select an image file', 'error');
+      showToast(t('profile.selectImage'), 'error');
       return;
     }
 
     // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
-      showToast('Image size must be less than 5MB', 'error');
+      showToast(t('profile.imageSizeLimit'), 'error');
       return;
     }
 
@@ -85,7 +87,7 @@ export const ProfileSidebar = ({
 
     setIsUploadingPicture(true);
     try {
-      showToast('Uploading profile picture...', 'info');
+      showToast(t('profile.uploadingPicture'), 'info');
       
       const { uploadProfileImage } = await import('@/services/profileService');
       const updatedUser = await uploadProfileImage(file, apiFetch);
@@ -101,7 +103,7 @@ export const ProfileSidebar = ({
         });
       }
 
-      showToast('Profile picture updated successfully!', 'success');
+      showToast(t('profile.pictureUpdated'), 'success');
     } catch (err) {
       console.error('Failed to upload profile picture:', err);
       showToast(
@@ -141,7 +143,7 @@ export const ProfileSidebar = ({
         });
       }
 
-      showToast('Name updated successfully!', 'success');
+      showToast(t('profile.nameUpdated'), 'success');
       setIsEditingName(false);
     } catch (err) {
       console.error('Failed to update name:', err);
@@ -201,7 +203,7 @@ export const ProfileSidebar = ({
                   ? 'bg-slate-600 cursor-not-allowed opacity-50' 
                   : 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
               }`} 
-              title={isUploadingPicture ? 'Uploading...' : 'Change picture'}
+              title={isUploadingPicture ? t('common.loading') : t('profile.changePicture')}
             >
               <input
                 type="file"
@@ -316,13 +318,13 @@ export const ProfileSidebar = ({
                 className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
                 onClick={handleShareProfile}
               >
-                Share Profile
+                {t('profile.shareProfile')}
               </Button>
               <Button
                 className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
                 onClick={() => setIsEditModalOpen(true)}
               >
-                Edit Profile
+                {t('profile.editProfile')}
               </Button>
               <Button
                 className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2"
@@ -344,7 +346,7 @@ export const ProfileSidebar = ({
                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
-                Logout
+                {t('profile.logout')}
               </Button>
             </>
           ) : (
@@ -357,28 +359,28 @@ export const ProfileSidebar = ({
                     window.location.href = '/auth?mode=login';
                   }}
                 >
-                  Login to add friend
+                  {t('profile.loginToAddFriend')}
                 </Button>
               ) : friendshipStatus === 'friend' ? (
                 <Button
                   className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold"
                   onClick={onRemoveFriend}
                 >
-                  Remove Friend
+                  {t('profile.removeFriend')}
                 </Button>
               ) : friendshipStatus === 'pending' ? (
                 <Button
                   className="w-full px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-semibold"
                   onClick={onCancelRequest}
                 >
-                  Cancel Request
+                  {t('profile.cancelRequest')}
                 </Button>
               ) : (
                 <Button
                   className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold"
                   onClick={onAddFriend}
                 >
-                  Add Friend
+                  {t('profile.addFriend')}
                 </Button>
               )}
             </>

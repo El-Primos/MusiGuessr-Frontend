@@ -1,16 +1,20 @@
 'use client';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 interface TournamentTabsProps {
   activeTab: 'all' | 'upcoming' | 'active' | 'completed';
   onTabChange: (tab: 'all' | 'upcoming' | 'active' | 'completed') => void;
 }
 
 export const TournamentTabs = ({ activeTab, onTabChange }: TournamentTabsProps) => {
-  const tabs: { key: 'all' | 'upcoming' | 'active' | 'completed'; label: string }[] = [
-    { key: 'all', label: 'All' },
-    { key: 'upcoming', label: 'Upcoming' },
-    { key: 'active', label: 'Active' },
-    { key: 'completed', label: 'Completed' },
+  const { t } = useLanguage();
+  
+  const tabs: { key: 'all' | 'upcoming' | 'active' | 'completed'; labelKey: string }[] = [
+    { key: 'all', labelKey: 'leaderboard.allTime' },
+    { key: 'upcoming', labelKey: 'tournaments.upcoming' },
+    { key: 'active', labelKey: 'tournaments.active' },
+    { key: 'completed', labelKey: 'tournaments.past' },
   ];
 
   return (
@@ -25,7 +29,7 @@ export const TournamentTabs = ({ activeTab, onTabChange }: TournamentTabsProps) 
               : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white border border-slate-200 dark:border-transparent'
           }`}
         >
-          {tab.label}
+          {t(tab.labelKey)}
         </button>
       ))}
     </div>

@@ -1,11 +1,15 @@
 'use client';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 interface LeaderboardTabsProps {
   activeTab: 'global' | 'friends';
   onTabChange: (tab: 'global' | 'friends') => void;
 }
 
 export const LeaderboardTabs = ({ activeTab, onTabChange }: LeaderboardTabsProps) => {
+  const { t } = useLanguage();
+  
   return (
     <div className="flex gap-2 mb-6">
       <button
@@ -18,7 +22,7 @@ export const LeaderboardTabs = ({ activeTab, onTabChange }: LeaderboardTabsProps
           }
         `}
       >
-        Global
+        {t('leaderboard.allTime')}
       </button>
       <button
         onClick={() => onTabChange('friends')}
@@ -30,7 +34,7 @@ export const LeaderboardTabs = ({ activeTab, onTabChange }: LeaderboardTabsProps
           }
         `}
       >
-        Friends
+        {t('profile.friends')}
       </button>
     </div>
   );

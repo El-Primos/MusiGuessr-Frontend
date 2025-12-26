@@ -12,6 +12,7 @@ import { Toast } from '@/components/Toast';
 import { useApi } from '@/lib/useApi';
 import { fetchUserProfile, ProfileData } from '@/services/profileService';
 import { addFriend, removeFriend, checkFriendship, getIncomingRequests, sendFollowRequest } from '@/services/friendsService';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
@@ -20,6 +21,7 @@ export default function OtherUserProfilePage() {
   const params = useParams();
   const userId = parseInt(params.userId as string, 10);
   const { apiFetch, token } = useApi(API_BASE);
+  const { t } = useLanguage();
 
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -225,7 +227,7 @@ export default function OtherUserProfilePage() {
                 <button
                   onClick={() => router.push("/profile")}
                   className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
-                  title="View My Profile"
+                  title={t('profile.title')}
                 >
                   <svg
                     className="w-5 h-5"
@@ -240,14 +242,14 @@ export default function OtherUserProfilePage() {
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                  <span className="hidden sm:inline">Profile</span>
+                  <span className="hidden sm:inline">{t('profile.title')}</span>
                 </button>
               </div>
             ) : null
           }
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-500 dark:text-slate-400">Loading...</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">{t('common.loading')}</div>
         </main>
       </div>
     );
@@ -267,7 +269,7 @@ export default function OtherUserProfilePage() {
                 <button
                   onClick={() => router.push("/profile")}
                   className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
-                  title="View My Profile"
+                  title={t('profile.title')}
                 >
                   <svg
                     className="w-5 h-5"
@@ -282,14 +284,14 @@ export default function OtherUserProfilePage() {
                       d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                     />
                   </svg>
-                  <span className="hidden sm:inline">Profile</span>
+                  <span className="hidden sm:inline">{t('profile.title')}</span>
                 </button>
               </div>
             ) : null
           }
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-500 dark:text-slate-400">Profile not found</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">{t('profile.userNotFound')}</div>
         </main>
       </div>
     );
@@ -309,7 +311,7 @@ export default function OtherUserProfilePage() {
               <button
                 onClick={() => router.push("/profile")}
                 className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
-                title="View My Profile"
+                title={t('profile.title')}
               >
                 <svg
                   className="w-5 h-5"
@@ -324,7 +326,7 @@ export default function OtherUserProfilePage() {
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-                <span className="hidden sm:inline">Profile</span>
+                <span className="hidden sm:inline">{t('profile.title')}</span>
               </button>
             </div>
           ) : null

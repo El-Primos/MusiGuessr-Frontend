@@ -2,6 +2,7 @@
 
 import Button from '@/components/Button';
 import { calculateTournamentStatus, hasTournamentStarted, hasTournamentEnded } from '@/lib/tournamentUtils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export interface TournamentCardData {
   tournamentId: string;
@@ -25,6 +26,7 @@ interface TournamentCardProps {
 }
 
 export const TournamentCard = ({ tournament, onJoin, onView, onPlay }: TournamentCardProps) => {
+  const { t } = useLanguage();
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'Upcoming':
@@ -68,18 +70,18 @@ export const TournamentCard = ({ tournament, onJoin, onView, onPlay }: Tournamen
       <div className="p-4 space-y-3 flex-1 flex flex-col">
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <span className="text-blue-600 dark:text-blue-200">Start Date:</span>
+            <span className="text-blue-600 dark:text-blue-200">{t('tournaments.startDate')}:</span>
             <p className="text-slate-900 dark:text-white font-semibold">{tournament.startDate}</p>
           </div>
           <div>
-            <span className="text-blue-600 dark:text-blue-200">End Date:</span>
+            <span className="text-blue-600 dark:text-blue-200">{t('tournaments.endDate')}:</span>
             <p className="text-slate-900 dark:text-white font-semibold">{tournament.endDate}</p>
           </div>
         </div>
 
         <div className="flex justify-between items-center text-sm">
           <div>
-            <span className="text-blue-600 dark:text-blue-200">Participants:</span>
+            <span className="text-blue-600 dark:text-blue-200">{t('tournaments.participants')}:</span>
             <span className="text-slate-900 dark:text-white font-semibold ml-2">
               {tournament.participants}
               {tournament.maxParticipants && ` / ${tournament.maxParticipants}`}
@@ -87,7 +89,7 @@ export const TournamentCard = ({ tournament, onJoin, onView, onPlay }: Tournamen
           </div>
           {tournament.prize && (
             <div>
-              <span className="text-blue-600 dark:text-blue-200">Prize:</span>
+              <span className="text-blue-600 dark:text-blue-200">{t('tournaments.prize')}:</span>
               <span className="text-yellow-500 dark:text-yellow-400 font-semibold ml-2">{tournament.prize}</span>
             </div>
           )}
@@ -104,7 +106,7 @@ export const TournamentCard = ({ tournament, onJoin, onView, onPlay }: Tournamen
               }`}
               onClick={() => !isFull && onJoin?.(tournament.tournamentId)}
             >
-              {isFull ? 'Full' : 'Join'}
+              {isFull ? t('tournaments.tournamentFull') : t('tournaments.joinTournament')}
             </Button>
           )}
           {canPlay && (
@@ -112,24 +114,24 @@ export const TournamentCard = ({ tournament, onJoin, onView, onPlay }: Tournamen
               className="flex-1 py-2 text-sm font-semibold rounded-lg bg-green-600 hover:bg-green-700 text-white"
               onClick={() => onPlay?.(tournament.tournamentId)}
             >
-              Play Now
+              {t('tournaments.playNow')}
             </Button>
           )}
           {tournament.isRegistered && !canPlay && !hasEnded && (
             <div className="flex-1 py-2 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center cursor-not-allowed">
-              Already Joined
+              {t('tournaments.registered')}
             </div>
           )}
           {tournament.isRegistered && hasEnded && (
             <div className="flex-1 py-2 text-sm font-semibold rounded-lg bg-green-600/20 text-green-400 border border-green-600/40 text-center">
-              Finished
+              {t('tournaments.past')}
             </div>
           )}
           <Button
             className="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm rounded-lg font-semibold"
             onClick={() => onView?.(tournament.tournamentId)}
           >
-            Details
+            {t('common.details')}
           </Button>
         </div>
       </div>

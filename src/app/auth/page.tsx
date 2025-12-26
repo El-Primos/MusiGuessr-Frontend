@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Button from "@/components/Button";
 import { Header } from "@/components/Header";
 import { AuthRes } from "@/dto/common.dto";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
@@ -15,6 +16,7 @@ const isEmail = (s: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
 export default function Auth() {
   const router = useRouter();
   const sp = useSearchParams();
+  const { t } = useLanguage();
 
   const initialMode = (sp.get("mode") as Mode) || "login";
   const [mode, setMode] = useState<Mode>(initialMode);
@@ -37,10 +39,10 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const title = useMemo(() => (mode === "login" ? "Welcome back" : "Create your account"), [mode]);
+  const title = useMemo(() => (mode === "login" ? t('auth.welcomeBack') : t('auth.createAccount')), [mode, t]);
   const subtitle = useMemo(
-    () => (mode === "login" ? "Login to continue" : "Sign up to start playing"),
-    [mode]
+    () => (mode === "login" ? t('auth.loginToContinue') : t('auth.signupToStart')),
+    [mode, t]
   );
 
   function switchMode(m: Mode) {
@@ -73,7 +75,7 @@ export default function Auth() {
     setError(null);
 
     if (!loginUserName.trim() || !loginPassword) {
-      setError("Please fill in username and password.");
+      setError(t('auth.fillUsernamePassword'));
       return;
     }
 
@@ -100,9 +102,9 @@ export default function Auth() {
       })
       .catch((err: unknown) => {
         if (err instanceof Error && err.message.includes("disabled")) {
-          setError("Hesabınız banlanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.");
+          setError(t('auth.accountBanned'));
         } else {
-          setError(err instanceof Error ? err.message : "Login failed.");
+          setError(err instanceof Error ? err.message : t('auth.loginFailed'));
         }
       })
       .finally(() => {
@@ -121,15 +123,15 @@ export default function Auth() {
     const em = email.trim();
 
     if (!n || !u || !em || !signupPassword) {
-      setError("Please fill in all fields.");
+      setError(t('auth.fillAllFields'));
       return;
     }
     if (!isEmail(em)) {
-      setError("Please enter a valid email.");
+      setError(t('auth.validEmail'));
       return;
     }
     if (signupPassword.length < 6) {
-      setError("Password must be at least 6 characters.");
+      setError(t('auth.passwordLength'));
       return;
     }
 
@@ -163,7 +165,7 @@ export default function Auth() {
       storeUserAndGoHome(data);
     })
     .catch((err: unknown) => {
-      setError(err instanceof Error ? err.message : "Sign up failed.");
+      setError(err instanceof Error ? err.message : t('auth.signupFailed'));
     })
     .finally(() => {
       setLoading(false);
@@ -198,7 +200,7 @@ export default function Auth() {
                     mode === "login" ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white",
                   ].join(" ")}
                 >
-                  Login
+                  {t('nav.login')}
                 </button>
                 <button
                   type="button"
@@ -208,7 +210,7 @@ export default function Auth() {
                     mode === "signup" ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white",
                   ].join(" ")}
                 >
-                  Sign Up
+                  {t('nav.signup')}
                 </button>
               </div>
             </div>
@@ -227,57 +229,57 @@ export default function Auth() {
           {mode === "login" ? (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Username</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('auth.username')}</label>
                 <input
                   value={loginUserName}
                   onChange={(e) => setLoginUserName(e.target.value)}
                   className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                  placeholder="Enter your username"
+                  placeholder={t('auth.enterUsername')}
                   autoComplete="username"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Password</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('auth.password')}</label>
                 <input
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   type="password"
                   className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                  placeholder="••••••••"
+                  placeholder={t('auth.enterPassword')}
                   autoComplete="current-password"
                 />
               </div>
 
               <Button className={primaryBtnClass} onClick={login}>
-                {loading ? "Processing..." : "Login"}
+                {loading ? t('auth.processing') : t('auth.loginButton')}
               </Button>
 
               <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-                Don&apos;t have an account?{" "}
+                {t('auth.noAccount')}{" "}
                 <button
                   type="button"
                   onClick={() => switchMode("signup")}
                   className="text-blue-500 dark:text-blue-400 hover:text-blue-400 dark:hover:text-blue-300 font-semibold underline underline-offset-4"
                 >
-                  Sign up
+                  {t('nav.signup')}
                 </button>
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Full Name</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('auth.fullName')}</label>
                 <input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                  placeholder="John Doe"
+                  placeholder={t('auth.enterFullName')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Username</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('auth.username')}</label>
                 <input
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
@@ -287,38 +289,38 @@ export default function Auth() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('auth.email')}</label>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                  placeholder="john@example.com"
+                  placeholder={t('auth.enterEmail')}
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">Password</label>
+                <label className="block text-sm font-medium text-slate-600 dark:text-slate-300 mb-1.5">{t('auth.password')}</label>
                 <input
                   value={signupPassword}
                   onChange={(e) => setSignupPassword(e.target.value)}
                   type="password"
                   className="w-full rounded-xl bg-slate-100 dark:bg-slate-900/50 border border-slate-300 dark:border-white/10 px-4 py-3 outline-none focus:ring-2 ring-blue-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
-                  placeholder="Min. 6 characters"
+                  placeholder={t('auth.minPassword')}
                 />
               </div>
 
               <Button className={primaryBtnClass} onClick={() => signup()}>
-                {loading ? "Creating account..." : "Create Account"}
+                {loading ? t('auth.creatingAccount') : t('auth.createAccountButton')}
               </Button>
 
               <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-                Already have an account?{" "}
+                {t('auth.hasAccount')}{" "}
                 <button
                   type="button"
                   onClick={() => switchMode("login")}
                   className="text-blue-500 dark:text-blue-400 hover:text-blue-400 dark:hover:text-blue-300 font-semibold underline underline-offset-4"
                 >
-                  Login
+                  {t('nav.login')}
                 </button>
               </p>
             </div>
@@ -330,7 +332,7 @@ export default function Auth() {
               onClick={() => (loading ? null : router.push("/"))}
               className="text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
-              ← Back to home
+              {t('nav.backToHome')}
             </button>
           </div>
         </div>

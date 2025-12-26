@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/useToast';
 import { Toast } from '@/components/Toast';
 import { shareGameHistory, deletePost, getMyPosts, type PostShareResponse } from '@/services/postService';
 import { type GameHistoryEntry } from '@/services/profileService';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface GameHistoryProps {
   gameHistory: GameHistoryEntry[];
@@ -16,6 +17,7 @@ interface GameHistoryProps {
 export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
   const router = useRouter();
   const { toast, showToast, hideToast } = useToast();
+  const { t } = useLanguage();
   const [posts, setPosts] = useState<PostShareResponse[]>([]);
   const [loadingPosts, setLoadingPosts] = useState<Record<number, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -63,7 +65,7 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
     try {
       const postResponse = await shareGameHistory(gameHistoryId, apiFetch);
       setPosts(prev => [...prev, postResponse]);
-      showToast('Game posted successfully!', 'success');
+      showToast(t('profile.gamePosted'), 'success');
     } catch (err) {
       console.error('Failed to post game:', err);
       showToast(err instanceof Error ? err.message : 'Failed to post game', 'error');
@@ -88,7 +90,7 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
     try {
       await deletePost(postId, apiFetch);
       setPosts(prev => prev.filter(p => p.postId !== postId));
-      showToast('Post removed successfully!', 'success');
+      showToast(t('profile.postRemoved'), 'success');
     } catch (err) {
       console.error('Failed to unpost:', err);
       showToast(err instanceof Error ? err.message : 'Failed to remove post', 'error');
@@ -106,17 +108,17 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
 
     const shareUrl = `${window.location.origin}/share/game/${postId}`;
     navigator.clipboard.writeText(shareUrl);
-    showToast('Share link copied!', 'success');
+    showToast(t('profile.shareLinkCopied'), 'success');
   };
 
   if (gameHistory.length === 0) {
     return (
       <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
         <div className="bg-slate-100 dark:bg-slate-950 px-4 py-3 border-b border-slate-200 dark:border-blue-900/40">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">Game History</h3>
+          <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('profile.gameHistory')}</h3>
         </div>
         <div className="p-8 text-center">
-          <p className="text-slate-500 dark:text-slate-400 text-sm">No games played yet.</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('profile.noGamesYet')}</p>
         </div>
       </div>
     );
@@ -126,7 +128,7 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
     <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
       {/* Header */}
       <div className="bg-slate-100 dark:bg-slate-950 px-4 py-3 border-b border-slate-200 dark:border-blue-900/40">
-        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Game History</h3>
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white">{t('profile.gameHistory')}</h3>
       </div>
 
       {/* Table */}
@@ -135,10 +137,10 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
           {/* Table Header */}
           <thead>
             <tr className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-blue-900/40">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">Date</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">Mode</th>
-              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">Score</th>
-              <th className="px-4 py-3 text-right text-sm font-semibold text-blue-600 dark:text-blue-200">Actions</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">{t('profile.date')}</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">{t('profile.mode')}</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-600 dark:text-blue-200">{t('leaderboard.score')}</th>
+              <th className="px-4 py-3 text-right text-sm font-semibold text-blue-600 dark:text-blue-200">{t('profile.actions')}</th>
             </tr>
           </thead>
 
@@ -166,7 +168,7 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
                           onClick={() => handlePost(game.gameHistoryId)}
                           disabled={isLoading || !apiFetch}
                         >
-                          {isLoading ? 'Posting...' : 'Post'}
+                          {isLoading ? t('profile.posting') : t('profile.post')}
                         </Button>
                       ) : (
                         <>
@@ -174,14 +176,14 @@ export const GameHistory = ({ gameHistory, apiFetch }: GameHistoryProps) => {
                             className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded-lg font-semibold"
                             onClick={() => handleShare(game.gameHistoryId)}
                           >
-                            Share
+                            {t('profile.share')}
                           </Button>
                           <Button
                             className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg font-semibold disabled:opacity-50"
                             onClick={() => handleUnpost(game.gameHistoryId)}
                             disabled={isLoading || !apiFetch}
                           >
-                            {isLoading ? 'Removing...' : 'Unpost'}
+                            {isLoading ? t('profile.removing') : t('profile.unpost')}
                           </Button>
                         </>
                       )}

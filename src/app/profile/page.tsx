@@ -11,12 +11,14 @@ import { GameHistory } from '@/components/Profile/GameHistory';
 import { useApi } from '@/lib/useApi';
 import { fetchOwnProfile, fetchUserGameHistory, ProfileData } from '@/services/profileService';
 import { Toast } from '@/components/Toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export default function ProfilePage() {
   const router = useRouter();
   const { apiFetch } = useApi(API_BASE);
+  const { t } = useLanguage();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -116,7 +118,7 @@ export default function ProfilePage() {
           className="top-0 left-0"
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-500 dark:text-slate-400">Loading...</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">{t('common.loading')}</div>
         </main>
       </div>
     );
@@ -156,7 +158,7 @@ export default function ProfilePage() {
           className="top-0 left-0"
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
-          <div className="text-center text-slate-500 dark:text-slate-400">Profile not found</div>
+          <div className="text-center text-slate-500 dark:text-slate-400">{t('profile.profileNotExist')}</div>
         </main>
       </div>
     );

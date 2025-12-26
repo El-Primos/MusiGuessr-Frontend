@@ -1,0 +1,496 @@
+'use client';
+
+import React, { createContext, useContext, useEffect, useState } from 'react';
+
+export type Language = 'en' | 'tr';
+
+interface LanguageContextType {
+  language: Language;
+  setLanguage: (lang: Language) => void;
+  t: (key: string) => string;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+
+// Translation dictionary
+const translations: Record<Language, Record<string, string>> = {
+  en: {
+    // Common
+    'common.loading': 'Loading...',
+    'common.error': 'Error',
+    'common.success': 'Success',
+    'common.cancel': 'Cancel',
+    'common.save': 'Save',
+    'common.delete': 'Delete',
+    'common.edit': 'Edit',
+    'common.close': 'Close',
+    'common.back': 'Back',
+    'common.next': 'Next',
+    'common.submit': 'Submit',
+    'common.search': 'Search',
+    'common.noResults': 'No results found',
+    'common.copyright': '© 2025 MusiGuessr. All rights reserved.',
+    'common.details': 'Details',
+    'common.retry': 'Retry',
+    'common.all': 'All',
+
+    // Settings
+    'settings.lightMode': 'Light Mode',
+    'settings.darkMode': 'Dark Mode',
+    'settings.language': 'Language',
+    'settings.english': 'English',
+    'settings.turkish': 'Türkçe',
+
+    // Navigation
+    'nav.admin': 'Admin',
+    'nav.profile': 'Profile',
+    'nav.logout': 'Logout',
+    'nav.login': 'Login',
+    'nav.signup': 'Sign Up',
+    'nav.home': 'Home',
+    'nav.backToHome': '← Back to home',
+    'nav.backToTournaments': 'Back to Tournaments',
+
+    // Home Page
+    'home.welcome': 'Welcome to MusiGuessr!',
+    'home.subtitle': 'Test your knowledge of music tracks and artists. Can you guess them all?',
+    'home.play': 'Play',
+    'home.tournaments': 'Tournaments',
+    'home.leaderboard': 'Leaderboard',
+
+    // Auth Page
+    'auth.welcomeBack': 'Welcome back',
+    'auth.createAccount': 'Create your account',
+    'auth.loginToContinue': 'Login to continue',
+    'auth.signupToStart': 'Sign up to start playing',
+    'auth.username': 'Username',
+    'auth.password': 'Password',
+    'auth.email': 'Email',
+    'auth.fullName': 'Full Name',
+    'auth.enterUsername': 'Enter your username',
+    'auth.enterPassword': '••••••••',
+    'auth.enterEmail': 'john@example.com',
+    'auth.enterFullName': 'John Doe',
+    'auth.minPassword': 'Min. 6 characters',
+    'auth.processing': 'Processing...',
+    'auth.creatingAccount': 'Creating account...',
+    'auth.loginButton': 'Login',
+    'auth.createAccountButton': 'Create Account',
+    'auth.noAccount': "Don't have an account?",
+    'auth.hasAccount': 'Already have an account?',
+    'auth.fillUsernamePassword': 'Please fill in username and password.',
+    'auth.fillAllFields': 'Please fill in all fields.',
+    'auth.validEmail': 'Please enter a valid email.',
+    'auth.passwordLength': 'Password must be at least 6 characters.',
+    'auth.loginFailed': 'Login failed.',
+    'auth.signupFailed': 'Sign up failed.',
+    'auth.accountBanned': 'Your account has been banned. Please contact admin@musiguessr.com.',
+
+    // Profile Page
+    'profile.title': 'Profile',
+    'profile.loadingProfile': 'Loading profile...',
+    'profile.userNotFound': 'User Not Found',
+    'profile.profileNotExist': 'The profile you are looking for does not exist.',
+    'profile.goToProfile': 'Go to Your Profile',
+    'profile.editProfile': 'Edit Profile',
+    'profile.shareProfile': 'Share Profile',
+    'profile.profileLinkCopied': 'Profile link copied!',
+    'profile.games': 'Games',
+    'profile.best': 'Best',
+    'profile.friends': 'Friends',
+    'profile.statistics': 'Statistics',
+    'profile.gameHistory': 'Game History',
+    'profile.noGamesYet': 'No games played yet',
+    'profile.startPlaying': 'Start playing to see your game history!',
+    'profile.addFriend': 'Add Friend',
+    'profile.removeFriend': 'Remove Friend',
+    'profile.cancelRequest': 'Cancel Request',
+    'profile.loginToAddFriend': 'Login to add friend',
+    'profile.friendsLabel': 'Friends',
+    'profile.averageScore': 'Average Score',
+    'profile.totalGames': 'Total Games',
+    'profile.guessAccuracy': 'Guess Accuracy',
+    'profile.date': 'Date',
+    'profile.mode': 'Mode',
+    'profile.actions': 'Actions',
+    'profile.post': 'Post',
+    'profile.posting': 'Posting...',
+    'profile.share': 'Share',
+    'profile.unpost': 'Unpost',
+    'profile.removing': 'Removing...',
+    'profile.logout': 'Logout',
+    'profile.uploadingPicture': 'Uploading profile picture...',
+    'profile.pictureUpdated': 'Profile picture updated successfully!',
+    'profile.nameUpdated': 'Name updated successfully!',
+    'profile.selectImage': 'Please select an image file',
+    'profile.imageSizeLimit': 'Image size must be less than 5MB',
+    'profile.shareLinkCopied': 'Share link copied!',
+    'profile.gamePosted': 'Game posted successfully!',
+    'profile.postRemoved': 'Post removed successfully!',
+    'profile.changePicture': 'Change picture',
+
+    // Game Page
+    'game.title': 'Music Guessing Game',
+    'game.subtitle': 'Listen to songs, find the artist, get the highest score!',
+    'game.score': 'Score',
+    'game.round': 'Round',
+    'game.timeLeft': 'Time Left',
+    'game.guess': 'Guess',
+    'game.skip': 'Skip',
+    'game.nextRound': 'Next Round',
+    'game.gameOver': 'Game Over!',
+    'game.finalScore': 'Final Score',
+    'game.playAgain': 'Play Again',
+    'game.exit': 'Exit',
+    'game.correct': 'Correct!',
+    'game.wrong': 'Wrong!',
+    'game.searchPlaceholder': 'Search for a song or artist...',
+    'game.noMatches': 'No matches found',
+    'game.startGame': 'Start Game',
+    'game.preparing': 'Preparing...',
+    'game.skipped': 'Skipped!',
+    'game.points': 'points',
+    'game.correctSong': 'Correct Song',
+    'game.song': 'Song',
+    'game.artist': 'Artist',
+    'game.genre': 'Genre',
+    'game.loadingSongInfo': 'Loading song info...',
+    'game.continue': 'Continue',
+
+    // Leaderboard Page
+    'leaderboard.title': 'Leaderboard',
+    'leaderboard.rank': 'Rank',
+    'leaderboard.player': 'Player',
+    'leaderboard.score': 'Score',
+    'leaderboard.gamesPlayed': 'Games Played',
+    'leaderboard.daily': 'Daily',
+    'leaderboard.weekly': 'Weekly',
+    'leaderboard.allTime': 'All Time',
+    'leaderboard.loading': 'Loading leaderboard...',
+    'leaderboard.noData': 'No leaderboard data available',
+
+    // Tournaments Page
+    'tournaments.title': 'Tournaments',
+    'tournaments.upcoming': 'Upcoming',
+    'tournaments.active': 'Active',
+    'tournaments.past': 'Past',
+    'tournaments.joinTournament': 'Join Tournament',
+    'tournaments.leaveTournament': 'Leave Tournament',
+    'tournaments.playNow': 'Play Now',
+    'tournaments.tournamentFull': 'Tournament Full',
+    'tournaments.registered': 'Registered',
+    'tournaments.notFound': 'Tournament Not Found',
+    'tournaments.notFoundDesc': 'The tournament you are looking for does not exist.',
+    'tournaments.startDate': 'Start Date',
+    'tournaments.endDate': 'End Date',
+    'tournaments.participants': 'Participants',
+    'tournaments.prize': 'Prize',
+    'tournaments.playlist': 'Playlist',
+    'tournaments.players': 'Players',
+    'tournaments.starts': 'Starts',
+    'tournaments.ends': 'Ends',
+    'tournaments.leaderboard': 'Leaderboard',
+    'tournaments.leaderboardUpcoming': 'Leaderboard will be available when the tournament starts.',
+    'tournaments.leaderboardEmpty': 'No scores yet. Be the first to play!',
+    'tournaments.leaderboardAvailable': 'Leaderboard will be available when the tournament starts.',
+    'tournaments.noScoresYet': 'No scores yet. Be the first to play!',
+    'tournaments.notFoundDescription': 'The tournament you are looking for does not exist.',
+    'tournaments.pts': 'pts',
+
+    // Admin Pages
+    'admin.dashboard': 'Admin Dashboard',
+    'admin.users': 'Users',
+    'admin.artists': 'Artists',
+    'admin.genres': 'Genres',
+    'admin.playlists': 'Playlists',
+    'admin.musicUpload': 'Music Upload',
+    'admin.tournament': 'Tournament',
+    'admin.manageUsers': 'Manage Users',
+    'admin.manageArtists': 'Manage Artists',
+    'admin.manageGenres': 'Manage Genres',
+    'admin.managePlaylists': 'Manage Playlists',
+    'admin.uploadMusic': 'Upload Music',
+    'admin.manageTournaments': 'Manage Tournaments',
+    'admin.totalUsers': 'Total Users',
+    'admin.totalArtists': 'Total Artists',
+    'admin.totalGenres': 'Total Genres',
+    'admin.totalSongs': 'Total Songs',
+    'admin.totalPlaylists': 'Total Playlists',
+    'admin.totalTournaments': 'Total Tournaments',
+    'admin.welcomeMessage': 'Welcome back, Admin! Here\'s an overview of the system.',
+    'admin.loadingStats': 'Loading statistics...',
+    'admin.viewDetails': 'View details',
+    'admin.quickActions': 'Quick Actions',
+    'admin.createTournament': 'Create Tournament',
+    'admin.unknownArtist': 'Unknown Artist',
+
+    // Loading Component
+    'loading.default': 'Loading...',
+    'loading.tournament': 'Loading tournament details...',
+  },
+  tr: {
+    // Common
+    'common.loading': 'Yükleniyor...',
+    'common.error': 'Hata',
+    'common.success': 'Başarılı',
+    'common.cancel': 'İptal',
+    'common.save': 'Kaydet',
+    'common.delete': 'Sil',
+    'common.edit': 'Düzenle',
+    'common.close': 'Kapat',
+    'common.back': 'Geri',
+    'common.next': 'İleri',
+    'common.submit': 'Gönder',
+    'common.search': 'Ara',
+    'common.noResults': 'Sonuç bulunamadı',
+    'common.copyright': '© 2025 MusiGuessr. Tüm hakları saklıdır.',
+    'common.details': 'Detaylar',
+    'common.retry': 'Tekrar Dene',
+    'common.all': 'Tümü',
+
+    // Settings
+    'settings.lightMode': 'Açık Mod',
+    'settings.darkMode': 'Koyu Mod',
+    'settings.language': 'Dil',
+    'settings.english': 'English',
+    'settings.turkish': 'Türkçe',
+
+    // Navigation
+    'nav.admin': 'Yönetim',
+    'nav.profile': 'Profil',
+    'nav.logout': 'Çıkış',
+    'nav.login': 'Giriş',
+    'nav.signup': 'Kayıt Ol',
+    'nav.home': 'Ana Sayfa',
+    'nav.backToHome': '← Ana sayfaya dön',
+    'nav.backToTournaments': 'Turnuvalara Dön',
+
+    // Home Page
+    'home.welcome': "MusiGuessr'a Hoş Geldiniz!",
+    'home.subtitle': 'Müzik parçaları ve sanatçılar hakkındaki bilginizi test edin. Hepsini tahmin edebilir misiniz?',
+    'home.play': 'Oyna',
+    'home.tournaments': 'Turnuvalar',
+    'home.leaderboard': 'Sıralama',
+
+    // Auth Page
+    'auth.welcomeBack': 'Tekrar hoş geldiniz',
+    'auth.createAccount': 'Hesabınızı oluşturun',
+    'auth.loginToContinue': 'Devam etmek için giriş yapın',
+    'auth.signupToStart': 'Oynamaya başlamak için kayıt olun',
+    'auth.username': 'Kullanıcı Adı',
+    'auth.password': 'Şifre',
+    'auth.email': 'E-posta',
+    'auth.fullName': 'Ad Soyad',
+    'auth.enterUsername': 'Kullanıcı adınızı girin',
+    'auth.enterPassword': '••••••••',
+    'auth.enterEmail': 'ornek@email.com',
+    'auth.enterFullName': 'Ad Soyad',
+    'auth.minPassword': 'En az 6 karakter',
+    'auth.processing': 'İşleniyor...',
+    'auth.creatingAccount': 'Hesap oluşturuluyor...',
+    'auth.loginButton': 'Giriş Yap',
+    'auth.createAccountButton': 'Hesap Oluştur',
+    'auth.noAccount': 'Hesabınız yok mu?',
+    'auth.hasAccount': 'Zaten hesabınız var mı?',
+    'auth.fillUsernamePassword': 'Lütfen kullanıcı adı ve şifrenizi girin.',
+    'auth.fillAllFields': 'Lütfen tüm alanları doldurun.',
+    'auth.validEmail': 'Lütfen geçerli bir e-posta adresi girin.',
+    'auth.passwordLength': 'Şifre en az 6 karakter olmalıdır.',
+    'auth.loginFailed': 'Giriş başarısız.',
+    'auth.signupFailed': 'Kayıt başarısız.',
+    'auth.accountBanned': 'Hesabınız yasaklanmıştır. Lütfen admin@musiguessr.com ile iletişime geçin.',
+
+    // Profile Page
+    'profile.title': 'Profil',
+    'profile.loadingProfile': 'Profil yükleniyor...',
+    'profile.userNotFound': 'Kullanıcı Bulunamadı',
+    'profile.profileNotExist': 'Aradığınız profil mevcut değil.',
+    'profile.goToProfile': 'Profiline Git',
+    'profile.editProfile': 'Profili Düzenle',
+    'profile.shareProfile': 'Profili Paylaş',
+    'profile.profileLinkCopied': 'Profil linki kopyalandı!',
+    'profile.games': 'Oyunlar',
+    'profile.best': 'En İyi',
+    'profile.friends': 'Arkadaşlar',
+    'profile.statistics': 'İstatistikler',
+    'profile.gameHistory': 'Oyun Geçmişi',
+    'profile.noGamesYet': 'Henüz oyun oynanmamış',
+    'profile.startPlaying': 'Oyun geçmişinizi görmek için oynamaya başlayın!',
+    'profile.addFriend': 'Arkadaş Ekle',
+    'profile.removeFriend': 'Arkadaşlıktan Çıkar',
+    'profile.cancelRequest': 'İsteği İptal Et',
+    'profile.loginToAddFriend': 'Arkadaş eklemek için giriş yapın',
+    'profile.friendsLabel': 'Arkadaşlar',
+    'profile.averageScore': 'Ortalama Puan',
+    'profile.totalGames': 'Toplam Oyun',
+    'profile.guessAccuracy': 'Tahmin Doğruluğu',
+    'profile.date': 'Tarih',
+    'profile.mode': 'Mod',
+    'profile.actions': 'İşlemler',
+    'profile.post': 'Paylaş',
+    'profile.posting': 'Paylaşılıyor...',
+    'profile.share': 'Paylaş',
+    'profile.unpost': 'Kaldır',
+    'profile.removing': 'Kaldırılıyor...',
+    'profile.logout': 'Çıkış',
+    'profile.uploadingPicture': 'Profil fotoğrafı yükleniyor...',
+    'profile.pictureUpdated': 'Profil fotoğrafı güncellendi!',
+    'profile.nameUpdated': 'İsim başarıyla güncellendi!',
+    'profile.selectImage': 'Lütfen bir resim dosyası seçin',
+    'profile.imageSizeLimit': 'Resim boyutu 5MB\'dan küçük olmalıdır',
+    'profile.shareLinkCopied': 'Paylaşım linki kopyalandı!',
+    'profile.gamePosted': 'Oyun başarıyla paylaşıldı!',
+    'profile.postRemoved': 'Paylaşım kaldırıldı!',
+    'profile.changePicture': 'Fotoğraf değiştir',
+
+    // Game Page
+    'game.title': 'Müzik Tahmin Oyunu',
+    'game.subtitle': 'Şarkıları dinle, sanatçıyı bul, en yüksek skoru sen yap!',
+    'game.score': 'Puan',
+    'game.round': 'Tur',
+    'game.timeLeft': 'Kalan Süre',
+    'game.guess': 'Tahmin Et',
+    'game.skip': 'Geç',
+    'game.nextRound': 'Sonraki Tur',
+    'game.gameOver': 'Oyun Bitti!',
+    'game.finalScore': 'Final Puanı',
+    'game.playAgain': 'Tekrar Oyna',
+    'game.exit': 'Çıkış',
+    'game.correct': 'Doğru!',
+    'game.wrong': 'Yanlış!',
+    'game.searchPlaceholder': 'Şarkı veya sanatçı ara...',
+    'game.noMatches': 'Eşleşme bulunamadı',
+    'game.startGame': 'Oyunu Başlat',
+    'game.preparing': 'Hazırlanıyor...',
+    'game.skipped': 'Pas Geçildi!',
+    'game.points': 'puan',
+    'game.correctSong': 'Doğru Şarkı',
+    'game.song': 'Şarkı',
+    'game.artist': 'Sanatçı',
+    'game.genre': 'Tür',
+    'game.loadingSongInfo': 'Şarkı bilgisi yükleniyor...',
+    'game.continue': 'Devam Et',
+
+    // Leaderboard Page
+    'leaderboard.title': 'Sıralama',
+    'leaderboard.rank': 'Sıra',
+    'leaderboard.player': 'Oyuncu',
+    'leaderboard.score': 'Puan',
+    'leaderboard.gamesPlayed': 'Oynanan Oyunlar',
+    'leaderboard.daily': 'Günlük',
+    'leaderboard.weekly': 'Haftalık',
+    'leaderboard.allTime': 'Tüm Zamanlar',
+    'leaderboard.loading': 'Sıralama yükleniyor...',
+    'leaderboard.noData': 'Sıralama verisi mevcut değil',
+
+    // Tournaments Page
+    'tournaments.title': 'Turnuvalar',
+    'tournaments.upcoming': 'Yaklaşan',
+    'tournaments.active': 'Aktif',
+    'tournaments.past': 'Geçmiş',
+    'tournaments.joinTournament': 'Turnuvaya Katıl',
+    'tournaments.leaveTournament': 'Turnuvadan Ayrıl',
+    'tournaments.playNow': 'Şimdi Oyna',
+    'tournaments.tournamentFull': 'Turnuva Dolu',
+    'tournaments.registered': 'Kayıtlı',
+    'tournaments.notFound': 'Turnuva Bulunamadı',
+    'tournaments.notFoundDesc': 'Aradığınız turnuva mevcut değil.',
+    'tournaments.notFoundDescription': 'Aradığınız turnuva mevcut değil.',
+    'tournaments.startDate': 'Başlangıç Tarihi',
+    'tournaments.endDate': 'Bitiş Tarihi',
+    'tournaments.participants': 'Katılımcılar',
+    'tournaments.prize': 'Ödül',
+    'tournaments.playlist': 'Playlist',
+    'tournaments.players': 'Oyuncular',
+    'tournaments.starts': 'Başlangıç',
+    'tournaments.ends': 'Bitiş',
+    'tournaments.leaderboard': 'Sıralama',
+    'tournaments.leaderboardUpcoming': 'Sıralama turnuva başladığında görünür olacak.',
+    'tournaments.leaderboardEmpty': 'Henüz puan yok. İlk oynayan siz olun!',
+    'tournaments.leaderboardAvailable': 'Sıralama turnuva başladığında görünür olacak.',
+    'tournaments.noScoresYet': 'Henüz puan yok. İlk oynayan siz olun!',
+    'tournaments.pts': 'puan',
+
+    // Admin Pages
+    'admin.dashboard': 'Yönetim Paneli',
+    'admin.users': 'Kullanıcılar',
+    'admin.artists': 'Sanatçılar',
+    'admin.genres': 'Türler',
+    'admin.playlists': 'Playlistler',
+    'admin.musicUpload': 'Müzik Yükle',
+    'admin.tournament': 'Turnuva',
+    'admin.manageUsers': 'Kullanıcı Yönetimi',
+    'admin.manageArtists': 'Sanatçı Yönetimi',
+    'admin.manageGenres': 'Tür Yönetimi',
+    'admin.managePlaylists': 'Playlist Yönetimi',
+    'admin.uploadMusic': 'Müzik Yükle',
+    'admin.manageTournaments': 'Turnuva Yönetimi',
+    'admin.totalUsers': 'Toplam Kullanıcı',
+    'admin.totalArtists': 'Toplam Sanatçı',
+    'admin.totalGenres': 'Toplam Tür',
+    'admin.totalSongs': 'Toplam Şarkı',
+    'admin.totalPlaylists': 'Toplam Playlist',
+    'admin.totalTournaments': 'Toplam Turnuva',
+    'admin.welcomeMessage': 'Tekrar hoş geldiniz, Admin! Sistem özeti burada.',
+    'admin.loadingStats': 'İstatistikler yükleniyor...',
+    'admin.viewDetails': 'Detayları gör',
+    'admin.quickActions': 'Hızlı İşlemler',
+    'admin.createTournament': 'Turnuva Oluştur',
+    'admin.unknownArtist': 'Bilinmeyen Sanatçı',
+
+    // Loading Component
+    'loading.default': 'Yükleniyor...',
+    'loading.tournament': 'Turnuva detayları yükleniyor...',
+  },
+};
+
+export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const [language, setLanguageState] = useState<Language>('en');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const savedLanguage = localStorage.getItem('language') as Language | null;
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'tr')) {
+      setLanguageState(savedLanguage);
+    } else {
+      // Check browser language
+      const browserLang = navigator.language.toLowerCase();
+      if (browserLang.startsWith('tr')) {
+        setLanguageState('tr');
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    localStorage.setItem('language', language);
+  }, [language, mounted]);
+
+  const setLanguage = (lang: Language) => {
+    setLanguageState(lang);
+  };
+
+  const t = (key: string): string => {
+    return translations[language][key] || key;
+  };
+
+  // Prevent flash of wrong language
+  if (!mounted) {
+    return null;
+  }
+
+  return (
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+      {children}
+    </LanguageContext.Provider>
+  );
+}
+
+export function useLanguage() {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useLanguage must be used within a LanguageProvider');
+  }
+  return context;
+}

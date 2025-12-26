@@ -3,6 +3,7 @@
 import Image from "next/image";
 import React from "react";
 import { ExitButton } from "./Game/ExitButton";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface HeaderProps {
   logoSrc: string;     // PNG path
@@ -14,6 +15,8 @@ interface HeaderProps {
 }
 
 export const Header = ({ logoSrc, exitVisible = false, onExit, className = "", exitButtonStyle = 'button', rightContent }: HeaderProps) => {
+  const { t } = useLanguage();
+  
   return (
     <header
       className={`
@@ -32,7 +35,7 @@ export const Header = ({ logoSrc, exitVisible = false, onExit, className = "", e
             <button
               onClick={onExit}
               className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
-              title="Go Home"
+              title={t('nav.home')}
             >
               <svg
                 className="w-5 h-5"
@@ -47,7 +50,7 @@ export const Header = ({ logoSrc, exitVisible = false, onExit, className = "", e
                   d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                 />
               </svg>
-              <span className="hidden sm:inline">Home</span>
+              <span className="hidden sm:inline">{t('nav.home')}</span>
             </button>
           )
         )}

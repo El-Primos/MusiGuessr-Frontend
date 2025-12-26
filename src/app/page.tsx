@@ -5,11 +5,13 @@ import { Header } from "@/components/Header";
 import { SettingsButton } from "@/components/SettingsButton";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 import { StoredUser } from "@/dto/common.dto"
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [hasUser, setHasUser] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
@@ -71,13 +73,13 @@ export default function Home() {
                       d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
-                  <span className="hidden sm:inline">Admin</span>
+                  <span className="hidden sm:inline">{t('nav.admin')}</span>
                 </button>
               )}
               <button
                 onClick={() => router.push("/profile")}
                 className="px-2 md:px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center gap-1 md:gap-2 transition-colors"
-                title="View Profile"
+                title={t('nav.profile')}
               >
                 <svg
                   className="w-5 h-5"
@@ -92,12 +94,12 @@ export default function Home() {
                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                   />
                 </svg>
-                <span className="hidden sm:inline">Profile</span>
+                <span className="hidden sm:inline">{t('nav.profile')}</span>
               </button>
               <button
                 onClick={handleLogout}
                 className="px-2 md:px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold flex items-center gap-1 transition-colors"
-                title="Logout"
+                title={t('nav.logout')}
               >
                 <svg
                   className="w-5 h-5"
@@ -112,7 +114,7 @@ export default function Home() {
                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
-                <span className="hidden md:inline">Logout</span>
+                <span className="hidden md:inline">{t('nav.logout')}</span>
               </button>
             </div>
           ) : null
@@ -121,9 +123,9 @@ export default function Home() {
 
       <div className="flex flex-col items-center justify-center flex-1 px-4 gap-4">
         <div className="w-full max-w-xl rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 backdrop-blur px-6 py-10 shadow-lg">
-          <h1 className="text-4xl font-bold mb-3 text-center">Welcome to MusiGuessr!</h1>
+          <h1 className="text-4xl font-bold mb-3 text-center">{t('home.welcome')}</h1>
           <p className="text-lg mb-8 text-center text-slate-600 dark:text-white/80">
-            Test your knowledge of music tracks and artists. Can you guess them all?
+            {t('home.subtitle')}
           </p>
 
           <div className="flex flex-col gap-3 items-center justify-center">
@@ -131,21 +133,21 @@ export default function Home() {
               className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
               onClick={() => go("/game")}
             >
-              Play
+              {t('home.play')}
             </Button>
 
             <Button
               className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
               onClick={() => go("/tournaments")}
             >
-              Tournaments
+              {t('home.tournaments')}
             </Button>
 
             <Button
               className="px-4 py-2 text-base text-slate-200 dark:text-slate-900 bg-blue-600 hover:bg-blue-700"
               onClick={() => go("/leaderboard")}
             >
-              Leaderboard
+              {t('home.leaderboard')}
             </Button>
 
             {/* login-signup - if there is no user in localStorage */}
@@ -155,14 +157,14 @@ export default function Home() {
                   className="px-4 py-2 text-sm bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 border border-slate-300 dark:border-white/10 min-w-[90px]"
                   onClick={() => go("/auth?mode=login")}
                 >
-                  Login
+                  {t('nav.login')}
                 </Button>
                 <span className="text-slate-400 dark:text-white/40">|</span>
                 <Button
                   className="px-4 py-2 text-sm bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 border border-slate-300 dark:border-white/10 min-w-[90px]"
                   onClick={() => go("/auth?mode=signup")}
                 >
-                  Sign Up
+                  {t('nav.signup')}
                 </Button>
               </div>
             )}
@@ -173,7 +175,7 @@ export default function Home() {
       <SettingsButton />
 
       <div className="mt-auto p-4 text-center text-sm text-slate-500 dark:text-gray-400">
-        &copy; 2025 MusiGuessr. All rights reserved.
+        {t('common.copyright')}
       </div>
     </div>
   );

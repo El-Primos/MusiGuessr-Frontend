@@ -1,5 +1,7 @@
 'use client';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 interface LeaderboardEntry {
   rank: number;
   userId: number;
@@ -35,13 +37,15 @@ const getRankColor = (rank: number, isCurrentUser: boolean): string => {
 };
 
 export const LeaderboardTable = ({ data, activeTab, isAuthenticated, currentUserId }: LeaderboardTableProps) => {
+  const { t } = useLanguage();
+  
   return (
     <div className="rounded-lg overflow-hidden border border-slate-200 dark:border-blue-900/60 bg-gradient-to-br from-white via-slate-50 to-slate-100 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900">
       {/* Table Header */}
       <div className="bg-slate-100 dark:bg-slate-950 px-4 py-3 flex font-semibold text-sm border-b border-slate-200 dark:border-blue-900/40">
-        <div className="w-16 text-blue-600 dark:text-blue-200">#</div>
-        <div className="flex-1 text-blue-600 dark:text-blue-200">Player Name</div>
-        <div className="w-32 text-right text-blue-600 dark:text-blue-200">Score</div>
+        <div className="w-16 text-blue-600 dark:text-blue-200">{t('leaderboard.rank')}</div>
+        <div className="flex-1 text-blue-600 dark:text-blue-200">{t('leaderboard.player')}</div>
+        <div className="w-32 text-right text-blue-600 dark:text-blue-200">{t('leaderboard.score')}</div>
       </div>
 
       {/* Table Rows */}

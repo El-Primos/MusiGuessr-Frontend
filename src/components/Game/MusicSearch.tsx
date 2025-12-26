@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useApi } from "@/lib/useApi";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export interface Track {
   id: number;
@@ -18,10 +19,11 @@ const API_BASE = process.env.NEXT_PUBLIC_API_BASE!;
 
 export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => {
   const [query, setQuery] = useState("");
-  const [allMusics, setAllMusics] = useState<Track[]>([]); // Tüm müzik havuzu
+  const [allMusics, setAllMusics] = useState<Track[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const { apiFetch } = useApi(API_BASE);
+  const { t } = useLanguage();
 
   // 1. ADIM: Tüm müzikleri tek seferde çek (Mount olduğunda)
   useEffect(() => {
@@ -40,10 +42,9 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
 
         const formatted: Track[] = rawList.map((m: any) => ({
           id: m.id,
-          title: m.name, // Backend 'name' gönderiyor, biz 'title' olarak eşliyoruz
-          artist: m.artist?.name || "Bilinmeyen Sanatçı"
+          title: m.name,
+          artist: m.artist?.name || t('admin.unknownArtist')
         }));
-        // --- KRİTİK DÜZELTME BİTİŞİ ---
 
         setAllMusics(formatted);
         console.log("allMusics güncellendi, toplam:", formatted.length);
@@ -83,7 +84,7 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
           ref={inputRef}
           type="text"
           value={query}
-          placeholder={isLoading ? "Yükleniyor..." : "Şarkı ara..."}
+          placeholder={isLoading ? t('common.loading') : t('game.searchPlaceholder')}
           disabled={isLoading}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-300 dark:border-blue-900 outline-none focus:ring-2 ring-blue-500 disabled:opacity-50 text-slate-900 dark:text-white placeholder:text-slate-400"
@@ -109,7 +110,7 @@ export const MusicSearch = ({ onSelect, resetSignal = 0 }: MusicSearchProps) => 
             </div>
           ))}
           {filteredResults.length === 0 && (
-            <div className="p-4 text-slate-500 text-sm">Sonuç bulunamadı.</div>
+            <div className="p-4 text-slate-500 text-sm">{t('game.noMatches')}</div>
           )}
         </div>
       )}
