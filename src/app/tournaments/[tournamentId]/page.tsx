@@ -304,7 +304,7 @@ export default function TournamentDetailsPage() {
         <Header
           logoSrc="/logo.png"
           exitVisible={true}
-          onExit={() => router.push('/tournaments')}
+          onExit={() => router.push('/')}
           className="top-0 left-0"
         />
         <main className="max-w-7xl mx-auto px-4 py-8">
@@ -348,7 +348,7 @@ export default function TournamentDetailsPage() {
       <Header
         logoSrc="/logo.png"
         exitVisible={true}
-        onExit={() => router.push('/tournaments')}
+        onExit={() => router.push('/')}
         className="top-0 left-0"
       />
 
