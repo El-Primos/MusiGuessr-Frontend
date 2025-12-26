@@ -31,6 +31,20 @@ export default function Game() {
   const [loading, setLoading] = useState(false);
   const [searchResetToken, setSearchResetToken] = useState(0);
   const [roundStartTime, setRoundStartTime] = useState<number>(0);
+  
+  // Answer Modal State
+  const [showAnswerModal, setShowAnswerModal] = useState(false);
+  const [answerData, setAnswerData] = useState<{
+    correct: boolean;
+    skipped: boolean;
+    earnedScore: number;
+    correctMusic: {
+      id: number;
+      name: string;
+      artist: string;
+      genre: string;
+    } | null;
+  } | null>(null);
 
   const gameplayDuration = 30;
 
@@ -125,7 +139,36 @@ export default function Game() {
           }),
         });
         const data = await res.json();
-        handleRoundTransition(data);
+        
+        // Fetch correct music details
+        let correctMusic = null;
+        if (data.correctMusicId) {
+          try {
+            const musicRes = await apiFetch(`/api/musics/${data.correctMusicId}`);
+            if (musicRes.ok) {
+              correctMusic = await musicRes.json();
+            }
+          } catch (err) {
+            console.error("Error fetching music details:", err);
+          }
+        }
+        
+        // Show answer modal
+        setAnswerData({
+          correct: data.correct,
+          skipped: false,
+          earnedScore: data.earnedScore,
+          correctMusic: correctMusic ? {
+            id: correctMusic.id,
+            name: correctMusic.name,
+            artist: correctMusic.artist?.name || "Unknown",
+            genre: correctMusic.genre?.name || "Unknown"
+          } : null
+        });
+        setShowAnswerModal(true);
+        
+        // Store data for later transition
+        (window as any).__pendingRoundData = data;
       } catch (err) {
         console.error("Tahmin hatası:", err);
       }
@@ -143,7 +186,46 @@ export default function Game() {
     try {
       const res = await apiFetch(`/api/games/${gameId}/skip`);
       const data = await res.json();
-      handleRoundTransition(data);
+      
+      console.log('Skip response data:', data);
+      
+      // Fetch correct music details
+      let correctMusic = null;
+      if (data.correctMusicId) {
+        console.log('Fetching music details for ID:', data.correctMusicId);
+        try {
+          const musicRes = await apiFetch(`/api/musics/${data.correctMusicId}`);
+          console.log('Music API response status:', musicRes.status);
+          if (musicRes.ok) {
+            correctMusic = await musicRes.json();
+            console.log('Fetched music details:', correctMusic);
+          } else {
+            const errorText = await musicRes.text();
+            console.error('Failed to fetch music details:', errorText);
+          }
+        } catch (err) {
+          console.error("Error fetching music details:", err);
+        }
+      } else {
+        console.warn('No correctMusicId in skip response');
+      }
+      
+      // Show answer modal
+      setAnswerData({
+        correct: false,
+        skipped: true,
+        earnedScore: 0,
+        correctMusic: correctMusic ? {
+          id: correctMusic.id,
+          name: correctMusic.name,
+          artist: correctMusic.artist?.name || "Unknown",
+          genre: correctMusic.genre?.name || "Unknown"
+        } : null
+      });
+      setShowAnswerModal(true);
+      
+      // Store data for later transition
+      (window as any).__pendingRoundData = data;
     } catch (err) {
       console.error("Pas geçme hatası:", err);
     }
@@ -163,6 +245,18 @@ export default function Game() {
       setRoundStartTime(Date.now());
       // Arama kutusunu temizlemek için sinyal gönder
       setSearchResetToken((prev) => prev + 1);
+    }
+  };
+  
+  /**
+   * Continue to next round after viewing answer
+   */
+  const handleContinue = () => {
+    setShowAnswerModal(false);
+    const data = (window as any).__pendingRoundData;
+    if (data) {
+      handleRoundTransition(data);
+      (window as any).__pendingRoundData = null;
     }
   };
 
@@ -188,6 +282,16 @@ export default function Game() {
         exitVisible={true}
         onExit={() => router.push(tournamentId ? `/tournaments/${tournamentId}` : "/")}
       />
+
+      {showAnswerModal && answerData && (
+        <AnswerModal
+          correct={answerData.correct}
+          skipped={answerData.skipped}
+          earnedScore={answerData.earnedScore}
+          correctMusic={answerData.correctMusic}
+          onContinue={handleContinue}
+        />
+      )}
 
       <main className="pt-8 pb-1 px-4 max-w-5xl mx-auto flex flex-col items-center">
         {gameStarted && !gameOver && (
@@ -289,6 +393,90 @@ const ResultModal = ({ score, onContinue }: { score: number; onContinue: () => v
           Ana Sayfaya Dön
         </button>
       </div>
+    </div>
+  </div>
+);
+
+const AnswerModal = ({
+  correct,
+  skipped,
+  earnedScore,
+  correctMusic,
+  onContinue,
+}: {
+  correct: boolean;
+  skipped: boolean;
+  earnedScore: number;
+  correctMusic: { id: number; name: string; artist: string; genre: string } | null;
+  onContinue: () => void;
+}) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md px-4">
+    <div className="w-full max-w-md rounded-3xl bg-slate-900 border border-slate-800 p-8 text-center shadow-2xl">
+      {/* Correct/Wrong/Skipped Icon */}
+      <div className={`mb-4 inline-flex h-20 w-20 items-center justify-center rounded-full ${
+        correct ? 'bg-green-500/20 text-green-400' : skipped ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'
+      }`}>
+        {correct ? (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-12 h-12">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+        ) : skipped ? (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-12 h-12">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8.688c0-.864.933-1.405 1.683-.977l7.108 4.062a1.125 1.125 0 010 1.953l-7.108 4.062A1.125 1.125 0 013 16.81V8.688zM12.75 8.688c0-.864.933-1.405 1.683-.977l7.108 4.062a1.125 1.125 0 010 1.953l-7.108 4.062a1.125 1.125 0 01-1.683-.977V8.688z" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-12 h-12">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        )}
+      </div>
+
+      {/* Result Text */}
+      <h2 className={`text-3xl font-bold mb-2 ${
+        correct ? 'text-green-400' : skipped ? 'text-yellow-400' : 'text-red-400'
+      }`}>
+        {correct ? 'Doğru!' : skipped ? 'Pas Geçildi!' : 'Yanlış!'}
+      </h2>
+
+      {/* Score */}
+      {correct && (
+        <p className="text-yellow-400 font-bold text-xl mb-4">
+          +{earnedScore} puan
+        </p>
+      )}
+
+      {/* Correct Song Details */}
+      {correctMusic ? (
+        <div className="bg-slate-800/50 rounded-2xl p-6 mb-6 border border-slate-700">
+          <p className="text-slate-400 text-sm mb-3">Doğru Şarkı:</p>
+          <div className="space-y-2 text-left">
+            <div>
+              <span className="text-blue-400 text-sm">Şarkı: </span>
+              <span className="text-white font-semibold">{correctMusic.name}</span>
+            </div>
+            <div>
+              <span className="text-blue-400 text-sm">Sanatçı: </span>
+              <span className="text-white font-semibold">{correctMusic.artist}</span>
+            </div>
+            <div>
+              <span className="text-blue-400 text-sm">Tür: </span>
+              <span className="text-white font-semibold">{correctMusic.genre}</span>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-slate-800/50 rounded-2xl p-6 mb-6 border border-slate-700">
+          <p className="text-slate-400 text-sm">Şarkı bilgisi yükleniyor...</p>
+        </div>
+      )}
+
+      {/* Continue Button */}
+      <button
+        onClick={onContinue}
+        className="w-full rounded-2xl bg-blue-600 py-4 text-lg font-bold text-white transition-all hover:bg-blue-500 active:scale-95"
+      >
+        Devam Et
+      </button>
     </div>
   </div>
 );
