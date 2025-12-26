@@ -281,8 +281,6 @@ export default function TournamentDetailsPage() {
         const errorText = await response.text();
         console.error('Failed to create tournament game:', errorText);
         throw new Error('Failed to create tournament game');
-        console.error('Failed to create tournament game:', errorText);
-        throw new Error('Failed to create tournament game');
       }
 
       const gameData = await response.json();
@@ -419,7 +417,7 @@ export default function TournamentDetailsPage() {
                   {canPlay && (
                     <Button
                       className="flex-1 py-3 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-semibold"
-                      onClick={() => router.push(`/game/tournament=${tournament.tournamentId}&playlist=${tournament.playlistId}`)}
+                      onClick={handlePlayTournament}
                     >
                       Play Now
                     </Button>
