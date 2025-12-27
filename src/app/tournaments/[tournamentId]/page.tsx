@@ -37,6 +37,8 @@ interface TournamentDetails {
   }[];
 }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080";
+
 export default function TournamentDetailsPage() {
   const router = useRouter();
   const params = useParams();
@@ -45,7 +47,7 @@ export default function TournamentDetailsPage() {
   
   const [tournament, setTournament] = useState<TournamentDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { apiFetch, token } = useApi('http://localhost:8080');
+  const { apiFetch, token } = useApi(API_BASE);
   const { toast, showToast, hideToast } = useToast();
   const [userId, setUserId] = useState<number | null>(null);
 

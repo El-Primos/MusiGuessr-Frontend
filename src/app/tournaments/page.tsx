@@ -31,6 +31,8 @@ interface TournamentData {
   tournaments: TournamentCardData[];
 }
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8080";
+
 export default function TournamentsPage() {
   const router = useRouter();
   const { t } = useLanguage();
@@ -41,7 +43,7 @@ export default function TournamentsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [, setRegisteredTournamentIds] = useState<Set<number>>(new Set());
   const { toast, showToast, hideToast } = useToast();
-  const { apiFetch, token } = useApi('http://localhost:8080');
+  const { apiFetch, token } = useApi(API_BASE);
   const [userId, setUserId] = useState<number | null>(null);
 
   // Load user ID from localStorage
