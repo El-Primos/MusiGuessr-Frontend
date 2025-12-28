@@ -12,7 +12,7 @@ const customJestConfig = {
 
   moduleNameMapper: {
     // alias
-    '^@/(.*)$': '<rootDir>/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
     // css stub
     '^.+\\.(css|scss|sass)$': 'identity-obj-proxy',
   },
