@@ -64,7 +64,7 @@ jest.mock('@/components/Game/MusicSearch', () => ({
     ),
 }));
 
-describe('Black Box Testing: Gameplay (TC-FE-GAME)', () => {
+describe('Unit Testing: Gameplay (TC-FE-GAME)', () => {
     beforeEach(() => {
         mockApiFetch.mockClear();
     });
