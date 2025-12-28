@@ -4,13 +4,15 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import Auth from '../app/auth/page';
 
 // Mock mocks
+let mockMode = 'signup'; // Control variable for search params
+
 jest.mock('next/navigation', () => ({
     useRouter: () => ({
         push: jest.fn(),
         replace: jest.fn(),
     }),
     useSearchParams: () => ({
-        get: (key: string) => (key === 'mode' ? 'signup' : null), // Default to signup for these tests
+        get: (key: string) => (key === 'mode' ? mockMode : null),
     }),
 }));
 
@@ -39,6 +41,7 @@ describe('Black Box Testing: Registration (TC-REG)', () => {
 
     beforeEach(() => {
         (global.fetch as jest.Mock).mockClear();
+        mockMode = 'signup'; // Reset to default
     });
 
     // TC-REG-01: Valid Registration
@@ -126,5 +129,58 @@ describe('Black Box Testing: Registration (TC-REG)', () => {
 
         expect(await screen.findByText('auth.fillAllFields')).toBeInTheDocument();
         expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    // TC-LOG-01: Valid Login
+    it('TC-LOG-01: Valid Login - Submits form successfully', async () => {
+        mockMode = 'login';
+        render(<Auth />);
+
+        // Fill Form
+        fireEvent.change(screen.getByPlaceholderText('auth.enterUsername'), { target: { value: 'john_doe' } });
+        fireEvent.change(screen.getByPlaceholderText('auth.enterPassword'), { target: { value: 'password123' } });
+
+        // Mock Success Response
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: true,
+            json: async () => ({ token: 'fake-jwt', id: 1, username: 'john_doe' }),
+        });
+
+        // Submit
+        const submitButton = screen.getByText('auth.loginButton');
+        fireEvent.click(submitButton);
+
+        await waitFor(() => {
+            expect(global.fetch).toHaveBeenCalledTimes(1);
+            expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('/api/auth/login'), expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({
+                    username: 'john_doe',
+                    password: 'password123'
+                })
+            }));
+        });
+    });
+
+    // TC-LOG-02: Invalid Credentials
+    it('TC-LOG-02: Invalid Credentials - Shows error', async () => {
+        mockMode = 'login';
+        render(<Auth />);
+
+        // Fill Form
+        fireEvent.change(screen.getByPlaceholderText('auth.enterUsername'), { target: { value: 'john_doe' } });
+        fireEvent.change(screen.getByPlaceholderText('auth.enterPassword'), { target: { value: 'wrongpass' } });
+
+        // Mock Error Response
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: false,
+            status: 401,
+            json: async () => ({ message: 'Invalid credentials' }),
+        });
+
+        const submitButton = screen.getByText('auth.loginButton');
+        fireEvent.click(submitButton);
+
+        expect(await screen.findByText('auth.invalidCredentials')).toBeInTheDocument();
     });
 });
