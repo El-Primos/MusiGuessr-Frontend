@@ -30,7 +30,7 @@ jest.mock('@/contexts/LanguageContext', () => ({
 jest.mock('@/components/AdminOps/MusicUpload', () => () => <div data-testid="music-upload-component">Music Upload Component</div>);
 jest.mock('@/components/AdminOps/MusicUpdate', () => () => <div data-testid="music-update-component">Music Update Component</div>);
 
-describe('Black Box Testing: Admin Module (TC-ADM)', () => {
+describe('Unit Testing: Admin Module (TC-ADM)', () => {
 
     beforeEach(() => {
         mockApiFetch.mockClear();

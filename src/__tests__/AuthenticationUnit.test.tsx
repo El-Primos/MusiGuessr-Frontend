@@ -37,7 +37,7 @@ jest.mock('@/components/Header', () => ({
 // Mock Fetch
 global.fetch = jest.fn();
 
-describe('Black Box Testing: Registration (TC-REG)', () => {
+describe('Unit Testing: Registration (TC-REG)', () => {
 
     beforeEach(() => {
         (global.fetch as jest.Mock).mockClear();
