@@ -169,28 +169,30 @@ export const ProfileSidebar = ({
         <div className="flex justify-center mb-4 relative">
           <div className="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-slate-300 dark:border-blue-900/40 flex items-center justify-center overflow-hidden relative">
             {profileData.avatar ? (
-              <Image
-                key={`${profileData.avatar}-${Date.now()}`} // Force re-render when avatar URL changes
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
                 src={profileData.avatar}
                 alt={profileData.name}
-                fill
-                unoptimized // Skip Next.js image optimization for external S3 URLs
-                className="object-cover rounded-full"
+                className="w-full h-full object-cover rounded-full"
                 onError={(e) => {
                   console.error('Failed to load image:', profileData.avatar);
-                  console.error('Error event:', e);
                   const img = e.currentTarget;
-                  img.style.opacity = '0.5';
+                  img.style.display = 'none';
+                  // Show fallback
+                  const fallback = img.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
                 }}
                 onLoad={() => {
                   console.log('Image loaded successfully:', profileData.avatar);
                 }}
               />
-            ) : (
-              <div className="text-4xl text-slate-500 dark:text-slate-400">
-                {profileData.name.charAt(0).toUpperCase()}
-              </div>
-            )}
+            ) : null}
+            <div 
+              className="text-4xl text-slate-500 dark:text-slate-400 absolute inset-0 flex items-center justify-center"
+              style={{ display: profileData.avatar ? 'none' : 'flex' }}
+            >
+              {profileData.name.charAt(0).toUpperCase()}
+            </div>
           </div>
           {isOwnProfile && (
             <label 
