@@ -170,23 +170,17 @@ export const ProfileSidebar = ({
           <div className="w-32 h-32 rounded-full bg-slate-200 dark:bg-slate-800 border-2 border-slate-300 dark:border-blue-900/40 flex items-center justify-center overflow-hidden relative">
             {profileData.avatar ? (
               <Image
-                key={profileData.avatar} // Force re-render when avatar URL changes
-                src={`${profileData.avatar}?t=${Date.now()}`} // Add timestamp to bypass cache
+                key={`${profileData.avatar}-${Date.now()}`} // Force re-render when avatar URL changes
+                src={profileData.avatar}
                 alt={profileData.name}
                 fill
+                unoptimized // Skip Next.js image optimization for external S3 URLs
                 className="object-cover rounded-full"
                 onError={(e) => {
                   console.error('Failed to load image:', profileData.avatar);
                   console.error('Error event:', e);
-                  // Try loading without timestamp
                   const img = e.currentTarget;
-                  if (!img.src.includes('?t=')) {
-                    // Already tried without timestamp, show error state
-                    img.style.opacity = '0.5';
-                  } else {
-                    // Try without timestamp
-                    img.src = profileData.avatar||"";
-                  }
+                  img.style.opacity = '0.5';
                 }}
                 onLoad={() => {
                   console.log('Image loaded successfully:', profileData.avatar);
